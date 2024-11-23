@@ -2,10 +2,6 @@
 
 # pyre-unsafe
 
-# Copyright (c) Facebook, Inc. and its affiliates.
-#
-# This source code is licensed under the MIT license found in the
-# LICENSE file in the root directory of this source tree.
 
 import logging
 import os
@@ -153,7 +149,6 @@ def train(train_loader, model, criterion, optimizer, epoch, print_freq=10):
     end = time.time()
 
     for i, (input, target) in enumerate(train_loader):
-
         # compute output
         output = model(input)
         loss = criterion(output, target)

@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
 
-# Copyright (c) Facebook, Inc. and its affiliates.
-#
-# This source code is licensed under the MIT license found in the
-# LICENSE file in the root directory of this source tree.
 
 import crypten.communicator as comm
 
@@ -318,9 +314,9 @@ class BinarySharedTensor:
         """Set tensor values by index"""
         if is_tensor(value) or isinstance(value, list):
             value = BinarySharedTensor(value)
-        assert isinstance(
-            value, BinarySharedTensor
-        ), "Unsupported input type %s for __setitem__" % type(value)
+        assert isinstance(value, BinarySharedTensor), (
+            "Unsupported input type %s for __setitem__" % type(value)
+        )
         self.share.__setitem__(index, value.share)
 
     @staticmethod
@@ -436,9 +432,9 @@ class BinarySharedTensor:
         """
         if is_tensor(src):
             src = BinarySharedTensor(src)
-        assert isinstance(
-            src, BinarySharedTensor
-        ), "Unrecognized scatter src type: %s" % type(src)
+        assert isinstance(src, BinarySharedTensor), (
+            "Unrecognized scatter src type: %s" % type(src)
+        )
         self.share.scatter_(dim, index, src.share)
         return self
 

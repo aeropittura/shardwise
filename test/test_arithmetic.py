@@ -2,10 +2,6 @@
 
 # pyre-unsafe
 
-# Copyright (c) Facebook, Inc. and its affiliates.
-#
-# This source code is licensed under the MIT license found in the
-# LICENSE file in the root directory of this source tree.
 
 
 import itertools
@@ -92,7 +88,6 @@ class TestArithmetic(MultiProcessTestCase):
             (5, 3, 32, 32),
         ]
         for size in sizes:
-
             # encryption and decryption without source:
             reference = get_random_test_tensor(size=size, is_float=True)
             encrypted_tensor = ArithmeticSharedTensor(reference)

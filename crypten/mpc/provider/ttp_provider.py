@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
 
-# Copyright (c) Facebook, Inc. and its affiliates.
-#
-# This source code is licensed under the MIT license found in the
-# LICENSE file in the root directory of this source tree.
 
 import logging
 
@@ -309,7 +305,6 @@ class TTPServer:
         return result
 
     def additive(self, size0, size1, op, *args, **kwargs):
-
         # Add all shares of `a` and `b` to get plaintext `a` and `b`
         a = self._get_additive_PRSS(size0)
         b = self._get_additive_PRSS(size1)

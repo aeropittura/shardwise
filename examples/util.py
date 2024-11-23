@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
 
-# Copyright (c) Facebook, Inc. and its affiliates.
-#
-# This source code is licensed under the MIT license found in the
-# LICENSE file in the root directory of this source tree.
 
 import logging
 import os
@@ -69,7 +65,6 @@ def kmeans(data, K, max_iter=100):
     clusters = data[perm[:K], :]
     assignments = None
     for iter in range(max_iter):
-
         # compute assignments, and stop if converged:
         prev_assignments = assignments
         assignments = kmeans_inference(data, clusters)

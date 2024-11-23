@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
 
-# Copyright (c) Facebook, Inc. and its affiliates.
-#
-# This source code is licensed under the MIT license found in the
-# LICENSE file in the root directory of this source tree.
 
 import sys
 import timeit
@@ -162,7 +158,6 @@ def _logging(func):
 
     @wraps(func)
     def logging_wrapper(self, *args, **kwargs):
-
         # TODO: Replace this
         # - hacks the inputs into some of the functions for world_size 1:
         world_size = self.get_world_size()

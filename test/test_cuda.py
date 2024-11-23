@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
 
-# Copyright (c) Facebook, Inc. and its affiliates.
-#
-# This source code is licensed under the MIT license found in the
-# LICENSE file in the root directory of this source tree.
 
 
 import collections
@@ -237,7 +233,6 @@ class TestCUDA(TestMPC):
                 padding,
                 stride,
             ) in itertools.product(*[v for _, v in kwargs.items()]):
-
                 # sample input:
                 input_size = (batches, in_channels, *image_size)
                 input = get_random_test_tensor(size=input_size, is_float=False)

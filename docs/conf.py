@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
 
-# Copyright (c) Facebook, Inc. and its affiliates.
-#
-# This source code is licensed under the MIT license found in the
-# LICENSE file in the root directory of this source tree.
 
 # Configuration file for the Sphinx documentation builder.
 #
@@ -25,7 +21,6 @@
 # -- Project information -----------------------------------------------------
 
 project = "CrypTen"
-copyright = "2019, Facebook AI Research"
 author = "Facebook AI Research"
 
 # The full version, including alpha/beta/rc tags

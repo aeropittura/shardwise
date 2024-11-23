@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
 
-# Copyright (c) Facebook, Inc. and its affiliates.
-#
-# This source code is licensed under the MIT license found in the
-# LICENSE file in the root directory of this source tree.
 
 import logging
 import math
@@ -408,7 +404,6 @@ class AutogradRoll(AutogradFunction):
 class AutogradSqueeze(AutogradFunction):
     @staticmethod
     def forward(ctx, *args, **kwargs):
-
         # preprocess inputs:
         assert len(args) >= 1
         if len(args) == 1:
@@ -497,7 +492,6 @@ class AutogradReLU(AutogradFunction):
 class AutogradDropout(AutogradFunction):
     @staticmethod
     def forward(ctx, input, p=0.5, training=True, inplace=False):
-
         if training and inplace:
             logging.warning(
                 "CrypTen dropout does not support inplace computation during training."
@@ -534,7 +528,6 @@ class AutogradDropout(AutogradFunction):
 class AutogradFeatureDropout(AutogradFunction):
     @staticmethod
     def forward(ctx, input, p=0.5, training=True, inplace=False):
-
         if training and inplace:
             logging.warning(
                 "CrypTen _feature_dropout does not support inplace computation during training."
@@ -1133,7 +1126,6 @@ class AutogradNorm(AutogradFunction):
 class AutogradSum(AutogradFunction):
     @staticmethod
     def forward(ctx, *args, **kwargs):
-
         # preprocess inputs:
         assert len(args) >= 1
         if len(args) == 1:
@@ -1192,7 +1184,6 @@ class AutogradTrace(AutogradFunction):
 class AutogradMean(AutogradFunction):
     @staticmethod
     def forward(ctx, *args, **kwargs):
-
         # preprocess inputs:
         assert len(args) >= 1
         if len(args) == 1:
@@ -1230,7 +1221,6 @@ class AutogradMean(AutogradFunction):
 class AutogradVariance(AutogradFunction):
     @staticmethod
     def forward(ctx, self, *args, **kwargs):
-
         # preprocess inputs:
         if len(args) == 0:
             dim = None
@@ -1287,7 +1277,6 @@ class AutogradVariance(AutogradFunction):
 class AutogradMin(AutogradFunction):
     @staticmethod
     def forward(ctx, *args, **kwargs):
-
         # preprocess inputs:
         assert len(args) >= 1
         if len(args) == 1:
@@ -1335,7 +1324,6 @@ class AutogradMin(AutogradFunction):
 class AutogradMax(AutogradFunction):
     @staticmethod
     def forward(ctx, *args, **kwargs):
-
         # preprocess inputs:
         assert len(args) >= 1
         if len(args) == 1:
@@ -1453,7 +1441,6 @@ class AutogradPad(AutogradFunction):
 class AutogradAvgPool2D(AutogradFunction):
     @staticmethod
     def forward(ctx, input, kernel_size, stride=None, padding=0, ceil_mode=False):
-
         # preprocess inputs:
         if stride is None:
             stride = kernel_size
@@ -1528,7 +1515,6 @@ class AutogradMaxPool2D(AutogradFunction):
         ceil_mode=False,
         return_indices=False,
     ):
-
         # preprocess inputs:
         if stride is None:
             stride = kernel_size
@@ -1887,7 +1873,6 @@ class AutogradBatchNorm(AutogradFunction):
         grad_output = grad_output.mul(weight)
         grad_input = grad_output.mul(inv_var)
         if training:
-
             # compute gradient term that is due to the mean:
             num_element = reduce(
                 lambda x, y: x * y, [grad_output.size(d) for d in stats_dimensions]

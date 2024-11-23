@@ -2,10 +2,6 @@
 
 # pyre-unsafe
 
-# Copyright (c) Facebook, Inc. and its affiliates.
-#
-# This source code is licensed under the MIT license found in the
-# LICENSE file in the root directory of this source tree.
 
 import logging
 import tempfile
@@ -79,7 +75,6 @@ def run_experiment(
     # loop over dataset:
     meter = AccuracyMeter()
     for idx, sample in enumerate(dataset):
-
         # preprocess sample:
         image, target = sample
         image = transform(image)

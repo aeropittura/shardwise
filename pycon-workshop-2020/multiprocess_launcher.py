@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
 
-# Copyright (c) Facebook, Inc. and its affiliates.
-#
-# This source code is licensed under the MIT license found in the
-# LICENSE file in the root directory of this source tree.
 
 """
 Based on
@@ -19,7 +15,6 @@ import crypten
 
 
 class MultiProcessLauncher:
-
     # run_process_fn will be run in subprocesses.
     def __init__(self, world_size, run_process_fn, fn_args=None):
         env = os.environ.copy()

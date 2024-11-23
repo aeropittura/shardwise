@@ -2,10 +2,6 @@
 
 # pyre-unsafe
 
-# Copyright (c) Facebook, Inc. and its affiliates.
-#
-# This source code is licensed under the MIT license found in the
-# LICENSE file in the root directory of this source tree.
 
 import unittest
 
@@ -25,7 +21,6 @@ class TestTensorboard(MultiProcessTestCase):
             crypten.init()
 
     def test_tensorboard(self) -> None:
-
         # create small crypten model:
         model = crypten.nn.Graph("input", "output")
         model.add_module("intermediate1", crypten.nn.ReLU(), ["input"])

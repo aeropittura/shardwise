@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
 
-# Copyright (c) Facebook, Inc. and its affiliates.
-#
-# This source code is licensed under the MIT license found in the
-# LICENSE file in the root directory of this source tree.
 
 import crypten.communicator as comm
 
@@ -223,9 +219,9 @@ class ArithmeticSharedTensor:
         """Set tensor values by index"""
         if isinstance(value, (int, float)) or is_tensor(value):
             value = ArithmeticSharedTensor(value)
-        assert isinstance(
-            value, ArithmeticSharedTensor
-        ), "Unsupported input type %s for __setitem__" % type(value)
+        assert isinstance(value, ArithmeticSharedTensor), (
+            "Unsupported input type %s for __setitem__" % type(value)
+        )
         self.share.__setitem__(index, value.share)
 
     def pad(self, pad, mode="constant", value=0):
@@ -268,9 +264,9 @@ class ArithmeticSharedTensor:
         for i, tensor in enumerate(tensors):
             if is_tensor(tensor):
                 tensors[i] = ArithmeticSharedTensor(tensor)
-            assert isinstance(
-                tensors[i], ArithmeticSharedTensor
-            ), "Can't stack %s with ArithmeticSharedTensor" % type(tensor)
+            assert isinstance(tensors[i], ArithmeticSharedTensor), (
+                "Can't stack %s with ArithmeticSharedTensor" % type(tensor)
+            )
 
         result = tensors[0].shallow_copy()
         result.share = torch_stack(
@@ -630,9 +626,9 @@ class ArithmeticSharedTensor:
         """
         if is_tensor(src):
             src = ArithmeticSharedTensor(src)
-        assert isinstance(
-            src, ArithmeticSharedTensor
-        ), "Unrecognized scatter src type: %s" % type(src)
+        assert isinstance(src, ArithmeticSharedTensor), (
+            "Unrecognized scatter src type: %s" % type(src)
+        )
         self.share.scatter_(dim, index, src.share)
         return self
 

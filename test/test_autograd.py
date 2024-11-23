@@ -2,10 +2,6 @@
 
 # pyre-unsafe
 
-# Copyright (c) Facebook, Inc. and its affiliates.
-#
-# This source code is licensed under the MIT license found in the
-# LICENSE file in the root directory of this source tree.
 
 import logging
 import random
@@ -62,7 +58,6 @@ class TestAutograd:
 
         # repeat test multiple times:
         for _ in range(10):
-
             # mark non-differentiable inputs as such:
             differentiable = [random.random() > 0.5 for _ in range(len(inputs))]
             for idx, diff in enumerate(differentiable):
@@ -190,7 +185,6 @@ class TestAutograd:
         """Tests that detach() works as expected."""
 
         for func_name in ["detach", "detach_"]:
-
             # get test case:
             input_size = (12, 5)
             input1 = get_random_test_tensor(size=input_size, is_float=True)
@@ -215,7 +209,6 @@ class TestAutograd:
         """Tests that requires_grad influences tracking of forward computations."""
 
         for requires_grad in [True, False]:
-
             # get test case:
             input = get_random_test_tensor(size=(12, 5), is_float=True)
             input = crypten.cryptensor(input, requires_grad=requires_grad)
@@ -362,7 +355,6 @@ class TestAutograd:
             if callable(value) and key.startswith("test_case")
         ]
         for idx, test_case in enumerate(test_cases):
-
             # get input tensors:
             input = get_random_test_tensor(size=(12, 5), is_float=True)
             input.requires_grad = True
@@ -387,7 +379,6 @@ class TestAutograd:
 
         # test cases in which tensor gets combined with itself:
         for func_name in ["sub", "add", "mul"]:
-
             # get input tensors:
             input = get_random_test_tensor(size=(12, 5), is_float=True)
             input.requires_grad = True
@@ -415,7 +406,6 @@ class TestAutograd:
 
         # PyTorch test case:
         for test in tests:
-
             # get test case:
             number_of_inputs, ops = test
             inputs = [
@@ -433,7 +423,6 @@ class TestAutograd:
             # perform forward pass, logging all intermediate outputs:
             outputs, encr_outputs = [inputs], [encr_inputs]
             for op in ops:
-
                 # get inputs for current operation:
                 input, output = outputs[-1], []
                 encr_input, encr_output = encr_outputs[-1], []
@@ -475,7 +464,6 @@ class TestAutograd:
 
         # re-use the same input multiple times:
         for _ in range(7):
-
             # perform forward pass:
             output = input.exp().sum()
             encr_output = encr_input.exp().sum()

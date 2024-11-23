@@ -2,10 +2,6 @@
 
 # pyre-unsafe
 
-# Copyright (c) Facebook, Inc. and its affiliates.
-#
-# This source code is licensed under the MIT license found in the
-# LICENSE file in the root directory of this source tree.
 
 
 import itertools
@@ -114,7 +110,6 @@ class TestMPC:
 
         # test both types:
         for ptype in [Ptype.arithmetic, Ptype.binary]:
-
             # generate shares, sync them between parties, and create tensor:
             shares, reference = _generate_tensor(ptype)
             share = comm.get().scatter(shares, 0)
@@ -1434,7 +1429,6 @@ class TestMPC:
         batch_dims = [(), (1,), (5,), (1, 1), (1, 5), (5, 5)]
 
         for tensor_type in [lambda x: x, MPCTensor]:
-
             for size in matmul_sizes:
                 for batch1, batch2 in itertools.combinations(batch_dims, 2):
                     size1 = (*batch1, *size)

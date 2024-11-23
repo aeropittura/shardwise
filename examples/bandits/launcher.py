@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
 
-# Copyright (c) Facebook, Inc. and its affiliates.
-#
-# This source code is licensed under the MIT license found in the
-# LICENSE file in the root directory of this source tree.
 
 """
 To run bandits example in multiprocess mode:
@@ -380,7 +376,6 @@ def build_learner(args, bandits, download_mnist):
             logging.info("Loading clusters from file...")
             clusters = torch.load(clusters_file)
         else:
-
             # load data and allocate clusters:
             context, _ = load_data(
                 split=args.mnist_split, pca=pca, download_mnist_func=download_mnist

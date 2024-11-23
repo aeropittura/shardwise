@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
 
-# Copyright (c) Facebook, Inc. and its affiliates.
-#
-# This source code is licensed under the MIT license found in the
-# LICENSE file in the root directory of this source tree.
 
 import crypten.nn as nn
 
@@ -50,7 +46,6 @@ def graph(model):
 
     # loop all graph connections:
     for output_name, input_names in model._graph.items():
-
         # get parameters and type of module:
         module = modules[output_name]
         op = str(type(module))

@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
 
-# Copyright (c) Facebook, Inc. and its affiliates.
-#
-# This source code is licensed under the MIT license found in the
-# LICENSE file in the root directory of this source tree.
 
 import random
 import time
@@ -62,7 +58,6 @@ def online_learner(
 
         # initialization of model parameters:
         if idx == 0:
-
             # initialize accumulators for linear least squares:
             A_inv = [torch.eye(num_features).unsqueeze(0) for _ in range(num_arms)]
             A_inv = crypten.cat([crypten.cryptensor(A) for A in A_inv])

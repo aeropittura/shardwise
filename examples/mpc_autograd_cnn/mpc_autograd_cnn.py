@@ -2,10 +2,6 @@
 
 # pyre-unsafe
 
-# Copyright (c) Facebook, Inc. and its affiliates.
-#
-# This source code is licensed under the MIT license found in the
-# LICENSE file in the root directory of this source tree.
 
 import tempfile
 
@@ -94,7 +90,6 @@ def train_encrypted(
             print(f"Epoch {epoch} in progress:")
 
         for j in range(0, num_samples, batch_size):
-
             # define the start and end of the training mini-batch
             start, end = j, min(j + batch_size, num_samples)
 
