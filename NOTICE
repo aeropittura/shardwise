@@ -1,0 +1,13 @@
+Shardwise
+
+Shardwise is derived from CrypTen:
+https://github.com/facebookresearch/CrypTen
+
+The inherited implementation is copyright (c) Facebook, Inc. and its affiliates
+and is distributed under the MIT License in LICENSE.
+Shardwise modifications are copyright (c) 2026 Shardwise contributors.
+
+Shardwise maintains its own package layout, API names, documentation, and tooling.
+These changes do not imply that the inherited cryptographic implementation was
+independently developed. Imported history is retained; new development commits
+use the Shardwise contributor identity.

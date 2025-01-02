@@ -1,0 +1,4 @@
+include NOTICE constraints.txt CHANGELOG.md
+recursive-include docs *.rst *.py
+recursive-include examples *.py *.pth.tar
+recursive-include benchmarks *.py *.jpg

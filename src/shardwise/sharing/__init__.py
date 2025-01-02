@@ -1,0 +1,35 @@
+#!/usr/bin/env python3
+
+
+from shardwise import protocols, providers  # noqa: F401
+from shardwise.settings import cfg
+from shardwise.sharing.launch import run_multiprocess
+from shardwise.sharing.ptype import ptype
+from shardwise.sharing.tensor import SecureTensor
+
+__all__ = [
+    "SecureTensor",
+    "protocols",
+    "providers",
+    "ptype",
+    "run_multiprocess",
+]
+
+# The secret-sharing representations supported by SecureTensor.
+arithmetic = ptype.arithmetic
+binary = ptype.binary
+
+# Set provider
+__SUPPORTED_PROVIDERS = {
+    "TFP": providers.TrustedFirstParty(),
+    "TTP": providers.TrustedThirdParty(),
+    "HE": providers.HomomorphicProvider(),
+}
+
+
+def get_default_provider():
+    return __SUPPORTED_PROVIDERS[cfg.sharing.provider]
+
+
+def ttp_required():
+    return cfg.sharing.provider == "TTP"
