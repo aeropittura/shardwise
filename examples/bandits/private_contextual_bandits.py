@@ -4,9 +4,9 @@
 import random
 import time
 
-import crypten
+import shardwise
 import torch
-from crypten.config import cfg
+from shardwise.settings import cfg
 
 
 def set_precision(bits):
@@ -40,7 +40,7 @@ def online_learner(
     total_reward = 0.0
 
     # initialize constructor for tensors:
-    crypten.set_default_backend(backend)
+    shardwise.set_default_backend(backend)
 
     # loop over dataset:
     idx = 0
@@ -52,7 +52,7 @@ def online_learner(
             "invalid sample: %s" % sample
         )
 
-        context = crypten.cryptensor(sample["context"])
+        context = shardwise.tensor(sample["context"])
         num_features = context.nelement()
         num_arms = sample["rewards"].nelement()
 
@@ -60,8 +60,8 @@ def online_learner(
         if idx == 0:
             # initialize accumulators for linear least squares:
             A_inv = [torch.eye(num_features).unsqueeze(0) for _ in range(num_arms)]
-            A_inv = crypten.cat([crypten.cryptensor(A) for A in A_inv])
-            b = crypten.cryptensor(torch.zeros(num_arms, num_features))
+            A_inv = shardwise.cat([shardwise.tensor(A) for A in A_inv])
+            b = shardwise.tensor(torch.zeros(num_arms, num_features))
 
             # compute initial weights for all arms:
             weights = b.unsqueeze(1).matmul(A_inv).squeeze(1)
@@ -82,7 +82,7 @@ def online_learner(
         # Once the action is taken, the reward (a scalar) is observed by some
         # party and secret shared. Here we simulate that by selecting the
         # reward from the rewards vector and then sharing it.
-        reward = crypten.cryptensor(
+        reward = shardwise.tensor(
             (sample["rewards"][selected_arm] > random.random()).view(1).float()
         )
 
@@ -91,7 +91,7 @@ def online_learner(
         A_inv_context = A_inv.matmul(context)
         numerator = A_inv_context.unsqueeze(1).mul(A_inv_context.unsqueeze(2))
         denominator = A_inv_context.matmul(context).add(1.0).view(-1, 1, 1)
-        with crypten.mpc.ConfigManager("reciprocal_nr_iters", nr_iters):
+        with shardwise.sharing.ConfigManager("reciprocal_nr_iters", nr_iters):
             update = numerator.mul_(denominator.reciprocal())
         A_inv.sub_(update.mul_(onehot.view(-1, 1, 1)))
         b.add_(context.mul(reward).unsqueeze(0).mul_(onehot.unsqueeze(0)))
@@ -148,8 +148,8 @@ def epsilon_greedy(
 
     # define scoring function
     def score_func(scores, A_inv, b, context):
-        explore = crypten.bernoulli(torch.tensor([epsilon]))
-        rand_scores = crypten.rand(*scores.size())
+        explore = shardwise.bernoulli(torch.tensor([epsilon]))
+        rand_scores = shardwise.rand(*scores.size())
         scores.mul_(1 - explore).add_(rand_scores.mul(explore))
 
     # run online learner:

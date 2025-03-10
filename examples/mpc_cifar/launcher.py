@@ -33,12 +33,12 @@ import argparse
 import logging
 import os
 
-from deeplearning.projects.crypten.examples.multiprocess_launcher import (
+from examples.multiprocess_launcher import (
     MultiProcessLauncher,
 )
 
 
-parser = argparse.ArgumentParser(description="CrypTen Cifar Training")
+parser = argparse.ArgumentParser(description="Shardwise Cifar Training")
 parser.add_argument(
     "--world_size",
     type=int,
@@ -127,7 +127,7 @@ parser.add_argument(
 
 
 def _run_experiment(args):
-    # only import here to initialize crypten within the subprocesses
+    # only import here to initialize shardwise within the subprocesses
     # pyre-fixme[21]: Could not find module `mpc_cifar`.
     from mpc_cifar import run_mpc_cifar  # @manual
 

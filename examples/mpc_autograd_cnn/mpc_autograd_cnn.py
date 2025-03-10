@@ -5,8 +5,8 @@
 
 import tempfile
 
-import crypten
-import crypten.communicator as comm
+import shardwise
+import shardwise.comm as comm
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -26,7 +26,7 @@ def run_mpc_autograd_cnn(
     Args:
         context_manager: used for setting proxy settings during download.
     """
-    crypten.init()
+    shardwise.init()
 
     data_alice, data_bob, train_labels = preprocess_mnist(context_manager)
     rank = comm.get().get_rank()
@@ -44,11 +44,11 @@ def run_mpc_autograd_cnn(
         x_bob = torch.empty(data_bob.size())
 
     # encrypt
-    x_alice_enc = crypten.cryptensor(x_alice, src=0)
-    x_bob_enc = crypten.cryptensor(x_bob, src=1)
+    x_alice_enc = shardwise.tensor(x_alice, src=0)
+    x_bob_enc = shardwise.tensor(x_bob, src=1)
 
     # combine feature sets
-    x_combined_enc = crypten.cat([x_alice_enc, x_bob_enc], dim=2)
+    x_combined_enc = shardwise.cat([x_alice_enc, x_bob_enc], dim=2)
     x_combined_enc = x_combined_enc.unsqueeze(1)
 
     # reduce training set to num_samples
@@ -58,7 +58,7 @@ def run_mpc_autograd_cnn(
     # encrypt plaintext model
     model_plaintext = CNN()
     dummy_input = torch.empty((1, 1, 28, 28))
-    model = crypten.nn.from_pytorch(model_plaintext, dummy_input)
+    model = shardwise.nn.from_pytorch(model_plaintext, dummy_input)
     model.train()
     model.encrypt()
 
@@ -78,7 +78,7 @@ def train_encrypted(
     print_freq,
 ):
     rank = comm.get().get_rank()
-    loss = crypten.nn.MSELoss()
+    loss = shardwise.nn.MSELoss()
 
     num_samples = x_encrypted.size(0)
     label_eye = torch.eye(2)
@@ -97,7 +97,7 @@ def train_encrypted(
             x_train = x_encrypted[start:end]
             x_train.requires_grad = True
             y_one_hot = label_eye[y_encrypted[start:end]]
-            y_train = crypten.cryptensor(y_one_hot, requires_grad=True)
+            y_train = shardwise.tensor(y_one_hot, requires_grad=True)
 
             # perform forward pass:
             output = encrypted_model(x_train)

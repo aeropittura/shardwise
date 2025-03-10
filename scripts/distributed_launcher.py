@@ -24,7 +24,7 @@ def main():
     processes = []
 
     # Use random file so multiple jobs can be run simultaneously
-    INIT_METHOD = "file:///tmp/crypten-rendezvous-{}".format(uuid.uuid1())
+    INIT_METHOD = "file:///tmp/shardwise-rendezvous-{}".format(uuid.uuid1())
 
     for rank in range(0, args.world_size):
         # each process's rank

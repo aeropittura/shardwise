@@ -7,7 +7,7 @@ Contains models used for benchmarking
 from dataclasses import dataclass
 from typing import Any
 
-import crypten
+import shardwise
 import torch
 import torch.nn as nn
 from torchvision import models
@@ -27,7 +27,7 @@ N_FEATURES = 20
 class Model:
     name: str
     plain: torch.nn.Module
-    crypten: crypten.nn.Module
+    shardwise: shardwise.nn.Module
     # must contains x, y, x_test, y_test attributes
     data: Any
     epochs: int
@@ -45,10 +45,10 @@ class LogisticRegression(torch.nn.Module):
         return torch.sigmoid(self.linear(x))
 
 
-class LogisticRegressionCrypTen(crypten.nn.Module):
+class LogisticRegressionShardwise(shardwise.nn.Module):
     def __init__(self, n_features=N_FEATURES):
         super().__init__()
-        self.linear = crypten.nn.Linear(n_features, 1)
+        self.linear = shardwise.nn.Linear(n_features, 1)
 
     def forward(self, x):
         return self.linear(x).sigmoid()
@@ -68,12 +68,12 @@ class FeedForward(torch.nn.Module):
         return out
 
 
-class FeedForwardCrypTen(crypten.nn.Module):
+class FeedForwardShardwise(shardwise.nn.Module):
     def __init__(self, n_features=N_FEATURES):
         super().__init__()
-        self.linear1 = crypten.nn.Linear(n_features, n_features // 2)
-        self.linear2 = crypten.nn.Linear(n_features // 2, n_features // 4)
-        self.linear3 = crypten.nn.Linear(n_features // 4, 1)
+        self.linear1 = shardwise.nn.Linear(n_features, n_features // 2)
+        self.linear2 = shardwise.nn.Linear(n_features // 2, n_features // 4)
+        self.linear3 = shardwise.nn.Linear(n_features // 4, 1)
 
     def forward(self, x):
         out = (self.linear1(x)).relu()
@@ -92,13 +92,13 @@ class ResNet(nn.Module):
         return self.model(x)
 
 
-class ResNetCrypTen(crypten.nn.Module):
+class ResNetShardwise(shardwise.nn.Module):
     def __init__(self, n_layers=18):
         super().__init__()
         assert n_layers in [18, 34, 50]
         model = getattr(models, "resnet{}".format(n_layers))(pretrained=True)
         dummy_input = torch.rand([1, 3, 224, 224])
-        self.model = crypten.nn.from_pytorch(model, dummy_input)
+        self.model = shardwise.nn.from_pytorch(model, dummy_input)
 
     def forward(self, x):
         return self.model(x)
@@ -108,7 +108,7 @@ MODELS = [
     Model(
         name="logistic regression",
         plain=LogisticRegression(),
-        crypten=LogisticRegressionCrypTen(),
+        shardwise=LogisticRegressionShardwise(),
         data=data.GaussianClusters(),
         epochs=50,
         lr=0.1,
@@ -118,7 +118,7 @@ MODELS = [
     Model(
         name="feedforward neural network",
         plain=FeedForward(),
-        crypten=FeedForwardCrypTen(),
+        shardwise=FeedForwardShardwise(),
         data=data.GaussianClusters(),
         epochs=50,
         lr=0.1,
@@ -128,7 +128,7 @@ MODELS = [
     Model(
         name="resnet18",
         plain=ResNet(n_layers=18),
-        crypten=ResNetCrypTen(n_layers=18),
+        shardwise=ResNetShardwise(n_layers=18),
         data=data.Images(),
         epochs=2,
         lr=0.1,
@@ -138,7 +138,7 @@ MODELS = [
     Model(
         name="resnet34",
         plain=ResNet(n_layers=34),
-        crypten=ResNetCrypTen(n_layers=34),
+        shardwise=ResNetShardwise(n_layers=34),
         data=data.Images(),
         epochs=2,
         lr=0.1,
@@ -148,7 +148,7 @@ MODELS = [
     Model(
         name="resnet50",
         plain=ResNet(n_layers=50),
-        crypten=ResNetCrypTen(n_layers=50),
+        shardwise=ResNetShardwise(n_layers=50),
         data=data.Images(),
         epochs=2,
         lr=0.1,

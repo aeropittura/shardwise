@@ -1,0 +1,29 @@
+#!/usr/bin/env python3
+
+
+
+from functools import wraps
+
+from shardwise.settings import cfg
+
+from shardwise.debug.tools import configure_logging, MultiprocessingPdb, validate_correctness
+
+
+pdb = MultiprocessingPdb()
+
+__all__ = ["pdb", "configure_logging", "validate_correctness", "validate_decorator"]
+
+
+def register_validation(getattr_function):
+    @wraps(getattr_function)
+    def validate_attribute(self, name):
+        # Get dispatched function call
+        function = getattr_function(self, name)
+
+        if not cfg.debug.validation_mode:
+            return function
+
+        # Run validation
+        return validate_correctness(self, function, name)
+
+    return validate_attribute

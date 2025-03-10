@@ -50,7 +50,7 @@ index_page = html.Div(
                 html.Div(
                     [
                         html.Img(
-                            src=app.get_asset_url("crypten-icon.png"),
+                            src=app.get_asset_url("shardwise-icon.png"),
                             id="plotly-image",
                             style={
                                 "height": "60px",
@@ -65,7 +65,7 @@ index_page = html.Div(
                     [
                         html.Div(
                             [
-                                html.H2("CrypTen", style={"margin-bottom": "0px"}),
+                                html.H2("Shardwise", style={"margin-bottom": "0px"}),
                                 html.H4("Benchmarks", style={"margin-top": "0px"}),
                             ]
                         )
@@ -112,7 +112,7 @@ index_page = html.Div(
                         dcc.Markdown(
                             """To reproduce or view assumptions see
                             [benchmarks](
-                            https://github.com/facebookresearch/CrypTen/blob/master/benchmarks/benchmark.py#L68)
+                            https://github.com/facebookresearch/Shardwise/blob/master/benchmarks/benchmark.py#L68)
                             """
                         ),
                         html.H5("Runtimes"),
@@ -129,11 +129,11 @@ index_page = html.Div(
                 html.Div(
                     [
                         html.Div(
-                            [dcc.Graph(id="func-runtime-crypten")],
+                            [dcc.Graph(id="func-runtime-shardwise")],
                             className="six columns",
                         ),
                         html.Div(
-                            [dcc.Graph(id="func-runtime-crypten-v-plain")],
+                            [dcc.Graph(id="func-runtime-shardwise-v-plain")],
                             className="six columns",
                         ),
                     ],
@@ -165,10 +165,10 @@ index_page = html.Div(
                         dcc.Markdown(
                             """
                             For model details or to reproduce see
-                            [models](https://github.com/facebookresearch/CrypTen/blob/master/benchmarks/models.py)
+                            [models](https://github.com/facebookresearch/Shardwise/blob/master/benchmarks/models.py)
                             and
                             [training details](
-                            https://github.com/facebookresearch/CrypTen/blob/master/benchmarks/benchmark.py#L293).
+                            https://github.com/facebookresearch/Shardwise/blob/master/benchmarks/benchmark.py#L293).
                             * trained on Gaussian clusters for binary classification
                                 * uses SGD with 5k samples, 20 features, over 20 epochs, and 0.1 learning rate
                             * feedforward has three hidden layers with intermediary RELU and
@@ -224,7 +224,7 @@ comparison_layout = html.Div(
                 html.Div(
                     [
                         html.Img(
-                            src=app.get_asset_url("crypten-icon.png"),
+                            src=app.get_asset_url("shardwise-icon.png"),
                             id="plotly-image",
                             style={
                                 "height": "60px",
@@ -239,7 +239,7 @@ comparison_layout = html.Div(
                     [
                         html.Div(
                             [
-                                html.H2("CrypTen", style={"margin-bottom": "0px"}),
+                                html.H2("Shardwise", style={"margin-bottom": "0px"}),
                                 html.H4("Benchmarks", style={"margin-top": "0px"}),
                             ]
                         )
@@ -333,14 +333,14 @@ comparison_layout = html.Div(
 
 
 @app.callback(
-    Output("func-runtime-crypten", "figure"),
+    Output("func-runtime-shardwise", "figure"),
     [Input("select_date", "value"), Input("benchmark-tabs", "value")],
 )
-def update_runtime_crypten(selected_date, mode):
+def update_runtime_shardwise(selected_date, mode):
     try:
         filter_df = func_df[func_df["mode"] == mode]
         filter_df = filter_df[filter_df["date"] == selected_date]
-        filter_df["runtime in seconds"] = filter_df["runtime crypten"]
+        filter_df["runtime in seconds"] = filter_df["runtime shardwise"]
     except KeyError:
         filter_df = pd.DataFrame()
 
@@ -353,11 +353,11 @@ def update_runtime_crypten(selected_date, mode):
         y="function",
         color="device",
         orientation="h",
-        error_x="runtime crypten error plus",
-        error_x_minus="runtime crypten error minus",
+        error_x="runtime shardwise error plus",
+        error_x_minus="runtime shardwise error minus",
         color_discrete_sequence=colors_discrete,
         template=template,
-        title="Crypten",
+        title="Shardwise",
         barmode="group",
     )
 
@@ -366,10 +366,10 @@ def update_runtime_crypten(selected_date, mode):
 
 
 @app.callback(
-    Output("func-runtime-crypten-v-plain", "figure"),
+    Output("func-runtime-shardwise-v-plain", "figure"),
     [Input("select_date", "value"), Input("benchmark-tabs", "value")],
 )
-def update_runtime_crypten_v_plain(selected_date, mode):
+def update_runtime_shardwise_v_plain(selected_date, mode):
     try:
         filter_df = func_df[func_df["mode"] == mode]
         filter_df = filter_df[filter_df["date"] == selected_date]
@@ -389,7 +389,7 @@ def update_runtime_crypten_v_plain(selected_date, mode):
         error_x_minus="runtime gap error minus",
         color_discrete_sequence=colors_discrete,
         template=template,
-        title="Crypten vs. Plaintext",
+        title="Shardwise vs. Plaintext",
         barmode="group",
     )
 
@@ -421,7 +421,7 @@ def update_abs_error(selected_date, mode):
         orientation="h",
         color_discrete_sequence=colors_discrete,
         template=template,
-        title="Crypten Absolute Error",
+        title="Shardwise Absolute Error",
         barmode="group",
     )
     fig.update_traces(texttemplate="%{text:.1f}", textposition="outside")
@@ -452,7 +452,7 @@ def update_abs_error(selected_date, mode):
         orientation="h",
         color_discrete_sequence=colors_discrete,
         template=template,
-        title="Crypten Relative Error",
+        title="Shardwise Relative Error",
         barmode="group",
     )
     fig.update_traces(texttemplate="%{text:%}", textposition="outside")
@@ -465,13 +465,13 @@ def process_comparison_options(filter_df, option):
     if option == "CPU vs Plaintext":
         filter_df = filter_df[filter_df["device"] == "cpu"]
         filter_df["type"] = np.where(
-            filter_df["is plain text"], "Plain Text", "CrypTen"
+            filter_df["is plain text"], "Plain Text", "Shardwise"
         )
     elif option == "GPU vs Plaintext":
         filter_df = filter_df[filter_df["device"] == "gpu"]
         if not filter_df.empty:
             filter_df["type"] = np.where(
-                filter_df["is plain text"], "Plain Text", "CrypTen"
+                filter_df["is plain text"], "Plain Text", "Shardwise"
             )
     elif option == "CPU vs GPU":
         filter_df = filter_df[filter_df["is plain text"] is False]
@@ -632,8 +632,8 @@ def update_runtime_diff(start_date, end_date, funcs):
         rows=len(funcs), cols=1, specs=[[{"type": "domain"}] for _ in range(len(funcs))]
     )
     for i, func in enumerate(funcs):
-        runtime = end_df[end_df["function"] == func]["runtime crypten"]
-        runtime_prev = start_df[start_df["function"] == func]["runtime crypten"]
+        runtime = end_df[end_df["function"] == func]["runtime shardwise"]
+        runtime_prev = start_df[start_df["function"] == func]["runtime shardwise"]
         func_text = func.capitalize()
 
         fig.add_trace(
@@ -719,7 +719,7 @@ def update_runtime_timeseries(funcs):
         return render_emtpy_figure()
 
     fig = px.line(
-        filtered_df, x="date", y="runtime crypten", template=template, color="function"
+        filtered_df, x="date", y="runtime shardwise", template=template, color="function"
     )
 
     return fig

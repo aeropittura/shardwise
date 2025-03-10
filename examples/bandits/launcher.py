@@ -24,7 +24,7 @@ import random
 import examples.util
 import torch
 import visdom
-from deeplearning.projects.crypten.examples.multiprocess_launcher import (
+from examples.multiprocess_launcher import (
     MultiProcessLauncher,
 )
 from examples.util import NoopContextManager, process_mnist_files
@@ -167,7 +167,7 @@ def parse_args(hostname):
         "--plaintext", action="store_true", help="use a non-private algorithm"
     )
     parser.add_argument(
-        "--backend", default="mpc", type=str, help="crypten backend: mpc (default)"
+        "--backend", default="mpc", type=str, help="shardwise backend: mpc (default)"
     )
     parser.add_argument(
         "--mnist-split",
@@ -427,9 +427,9 @@ def _run_experiment(args):
         import private_contextual_bandits as bandits  # @manual
 
     learner_func = build_learner(args, bandits, download_mnist)
-    import crypten
+    import shardwise
 
-    crypten.init()
+    shardwise.init()
     learner_func()
 
 

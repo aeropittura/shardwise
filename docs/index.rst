@@ -1,11 +1,11 @@
-.. CrypTen documentation master file, created by sphinx-quickstart on Thu Sep 12 20:49:44 2019.  You can adapt this file completely to your liking, but it should at least
+.. Shardwise documentation master file, created by sphinx-quickstart on Thu Sep 12 20:49:44 2019.  You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-CrypTen Documentation
+Shardwise Documentation
 =====================
-CrypTen is a Privacy Preserving Machine Learning framework written using `PyTorch
+Shardwise is a Privacy Preserving Machine Learning framework written using `PyTorch
 <http://pytorch.org/>`_ that allows researchers and developers to
-train models using encrypted data. CrypTen currently supports
+train models using encrypted data. Shardwise currently supports
 `Secure multi-party computation
 <https://en.wikipedia.org/wiki/Secure_multi-party_computation>`_ as its encryption
 mechanism.
@@ -19,14 +19,14 @@ mechanism.
 Installation on Linux and Mac
 =============================
 
-We recommend installing CrypTen in its own ``conda`` environment. Please install
+We recommend installing Shardwise in its own ``conda`` environment. Please install
 ``Anaconda Python 3.7`` before doing the following steps
 
 For Linux or Mac
 
 .. code-block:: bash
 
-    $ pip install crypten
+    $ pip install shardwise
 
 To check if your installation is working,
 you can run the unit tests by cloning the repo then
@@ -38,7 +38,7 @@ you can run the unit tests by cloning the repo then
 We do not support Windows yet.
 For contributing to the latest development version, please see Contributing_.
 
-.. _Contributing: https://github.com/facebookresearch/CrypTen/blob/master/CONTRIBUTING.md
+.. _Contributing: https://github.com/facebookresearch/Shardwise/blob/master/CONTRIBUTING.md
 
 Examples
 ========
@@ -83,16 +83,16 @@ Some MPC specific options are
 Examples on AWS
 ---------------
 
-CrypTen also provides a script ``aws_launcher`` to launch examples with
+Shardwise also provides a script ``aws_launcher`` to launch examples with
 encrypted data on multiple AWS instances. See :doc:`aws`.
 
 .. toctree::
     :maxdepth: 3
     :caption: Package Reference
 
-    crypten.CrypTensor <cryptensor>
-    crypten.MPCTensor <mpctensor>
-    crypten.nn <nn>
+    shardwise.ShardTensor <shard_tensor>
+    shardwise.SecureTensor <mpctensor>
+    shardwise.nn <nn>
 
 Indices and tables
 ==================

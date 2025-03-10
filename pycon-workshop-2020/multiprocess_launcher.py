@@ -3,7 +3,7 @@
 
 """
 Based on
-https://github.com/facebookresearch/CrypTen/blob/master/examples/multiprocess_launcher.py
+https://github.com/facebookresearch/Shardwise/blob/master/examples/multiprocess_launcher.py
 """
 
 import logging
@@ -11,7 +11,7 @@ import multiprocessing
 import os
 import uuid
 
-import crypten
+import shardwise
 
 
 class MultiProcessLauncher:
@@ -22,7 +22,7 @@ class MultiProcessLauncher:
         multiprocessing.set_start_method("spawn")
 
         # Use random file so multiple jobs can be run simultaneously
-        INIT_METHOD = "file:///tmp/crypten-rendezvous-{}".format(uuid.uuid1())
+        INIT_METHOD = "file:///tmp/shardwise-rendezvous-{}".format(uuid.uuid1())
         env["RENDEZVOUS"] = INIT_METHOD
 
         self.processes = []
@@ -35,7 +35,7 @@ class MultiProcessLauncher:
             )
             self.processes.append(process)
 
-        if crypten.mpc.ttp_required():
+        if shardwise.sharing.ttp_required():
             ttp_process = multiprocessing.Process(
                 target=self.__class__._run_process,
                 name="TTP",
@@ -43,7 +43,7 @@ class MultiProcessLauncher:
                     world_size,
                     world_size,
                     env,
-                    crypten.mpc.provider.TTPServer,
+                    shardwise.providers.TTPServer,
                     None,
                 ),
             )
@@ -56,7 +56,7 @@ class MultiProcessLauncher:
         os.environ["RANK"] = str(rank)
         orig_logging_level = logging.getLogger().level
         logging.getLogger().setLevel(logging.INFO)
-        crypten.init()
+        shardwise.init()
         logging.getLogger().setLevel(orig_logging_level)
         if fn_args is None:
             run_process_fn()

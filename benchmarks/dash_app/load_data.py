@@ -121,16 +121,16 @@ def set_metadata(df, date, device):
 
 
 def compute_runtime_gap(func_df):
-    """Computes runtime gap between CrypTen and Plain Text"""
-    func_df["runtime gap"] = func_df["runtime crypten"] / func_df["runtime"]
-    func_df["runtime gap Q1"] = func_df["runtime crypten Q1"] / func_df["runtime"]
-    func_df["runtime gap Q3"] = func_df["runtime crypten Q3"] / func_df["runtime"]
+    """Computes runtime gap between Shardwise and Plain Text"""
+    func_df["runtime gap"] = func_df["runtime shardwise"] / func_df["runtime"]
+    func_df["runtime gap Q1"] = func_df["runtime shardwise Q1"] / func_df["runtime"]
+    func_df["runtime gap Q3"] = func_df["runtime shardwise Q3"] / func_df["runtime"]
     return func_df
 
 
 def add_error_bars(func_df):
     """Adds error bars for plotting based on Q1 and Q3"""
-    columns = ["runtime crypten", "runtime gap"]
+    columns = ["runtime shardwise", "runtime gap"]
     for col in columns:
         func_df = calc_error_bar(func_df, col)
     return func_df

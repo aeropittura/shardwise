@@ -101,12 +101,12 @@ for date in dates:
         continue
     # checkout closest version before date
     subprocess.call(
-        f"cd /tmp/CrypTen && "
+        f"cd /tmp/Shardwise && "
         + f"git checkout `git rev-list -n 1 --before='{date} 01:01' master`",
         shell=True,
     )
     for mode, arg in modes.items():
-        subprocess.call(venv + "pip3 install CrypTen/.", shell=True)
+        subprocess.call(venv + "pip3 install Shardwise/.", shell=True)
         subprocess.call(f"echo Generating {date} Benchmarks for {mode}", shell=True)
         path = os.path.join(PATH, f"dash_app/data/{date}", mode)
         subprocess.call(f"mkdir -p {path}", shell=True)
@@ -120,4 +120,4 @@ for date in dates:
 
 # clean up
 shutil.rmtree("/tmp/.venv", ignore_errors=True)
-shutil.rmtree("/tmp/CrypTen", ignore_errors=True)
+shutil.rmtree("/tmp/Shardwise", ignore_errors=True)

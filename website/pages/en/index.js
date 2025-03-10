@@ -27,12 +27,12 @@ class HomeSplash extends React.Component {
     );
 
     const TitleLogo = props => (
-        <img src={props.img_src} alt="CrypTen"/>
+        <img src={props.img_src} alt="Shardwise"/>
     );
 
     const ProjectTitle = () => (
       <h2 className="projectTitle">
-        <TitleLogo img_src={`${baseUrl}img/crypten-logo-full.png`} />
+        <TitleLogo img_src={`${baseUrl}img/shardwise-logo-full.png`} />
         <small>{siteConfig.tagline}</small>
       </h2>
     );
@@ -58,8 +58,8 @@ class HomeSplash extends React.Component {
         <div className="inner">
           <ProjectTitle siteConfig={siteConfig} />
           <PromoSection>
-            <Button href="https://github.com/facebookresearch/crypten">GitHub</Button>
-            <Button href="https://crypten.readthedocs.io/en/latest/">Docs</Button>
+            <Button href="https://github.com/facebookresearch/shardwise">GitHub</Button>
+            <Button href="https://shardwise.readthedocs.io/en/latest/">Docs</Button>
           </PromoSection>
           <PromoSection>
             <Button href="#try">Get Started</Button>
@@ -103,7 +103,7 @@ class Index extends React.Component {
         className="productShowcaseSection"
         style={{textAlign: 'left'}} id="tasks">
         <br /><br />
-        <h2>How CrypTen Works</h2>
+        <h2>How Shardwise Works</h2>
       </div>
     );
 
@@ -111,7 +111,7 @@ class Index extends React.Component {
       <div
         style={{textAlign: 'center'}}>
         <p background="dark" id="tutorials">For more, checkout the
-          <a href="https://github.com/facebookresearch/CrypTen#how-crypten-works">
+          <a href="https://github.com/facebookresearch/Shardwise#how-shardwise-works">
            &nbsp;Tutorials
           </a>
         </p>
@@ -123,22 +123,22 @@ class Index extends React.Component {
           {[
             {
               content: 'Please see the '+
-              '[CrypTen Docs](https://github.com/facebookresearch/crypten#installing-crypten).'+
-              '\n```bash\n\n pip install crypten\n```',
+              '[Shardwise Docs](https://github.com/facebookresearch/shardwise#installing-shardwise).'+
+              '\n```bash\n\n pip install shardwise\n```',
               title: 'Installation Script',
             },
             {
-              content: 'CrypTensors encrypt data using familiar PyTorch '+
+              content: 'ShardTensors encrypt data using familiar PyTorch '+
                         'syntax. For example: \n\n'+
                         '```python \n # PyTorch '+
                         '\n x = torch.tensor([1, 2, 3])\n '+
                         'y = torch.tensor([4, 5, 6])\n '+
                         'z = x + y\n ' +
-                        '\n # CrypTen\n '+
-                        'x_enc = crypten.cryptensor([1, 2, 3])\n '+
-                        'y_enc = crypten.cryptensor([4, 5, 6])\n '+
+                        '\n # Shardwise\n '+
+                        'x_enc = shardwise.tensor([1, 2, 3])\n '+
+                        'y_enc = shardwise.tensor([4, 5, 6])\n '+
                         'z_enc = x_enc + y_enc```',
-              title: 'CrypTensors'
+              title: 'ShardTensors'
             },
           ]}
         </Block>
@@ -150,19 +150,19 @@ class Index extends React.Component {
         {[
           {
             content:
-              'CrypTen is a new framework built on PyTorch to facilitate ' +
+              'Shardwise is a new framework built on PyTorch to facilitate ' +
               'research in secure and privacy-preserving machine learning. '+
-              'CrypTen enables machine learning researchers, who '+
+              'Shardwise enables machine learning researchers, who '+
               'may not be cryptography experts, '+
               'to easily experiment with machine learning models '+
               'using secure computing techniques. '+
-              'CrypTen lowers the barrier for machine learning researchers '+
+              'Shardwise lowers the barrier for machine learning researchers '+
               'by integrating with the common PyTorch API.',
             title: 'Secure Machine Learning',
           },
           {
             content: '',
-            image: `${baseUrl}img/crypten-diagram.jpg`,
+            image: `${baseUrl}img/shardwise-diagram.jpg`,
             imageAlign: 'bottom',
             title: '',
           },
@@ -175,7 +175,7 @@ class Index extends React.Component {
         {[
           {
             content: '',
-            image: `${baseUrl}img/crypten-multiplication.png`,
+            image: `${baseUrl}img/shardwise-multiplication.png`,
             imageAlign: 'bottom',
             title: '',
           },
@@ -202,19 +202,19 @@ class Index extends React.Component {
         {[
           {
             content:
-              'CrypTen currently implements a cryptographic method called '+
+              'Shardwise currently implements a cryptographic method called '+
               'secure multiparty computation (MPC), and we expect to add '+
               'support for homomorphic encryption and secure enclaves in '+
               'futue releases. It works in the \u201Chonest but '+
               ' curious\u201D model (assumes the absence of malicious '+
               'and adversarial agents) that is used'+
               'frequently in cryptographic research, but additional '+
-              'safeguards must be added before Crypten is ready to be used in '+
+              'safeguards must be added before Shardwise is ready to be used in '+
               'production settings ',
             title:  'Overview'
           },
           {
-            image: `${baseUrl}img/crypten-pytorch-diagram.gif`,
+            image: `${baseUrl}img/shardwise-pytorch-diagram.gif`,
             imageAlign: 'bottom',
           },
         ]}
