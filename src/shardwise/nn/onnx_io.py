@@ -15,8 +15,8 @@ from torch.onnx import OperatorExportTypes
 from shardwise.nn import layers
 
 try:
-    import tensorflow as tf  # @manual
-    import tf2onnx  # @manual
+    import tensorflow as tf
+    import tf2onnx
 
     TF_AND_TF2ONNX = True
 except ImportError:

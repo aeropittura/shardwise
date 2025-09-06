@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-# pyre-unsafe
 
 
 
@@ -21,8 +20,6 @@ class TestArithmetic(MultiProcessTestCase):
     This class tests all functions of the ArithmeticSharedTensor.
     """
 
-    # pyre-fixme[14]: `setUp` overrides method defined in `MultiProcessTestCase`
-    #  inconsistently.
     def setUp(self) -> None:
         super().setUp()
         # We don't want the main process (rank -1) to initialize the communcator
@@ -169,24 +166,16 @@ class TestArithmetic(MultiProcessTestCase):
             self._check(encrypted_out, reference, "square failed")
 
         # Test radd, rsub, and rmul
-        # pyre-fixme[61]: `tensor1` is undefined, or not always defined.
         reference = 2 + tensor1
-        # pyre-fixme[61]: `tensor1` is undefined, or not always defined.
         encrypted = ArithmeticSharedTensor(tensor1)
-        # pyre-fixme[58]: `+` is not supported for operand types `int` and
-        #  `ArithmeticSharedTensor`.
         encrypted_out = 2 + encrypted
         self._check(encrypted_out, reference, "right add failed")
 
-        # pyre-fixme[61]: `tensor1` is undefined, or not always defined.
         reference = 2 - tensor1
         encrypted_out = 2 - encrypted
         self._check(encrypted_out, reference, "right sub failed")
 
-        # pyre-fixme[61]: `tensor1` is undefined, or not always defined.
         reference = 2 * tensor1
-        # pyre-fixme[58]: `*` is not supported for operand types `int` and
-        #  `ArithmeticSharedTensor`.
         encrypted_out = 2 * encrypted
         self._check(encrypted_out, reference, "right mul failed")
 
@@ -194,7 +183,6 @@ class TestArithmetic(MultiProcessTestCase):
         """Tests sum reduction on encrypted tensor."""
         tensor = get_random_test_tensor(size=(5, 100, 100), is_float=True)
         encrypted = ArithmeticSharedTensor(tensor)
-        # pyre-fixme[16]: `ArithmeticSharedTensor` has no attribute `sum`.
         self._check(encrypted.sum(), tensor.sum(), "sum failed")
 
         for dim in [0, 1, 2]:
@@ -206,7 +194,6 @@ class TestArithmetic(MultiProcessTestCase):
         """Tests prod reduction on encrypted tensor."""
         tensor = get_random_test_tensor(size=(3, 3), max_value=3, is_float=False)
         encrypted = ArithmeticSharedTensor(tensor)
-        # pyre-fixme[16]: `ArithmeticSharedTensor` has no attribute `prod`.
         self._check(encrypted.prod(), tensor.prod().float(), "prod failed")
 
         # test with dim argument
@@ -240,7 +227,6 @@ class TestArithmetic(MultiProcessTestCase):
         """Tests computing means of encrypted tensors."""
         tensor = get_random_test_tensor(size=(5, 10, 15), is_float=True)
         encrypted = ArithmeticSharedTensor(tensor)
-        # pyre-fixme[16]: `ArithmeticSharedTensor` has no attribute `mean`.
         self._check(encrypted.mean(), tensor.mean(), "mean failed")
 
         for dim in [0, 1, 2]:
@@ -360,7 +346,6 @@ class TestArithmetic(MultiProcessTestCase):
 
             # dot
             encrypted_tensor = ArithmeticSharedTensor(tensor1)
-            # pyre-fixme[16]: `ArithmeticSharedTensor` has no attribute `dot`.
             encrypted_out = encrypted_tensor.dot(tensor2)
             self._check(
                 encrypted_out,
@@ -374,7 +359,6 @@ class TestArithmetic(MultiProcessTestCase):
 
             # ger
             encrypted_tensor = ArithmeticSharedTensor(tensor1)
-            # pyre-fixme[16]: `ArithmeticSharedTensor` has no attribute `ger`.
             encrypted_out = encrypted_tensor.ger(tensor2)
             self._check(
                 encrypted_out,
@@ -394,13 +378,11 @@ class TestArithmetic(MultiProcessTestCase):
             reference = tensor.unsqueeze(dim)
 
             encrypted = ArithmeticSharedTensor(tensor)
-            # pyre-fixme[16]: `ArithmeticSharedTensor` has no attribute `unsqueeze`.
             encrypted_out = encrypted.unsqueeze(dim)
             self._check(encrypted_out, reference, "unsqueeze failed")
 
             # Test squeeze
             encrypted = ArithmeticSharedTensor(tensor.unsqueeze(0))
-            # pyre-fixme[16]: `ArithmeticSharedTensor` has no attribute `squeeze`.
             encrypted_out = encrypted.squeeze()
             self._check(encrypted_out, reference.squeeze(), "squeeze failed")
 
@@ -431,15 +413,12 @@ class TestArithmetic(MultiProcessTestCase):
 
             if len(size) == 2:  # t() asserts dim == 2
                 reference = tensor.t()
-                # pyre-fixme[16]: `ArithmeticSharedTensor` has no attribute `t`.
                 encrypted_out = encrypted_tensor.t()
                 self._check(encrypted_out, reference, "t() failed")
 
             for dim0 in range(len(size)):
                 for dim1 in range(len(size)):
                     reference = tensor.transpose(dim0, dim1)
-                    # pyre-fixme[16]: `ArithmeticSharedTensor` has no attribute
-                    #  `transpose`.
                     encrypted_out = encrypted_tensor.transpose(dim0, dim1)
                     self._check(encrypted_out, reference, "transpose failed")
 
@@ -462,7 +441,6 @@ class TestArithmetic(MultiProcessTestCase):
             # test reversing the dimensions
             dim_arr = [x - 1 for x in range(tensor.dim(), 0, -1)]
             reference = tensor.permute(dim_arr)
-            # pyre-fixme[16]: `ArithmeticSharedTensor` has no attribute `permute`.
             encrypted_out = encrypted_tensor.permute(dim_arr)
             self._check(encrypted_out, reference, "permute failed")
 
@@ -646,7 +624,6 @@ class TestArithmetic(MultiProcessTestCase):
         for dimension in range(0, 4):
             reference = torch.from_numpy(tensor.numpy().take(index, dimension))
             encrypted_tensor = ArithmeticSharedTensor(tensor)
-            # pyre-fixme[16]: `ArithmeticSharedTensor` has no attribute `take`.
             encrypted_out = encrypted_tensor.take(index, dimension)
             self._check(encrypted_out, reference, "take function failed: dimension set")
 
@@ -672,8 +649,6 @@ class TestArithmetic(MultiProcessTestCase):
                 reference = tensor[:, 0]
 
                 encrypted_tensor = ArithmeticSharedTensor(tensor)
-                # pyre-fixme[16]: `ArithmeticSharedTensor` has no attribute
-                #  `__getitem__`.
                 encrypted_out = encrypted_tensor[:, 0]
                 self._check(encrypted_out, reference, "getitem failed")
 
@@ -954,7 +929,6 @@ class TestArithmetic(MultiProcessTestCase):
                 index = index.abs().clamp(0, 4)
                 encrypted = ArithmeticSharedTensor(tensor)
                 reference = tensor.gather(dim, index)
-                # pyre-fixme[16]: `ArithmeticSharedTensor` has no attribute `gather`.
                 encrypted_out = encrypted.gather(dim, index)
                 self._check(encrypted_out, reference, f"gather failed with size {size}")
 
@@ -970,7 +944,6 @@ class TestArithmetic(MultiProcessTestCase):
                 for idx in range(6):
                     split = (idx, 5 - idx)
                     reference0, reference1 = tensor.split(split, dim=dim)
-                    # pyre-fixme[16]: `ArithmeticSharedTensor` has no attribute `split`.
                     encrypted_out0, encrypted_out1 = encrypted.split(split, dim=dim)
 
                     self._check(

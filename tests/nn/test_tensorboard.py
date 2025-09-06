@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-# pyre-unsafe
 
 
 import unittest
@@ -13,8 +12,6 @@ from tests.support.multiprocess import MultiProcessTestCase
 class TestTensorboard(MultiProcessTestCase):
     """This class tests the shardwise.nn.tensorboard package."""
 
-    # pyre-fixme[14]: `setUp` overrides method defined in `MultiProcessTestCase`
-    #  inconsistently.
     def setUp(self) -> None:
         super().setUp()
         if self.rank >= 0:

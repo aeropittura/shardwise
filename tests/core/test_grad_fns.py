@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-# pyre-unsafe
 
 
 
@@ -688,7 +687,6 @@ class TestGradients:
 
     def test_norm(self) -> None:
         """Tests p-norm"""
-        # pyre-fixme[16]: `TestGradients` has no attribute `default_tolerance`.
         self.default_tolerance *= 2  # Increase tolerance for norm test
         for p in [1, 1.5, 2, 3, float("inf"), "fro"]:
             tensor = get_random_test_tensor(max_value=2, size=(3, 3, 3), is_float=True)
@@ -885,19 +883,14 @@ class TestGradients:
                     encrypted_grad = batch_norm_fn.backward(ctx, enc_grad_input)
                 TorchGrad = namedtuple("TorchGrad", ["name", "value"])
                 torch_gradients = [
-                    # pyre-fixme[19]: Expected 1 positional argument.
                     TorchGrad("input gradient", tensor.grad),
-                    # pyre-fixme[19]: Expected 1 positional argument.
                     TorchGrad("weight gradient", weight.grad),
-                    # pyre-fixme[19]: Expected 1 positional argument.
                     TorchGrad("bias gradient", bias.grad),
                 ]
                 for i, torch_gradient in enumerate(torch_gradients):
                     self._check(
                         encrypted_grad[i],
-                        # pyre-fixme[16]: `tuple` has no attribute `value`.
                         torch_gradient.value,
-                        # pyre-fixme[16]: `tuple` has no attribute `name`.
                         f"batchnorm backward {torch_gradient.name} failed "
                         f"with training {is_training} on {tensor.dim()}-D",
                         tolerance=tolerance,
@@ -974,7 +967,6 @@ class TestGradients:
                 reference = tensor.sigmoid()
                 reference = alpha * reference + (1 - alpha) * (1 - reference)
 
-                # pyre-fixme[6]: For 1st argument expected `Tensor` but got `float`.
                 reference = torch.nn.functional.binary_cross_entropy(reference, target)
                 out_encr = tensor_encr.rappor_loss(
                     target_encr, alpha, skip_forward=skip_forward
@@ -1215,10 +1207,7 @@ class TestGradients:
 
 # Run all unit tests with both TFP and TTP providers
 class TestTFP(MultiProcessTestCase, TestGradients):
-    # pyre-fixme[14]: `setUp` overrides method defined in `MultiProcessTestCase`
-    #  inconsistently.
     def setUp(self) -> None:
-        # pyre-fixme[16]: `ShardwiseConfig` has no attribute `mpc`.
         self._original_provider = cfg.mpc.provider
         cfg.mpc.provider = "TFP"
         super(TestTFP, self).setUp()
@@ -1229,10 +1218,7 @@ class TestTFP(MultiProcessTestCase, TestGradients):
 
 
 class TestTTP(MultiProcessTestCase, TestGradients):
-    # pyre-fixme[14]: `setUp` overrides method defined in `MultiProcessTestCase`
-    #  inconsistently.
     def setUp(self) -> None:
-        # pyre-fixme[16]: `ShardwiseConfig` has no attribute `mpc`.
         self._original_provider = cfg.mpc.provider
         cfg.mpc.provider = "TTP"
         super(TestTTP, self).setUp()

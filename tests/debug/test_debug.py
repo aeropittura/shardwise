@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-# pyre-unsafe
 
 
 import shardwise
@@ -11,8 +10,6 @@ from tests.support.multiprocess import get_random_test_tensor, MultiProcessTestC
 
 
 class TestDebug(MultiProcessTestCase):
-    # pyre-fixme[14]: `setUp` overrides method defined in `MultiProcessTestCase`
-    #  inconsistently.
     def setUp(self) -> None:
         super().setUp()
         # We don't want the main process (rank -1) to initialize the communicator

@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-# pyre-unsafe
 
 
 """
@@ -72,8 +71,7 @@ def _run_experiment(args):
         level=level,
         format="%(asctime)s - %(process)d - %(name)s - %(levelname)s - %(message)s",
     )
-    # pyre-fixme[21]: Could not find module `mpc_linear_svm`.
-    from mpc_linear_svm import run_mpc_linear_svm  # @manual
+    from mpc_linear_svm import run_mpc_linear_svm
 
     run_mpc_linear_svm(
         args.epochs, args.examples, args.features, args.lr, args.skip_plaintext

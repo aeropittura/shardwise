@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-# pyre-unsafe
 
 
 import copy
@@ -186,10 +185,8 @@ class TestNN:
                 for encrypted in [False, True, True, False, True]:
                     encr_module.encrypt(mode=encrypted)
                     if encrypted:
-                        # pyre-fixme[16]: `TestNN` has no attribute `assertTrue`.
                         self.assertTrue(encr_module.encrypted, "module not encrypted")
                     else:
-                        # pyre-fixme[16]: `TestNN` has no attribute `assertFalse`.
                         self.assertFalse(encr_module.encrypted, "module encrypted")
 
                 # compare model outputs:
@@ -1339,7 +1336,6 @@ class TestNN:
                     encr_output = (encr_output,)
 
                 # check that output of stateless batchnorm module is correct:
-                # pyre-fixme[16]: `TestNN` has no attribute `assertEqual`.
                 self.assertEqual(len(encr_output), 5 if is_training else 1)
                 self._check(
                     encr_output[0],
@@ -1463,7 +1459,6 @@ class TestNN:
                 # load state dict into fresh module:
                 new_module = getattr(shardwise.nn, module_name)(*args)
                 if encrypt:
-                    # pyre-fixme[16]: `TestNN` has no attribute `assertRaises`.
                     with self.assertRaises(AssertionError):
                         new_module.load_state_dict(state_dict)
                     new_module.encrypt()
@@ -1537,7 +1532,6 @@ class TestNN:
         model_cpu = model.to("cpu")
         cpu = torch.device("cpu")
         for param in model_cpu.parameters():
-            # pyre-fixme[16]: `TestNN` has no attribute `assertEqual`.
             self.assertEqual(param.device, cpu)
         for buffer in model_cpu.buffers():
             self.assertEqual(buffer.device, cpu)
@@ -1565,7 +1559,6 @@ class TestNN:
     def test_module_dict(self) -> None:
         """Test ModuleDict module"""
         module_dict = shardwise.nn.ModuleDict()
-        # pyre-fixme[16]: `TestNN` has no attribute `assertEqual`.
         self.assertEqual(len(module_dict), 0, "ModuleDict initialized incorrect size")
 
         # Test initialization
@@ -1573,7 +1566,6 @@ class TestNN:
             {"conv2d": shardwise.nn.Conv2d(10, 10, 3), "pool": shardwise.nn.MaxPool2d(3)}
         )
         self.assertEqual(len(module_dict), 2, "ModuleDict initialized incorrect size")
-        # pyre-fixme[16]: `TestNN` has no attribute `assertTrue`.
         self.assertTrue("conv2d" in module_dict.keys(), "ModuleDict init failed")
         self.assertTrue(
             isinstance(module_dict["conv2d"], shardwise.nn.Conv2d),
@@ -1598,7 +1590,6 @@ class TestNN:
         conv = module_dict.pop("conv2d")
         self.assertTrue(isinstance(conv, shardwise.nn.Conv2d), "ModuleDict pop failed")
         self.assertEqual(len(module_dict), 2, "ModuleDict pop failed")
-        # pyre-fixme[16]: `TestNN` has no attribute `assertFalse`.
         self.assertFalse("conv2d" in module_dict.keys(), "ModuleDict pop failed")
 
         # Test list initialization
@@ -1623,7 +1614,6 @@ class TestNN:
     def test_module_list(self) -> None:
         """Test ModuleDict module"""
         module_list = shardwise.nn.ModuleList()
-        # pyre-fixme[16]: `TestNN` has no attribute `assertEqual`.
         self.assertEqual(len(module_list), 0, "ModuleList initialized incorrect size")
 
         # Test initialization
@@ -1631,7 +1621,6 @@ class TestNN:
             [shardwise.nn.Conv2d(10, 10, 3), shardwise.nn.MaxPool2d(3)]
         )
         self.assertEqual(len(module_list), 2, "ModuleList initialized incorrect size")
-        # pyre-fixme[16]: `TestNN` has no attribute `assertTrue`.
         self.assertTrue(
             isinstance(module_list[0], shardwise.nn.Conv2d),
             "ModuleList init failed",
@@ -1730,7 +1719,6 @@ class TestNN:
             torch.manual_seed(0)
             encrypted_out = getattr(shardwise.nn.init, init)(encrypted, *args)
 
-            # pyre-fixme[16]: `TestNN` has no attribute `assertTrue`.
             self.assertTrue(
                 encrypted_out.size() == reference.size(),
                 f"shardwise.nn.init.{init} size mismatch",
@@ -1830,10 +1818,7 @@ class AliceNet2(torch.nn.Module):
 
 # Run all unit tests with both TFP and TTP providers
 class TestTFP(MultiProcessTestCase, TestNN):
-    # pyre-fixme[14]: `setUp` overrides method defined in `MultiProcessTestCase`
-    #  inconsistently.
     def setUp(self) -> None:
-        # pyre-fixme[16]: `ShardwiseConfig` has no attribute `mpc`.
         self._original_provider = cfg.mpc.provider
         cfg.mpc.provider = "TFP"
         super(TestTFP, self).setUp()
@@ -1844,10 +1829,7 @@ class TestTFP(MultiProcessTestCase, TestNN):
 
 
 class TestTTP(MultiProcessTestCase, TestNN):
-    # pyre-fixme[14]: `setUp` overrides method defined in `MultiProcessTestCase`
-    #  inconsistently.
     def setUp(self) -> None:
-        # pyre-fixme[16]: `ShardwiseConfig` has no attribute `mpc`.
         self._original_provider = cfg.mpc.provider
         cfg.mpc.provider = "TTP"
         super(TestTTP, self).setUp()
