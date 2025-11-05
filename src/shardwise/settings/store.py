@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 
 
-import os
 from contextlib import contextmanager
+import os
 
-import yaml
 from omegaconf import OmegaConf
+import yaml
 
 
 class ShardwiseConfig:

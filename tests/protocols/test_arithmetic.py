@@ -1,18 +1,17 @@
 #!/usr/bin/env python3
 
 
-
-
 import itertools
 import logging
 import unittest
 
-import shardwise
 import torch
 import torch.nn.functional as F
-from shardwise.utils.dtypes import is_float_tensor
+
+import shardwise
 from shardwise.protocols import ArithmeticSharedTensor
-from tests.support.multiprocess import get_random_test_tensor, MultiProcessTestCase
+from shardwise.utils.dtypes import is_float_tensor
+from tests.support.multiprocess import MultiProcessTestCase, get_random_test_tensor
 
 
 class TestArithmetic(MultiProcessTestCase):
@@ -44,7 +43,7 @@ class TestArithmetic(MultiProcessTestCase):
         test_passed = test_passed.gt(0).all().item() == 1
         if not test_passed:
             logging.info(msg)
-            logging.info("Result %s" % tensor)
+            logging.info(f"Result {tensor}")
             logging.info("Result - Reference = %s" % (tensor - reference))
         self.assertTrue(test_passed, msg=msg)
 
@@ -60,9 +59,7 @@ class TestArithmetic(MultiProcessTestCase):
 
             new_share = get_random_test_tensor(is_float=False)
             encrypted_tensor.share = new_share
-            self.assertTrue(
-                torch.equal(encrypted_tensor.share, new_share), "share setter failed"
-            )
+            self.assertTrue(torch.equal(encrypted_tensor.share, new_share), "share setter failed")
 
     def test_encrypt_decrypt(self) -> None:
         """
@@ -90,9 +87,7 @@ class TestArithmetic(MultiProcessTestCase):
             encrypted_tensor = ArithmeticSharedTensor(reference)
             self._check(encrypted_tensor, reference, "en/decryption failed")
             for dst in range(self.world_size):
-                self._check(
-                    encrypted_tensor, reference, "en/decryption failed", dst=dst
-                )
+                self._check(encrypted_tensor, reference, "en/decryption failed", dst=dst)
 
             # encryption and decryption with source:
             for src in range(self.world_size):
@@ -124,28 +119,22 @@ class TestArithmetic(MultiProcessTestCase):
                 self._check(
                     encrypted_out,
                     reference,
-                    "%s %s failed" % ("private" if private_type else "public", func),
+                    "{} {} failed".format("private" if private_type else "public", func),
                 )
                 if "_" in func:
                     # Check in-place op worked
                     self._check(
                         encrypted,
                         reference,
-                        "%s %s failed"
-                        % ("private" if private_type else "public", func),
+                        "{} {} failed".format("private" if private_type else "public", func),
                     )
                 else:
                     # Check original is not modified
                     self._check(
                         encrypted,
                         tensor1,
-                        "%s %s failed"
-                        % (
-                            (
-                                "private"
-                                if tensor_type == ArithmeticSharedTensor
-                                else "public"
-                            ),
+                        "{} {} failed".format(
+                            ("private" if tensor_type == ArithmeticSharedTensor else "public"),
                             func,
                         ),
                     )
@@ -157,7 +146,7 @@ class TestArithmetic(MultiProcessTestCase):
                 encrypted2 = ArithmeticSharedTensor(tensor2)
                 reference = getattr(tensor1, func)(tensor2)
                 encrypted_out = getattr(encrypted1, func)(encrypted2)
-                self._check(encrypted_out, reference, "private %s failed" % func)
+                self._check(encrypted_out, reference, f"private {func} failed")
 
             tensor = get_random_test_tensor(is_float=True)
             reference = tensor * tensor
@@ -240,9 +229,7 @@ class TestArithmetic(MultiProcessTestCase):
             tensor = get_random_test_tensor(max_value=7, is_float=True)
             for width in range(2, tensor.nelement()):
                 matrix_size = (tensor.nelement(), width)
-                matrix = get_random_test_tensor(
-                    max_value=7, size=matrix_size, is_float=True
-                )
+                matrix = get_random_test_tensor(max_value=7, size=matrix_size, is_float=True)
                 reference = tensor.matmul(matrix)
                 encrypted_tensor = ArithmeticSharedTensor(tensor)
                 matrix = tensor_type(matrix)
@@ -271,28 +258,26 @@ class TestArithmetic(MultiProcessTestCase):
                     encrypted2 = tensor_type(tensor2)
 
                     reference = getattr(tensor1, func)(dimension, index, tensor2)
-                    encrypted_out = getattr(encrypted, func)(
-                        dimension, index, encrypted2
-                    )
+                    encrypted_out = getattr(encrypted, func)(dimension, index, encrypted2)
                     private = tensor_type == ArithmeticSharedTensor
                     self._check(
                         encrypted_out,
                         reference,
-                        "%s %s failed" % ("private" if private else "public", func),
+                        "{} {} failed".format("private" if private else "public", func),
                     )
                     if func.endswith("_"):
                         # Check in-place index_add worked
                         self._check(
                             encrypted,
                             reference,
-                            "%s %s failed" % ("private" if private else "public", func),
+                            "{} {} failed".format("private" if private else "public", func),
                         )
                     else:
                         # Check original is not modified
                         self._check(
                             encrypted,
                             tensor1,
-                            "%s %s failed" % ("private" if private else "public", func),
+                            "{} {} failed".format("private" if private else "public", func),
                         )
 
     def test_scatter(self) -> None:
@@ -315,23 +300,25 @@ class TestArithmetic(MultiProcessTestCase):
                         self._check(
                             encrypted_out,
                             reference,
-                            "%s %s failed" % ("private" if private else "public", func),
+                            "{} {} failed".format("private" if private else "public", func),
                         )
                         if func.endswith("_"):
                             # Check in-place scatter/scatter-add modified input
                             self._check(
                                 encrypted,
                                 reference,
-                                "%s %s failed to modify input"
-                                % ("private" if private else "public", func),
+                                "{} {} failed to modify input".format(
+                                    "private" if private else "public", func
+                                ),
                             )
                         else:
                             # Check original is not modified
                             self._check(
                                 encrypted,
                                 tensor1,
-                                "%s %s unintendedly modified input"
-                                % ("private" if private else "public", func),
+                                "{} {} unintendedly modified input".format(
+                                    "private" if private else "public", func
+                                ),
                             )
 
     def test_dot_ger(self) -> None:
@@ -351,7 +338,7 @@ class TestArithmetic(MultiProcessTestCase):
                 encrypted_out,
                 dot_reference,
                 (
-                    "%s dot product failed" % "private"
+                    "{} dot product failed".format("private")
                     if tensor_type == ArithmeticSharedTensor
                     else "public"
                 ),
@@ -364,7 +351,7 @@ class TestArithmetic(MultiProcessTestCase):
                 encrypted_out,
                 ger_reference,
                 (
-                    "%s outer product failed" % "private"
+                    "{} outer product failed".format("private")
                     if tensor_type == ArithmeticSharedTensor
                     else "public"
                 ),
@@ -593,7 +580,7 @@ class TestArithmetic(MultiProcessTestCase):
                         dilation=dilation,
                         groups=groups,
                     )
-                    self._check(encr_conv, reference, "%s failed" % func_name)
+                    self._check(encr_conv, reference, f"{func_name} failed")
 
     def test_pooling(self) -> None:
         """Test avgPool of encrypted tensor."""
@@ -604,9 +591,7 @@ class TestArithmetic(MultiProcessTestCase):
                 pool_size = width2
                 for stride in range(1, width2):
                     for padding in range(2):
-                        reference = F.avg_pool2d(
-                            matrix, pool_size, stride=stride, padding=padding
-                        )
+                        reference = F.avg_pool2d(matrix, pool_size, stride=stride, padding=padding)
 
                         encrypted_matrix = ArithmeticSharedTensor(matrix)
                         encrypted_pool = encrypted_matrix.avg_pool2d(
@@ -665,9 +650,7 @@ class TestArithmetic(MultiProcessTestCase):
                 encrypted2 = tensor_type(tensor2)
                 encrypted_out[:, 0] = encrypted2
 
-                self._check(
-                    encrypted_out, reference, "%s setitem failed" % type(encrypted2)
-                )
+                self._check(encrypted_out, reference, f"{type(encrypted2)} setitem failed")
 
                 reference = tensor.clone()
                 reference[0, :] = tensor2
@@ -676,9 +659,7 @@ class TestArithmetic(MultiProcessTestCase):
                 encrypted2 = tensor_type(tensor2)
                 encrypted_out[0, :] = encrypted2
 
-                self._check(
-                    encrypted_out, reference, "%s setitem failed" % type(encrypted2)
-                )
+                self._check(encrypted_out, reference, f"{type(encrypted2)} setitem failed")
 
     def test_pad(self) -> None:
         sizes = [(1,), (5,), (1, 1), (5, 5), (5, 5, 5), (5, 3, 32, 32)]
@@ -754,8 +735,7 @@ class TestArithmetic(MultiProcessTestCase):
                     self._check(
                         encrypted_out,
                         reference,
-                        "%s %s broadcast failed"
-                        % ("private" if private else "public", func),
+                        "{} {} broadcast failed".format("private" if private else "public", func),
                     )
 
             for size in matmul_sizes:
@@ -776,8 +756,7 @@ class TestArithmetic(MultiProcessTestCase):
                     self._check(
                         encrypted_out,
                         reference,
-                        "%s matmul broadcast failed"
-                        % ("private" if private else "public"),
+                        "%s matmul broadcast failed" % ("private" if private else "public"),
                     )
 
     def test_inplace(self) -> None:
@@ -806,14 +785,16 @@ class TestArithmetic(MultiProcessTestCase):
                 self._check(
                     encrypted1,
                     tensor1,
-                    "%s out-of-place %s modifies input"
-                    % ("private" if private else "public", op),
+                    "{} out-of-place {} modifies input".format(
+                        "private" if private else "public", op
+                    ),
                 )
                 self._check(
                     encrypted_out,
                     reference,
-                    "%s out-of-place %s produces incorrect output"
-                    % ("private" if private else "public", op),
+                    "{} out-of-place {} produces incorrect output".format(
+                        "private" if private else "public", op
+                    ),
                 )
                 self.assertFalse(id(encrypted_out.share) == input_plain_id)
                 self.assertFalse(id(encrypted_out) == input_encrypted_id)
@@ -823,14 +804,16 @@ class TestArithmetic(MultiProcessTestCase):
                 self._check(
                     encrypted1,
                     reference,
-                    "%s in-place %s_ does not modify input"
-                    % ("private" if private else "public", op),
+                    "{} in-place {}_ does not modify input".format(
+                        "private" if private else "public", op
+                    ),
                 )
                 self._check(
                     encrypted_out,
                     reference,
-                    "%s in-place %s_ produces incorrect output"
-                    % ("private" if private else "public", op),
+                    "{} in-place {}_ produces incorrect output".format(
+                        "private" if private else "public", op
+                    ),
                 )
                 self.assertTrue(id(encrypted_out.share) == input_plain_id)
                 self.assertTrue(id(encrypted_out) == input_encrypted_id)
@@ -878,9 +861,7 @@ class TestArithmetic(MultiProcessTestCase):
             tensor2 = get_random_test_tensor(size=size, is_float=True)
             encrypted_tensor2 = y_type(tensor2)
 
-            condition_tensor = (
-                get_random_test_tensor(max_value=1, size=size, is_float=False) + 1
-            )
+            condition_tensor = get_random_test_tensor(max_value=1, size=size, is_float=False) + 1
             condition_encrypted = ArithmeticSharedTensor(condition_tensor)
             condition_bool = condition_tensor.bool()
 
@@ -891,18 +872,14 @@ class TestArithmetic(MultiProcessTestCase):
             self._check(
                 encrypted_out,
                 reference_out,
-                f"{'private' if y_is_private else 'public'} y "
-                "where failed with public condition",
+                f"{'private' if y_is_private else 'public'} y where failed with public condition",
             )
 
-            encrypted_out = encrypted_tensor1.where(
-                condition_encrypted, encrypted_tensor2
-            )
+            encrypted_out = encrypted_tensor1.where(condition_encrypted, encrypted_tensor2)
             self._check(
                 encrypted_out,
                 reference_out,
-                f"{'private' if y_is_private else 'public'} y "
-                "where failed with private condition",
+                f"{'private' if y_is_private else 'public'} y where failed with private condition",
             )
 
             # test scalar y
@@ -946,19 +923,13 @@ class TestArithmetic(MultiProcessTestCase):
                     reference0, reference1 = tensor.split(split, dim=dim)
                     encrypted_out0, encrypted_out1 = encrypted.split(split, dim=dim)
 
-                    self._check(
-                        encrypted_out0, reference0, f"split failed with input {split}"
-                    )
-                    self._check(
-                        encrypted_out1, reference1, f"split failed with input {split}"
-                    )
+                    self._check(encrypted_out0, reference0, f"split failed with input {split}")
+                    self._check(encrypted_out1, reference1, f"split failed with input {split}")
 
                 split = (5,)
                 (reference,) = tensor.split(split, dim=dim)
                 (encrypted_out,) = encrypted.split(split, dim=dim)
-                self._check(
-                    encrypted_out, reference, f"split failed with input {split}"
-                )
+                self._check(encrypted_out, reference, f"split failed with input {split}")
 
                 with self.assertRaises(RuntimeError):
                     encrypted_out.split((5, 1))

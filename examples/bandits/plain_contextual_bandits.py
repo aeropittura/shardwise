@@ -36,9 +36,7 @@ def online_learner(
     for sample in sampler():
         start_t = time.time()
         # unpack sample:
-        assert "context" in sample and "rewards" in sample, (
-            "invalid sample: %s" % sample
-        )
+        assert "context" in sample and "rewards" in sample, f"invalid sample: {sample}"
         context = sample["context"].to(dtype=dtype, device=device)
         rewards = sample["rewards"].to(dtype=dtype, device=device)
         num_features, num_arms = context.nelement(), rewards.nelement()
@@ -47,10 +45,7 @@ def online_learner(
         if idx == 0:
             # initialize accumulators for linear least squares:
             A_inv = torch.stack(
-                [
-                    torch.eye(num_features, dtype=dtype, device=device)
-                    for _ in range(num_arms)
-                ],
+                [torch.eye(num_features, dtype=dtype, device=device) for _ in range(num_arms)],
                 dim=0,
             )  # inv(X^T X + I)
             b = torch.zeros(num_arms, num_features, dtype=dtype, device=device)  # X^T r
@@ -165,9 +160,7 @@ def linucb(
     # define UCB scoring function:
     def score_func(scores, A_inv, b, context):
         for arm in range(scores.nelement()):
-            scores[arm] += (
-                context.matmul(A_inv[arm, :, :]).dot(context).sqrt_().mul_(epsilon)
-            )
+            scores[arm] += context.matmul(A_inv[arm, :, :]).dot(context).sqrt_().mul_(epsilon)
 
     # run online learner:
     online_learner(

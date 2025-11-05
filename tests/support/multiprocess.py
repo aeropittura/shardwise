@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 
+from functools import wraps
 import multiprocessing
 import os
 import sys
@@ -8,12 +9,12 @@ import tempfile
 import traceback
 import unittest
 import warnings
-from functools import wraps
+
+import torch
+import torch.distributed as dist
 
 import shardwise.comm as comm
 import shardwise.debug
-import torch
-import torch.distributed as dist
 from shardwise.settings import cfg
 
 
@@ -34,10 +35,7 @@ def get_random_test_tensor(
     if min_value is None:
         min_value = -max_value
     if is_float:
-        tensor = (
-            torch.rand(torch.Size(size), device=device) * (max_value - min_value)
-            + min_value
-        )
+        tensor = torch.rand(torch.Size(size), device=device) * (max_value - min_value) + min_value
     else:
         tensor = torch.randint(
             min_value, max_value, torch.Size(size), dtype=torch.int64, device=device
@@ -48,7 +46,7 @@ def get_random_test_tensor(
 
     # Broadcast this tensor to the world so that the generated random tensor
     # is in sync in all distributed processes.
-    
+
     tensor = comm.get().broadcast(tensor, 0)
 
     return tensor
@@ -72,7 +70,7 @@ def get_random_linear(in_channels, out_channels):
     if dist.is_initialized():
         # Broadcast this tensor to the world so that the generated random tensor
         # is in sync in all distributed processes.
-        
+
         comm.get().broadcast(linear.weight, 0)
         comm.get().broadcast(linear.bias, 0)
 
@@ -114,7 +112,7 @@ class MultiProcessTestCase(unittest.TestCase):
         self.mp_context = multiprocessing.get_context("spawn")
 
     def setUp(self, world_size=DEFAULT_WORLD_SIZE):
-        super(MultiProcessTestCase, self).setUp()
+        super().setUp()
 
         shardwise.debug.configure_logging()
 
@@ -131,7 +129,7 @@ class MultiProcessTestCase(unittest.TestCase):
                 self.processes += [self._spawn_ttp()]
 
     def tearDown(self):
-        super(MultiProcessTestCase, self).tearDown()
+        super().tearDown()
         for p in self.processes:
             p.terminate()
 
@@ -149,7 +147,7 @@ class MultiProcessTestCase(unittest.TestCase):
         communicator_args = {
             "WORLD_SIZE": self.world_size,
             "RANK": self.world_size,
-            "RENDEZVOUS": "file://%s" % self.file,
+            "RENDEZVOUS": f"file://{self.file}",
             "BACKEND": "gloo",
         }
         for key, val in communicator_args.items():
@@ -187,7 +185,7 @@ class MultiProcessTestCase(unittest.TestCase):
         communicator_args = {
             "WORLD_SIZE": self.world_size,
             "RANK": self.rank,
-            "RENDEZVOUS": "file://%s" % self.file,
+            "RENDEZVOUS": f"file://{self.file}",
             "BACKEND": "gloo",
         }
         for key, val in communicator_args.items():

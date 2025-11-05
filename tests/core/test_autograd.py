@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
 
 
-
 import logging
 import random
 import unittest
 
+import torch
+
 import shardwise
 import shardwise.core.grad_fns as gradients
-import torch
-from shardwise.utils.dtypes import is_float_tensor
-from shardwise.settings import cfg
 from shardwise.core.grad_fns import AutogradContext, AutogradFunction
-from tests.support.multiprocess import get_random_test_tensor, MultiProcessTestCase
+from shardwise.settings import cfg
+from shardwise.utils.dtypes import is_float_tensor
+from tests.support.multiprocess import MultiProcessTestCase, get_random_test_tensor
 
 
 class TestAutograd:
@@ -43,7 +43,7 @@ class TestAutograd:
             test_passed = (tensor == reference).all().item() == 1
         if not test_passed:
             logging.info(msg)
-            logging.info("Result %s" % tensor)
+            logging.info(f"Result {tensor}")
             logging.info("Result - Reference = %s" % (tensor - reference))
         self.assertTrue(test_passed, msg=msg)
 
@@ -133,7 +133,7 @@ class TestAutograd:
 
         # check that registering new classes works:
         for func_name in ["mock_func1", "mock_func2", "mock_func3"]:
-            cls = type("%sName" % func_name, (AutogradFunction,), {})
+            cls = type(f"{func_name}Name", (AutogradFunction,), {})
             gradients.register_function(func_name)(cls)
             grad_fn = gradients.get_grad_fn(func_name)
             self.assertEqual(grad_fn, cls)
@@ -141,7 +141,7 @@ class TestAutograd:
 
         # check that existing functions cannot be overwritten:
         for func_name in ["add", "sub", "view"]:
-            cls = type("%sName" % func_name, (AutogradFunction,), {})
+            cls = type(f"{func_name}Name", (AutogradFunction,), {})
             with self.assertRaises(ValueError):
                 gradients.register_function(func_name)(cls)
 
@@ -242,9 +242,7 @@ class TestAutograd:
             intermediate = input.pow(2.0)  # PyTorch
             output = intermediate.add(1.0).add(intermediate.mul(2.0)).sum()
             encr_intermediate = encr_input.square()  # Shardwise
-            encr_output = (
-                encr_intermediate.add(1.0).add(encr_intermediate.mul(2.0)).sum()
-            )
+            encr_output = encr_intermediate.add(1.0).add(encr_intermediate.mul(2.0)).sum()
             return output, encr_output
 
         def test_case3(input, encr_input):
@@ -252,9 +250,7 @@ class TestAutograd:
             intermediate2 = intermediate1.add(1.0).add(intermediate1.mul(2.0))
             output = intermediate2.pow(2.0).sum()
             encr_intermediate1 = encr_input.square()  # Shardwise
-            encr_intermediate2 = encr_intermediate1.add(1.0).add(
-                encr_intermediate1.mul(2.0)
-            )
+            encr_intermediate2 = encr_intermediate1.add(1.0).add(encr_intermediate1.mul(2.0))
             encr_output = encr_intermediate2.square().sum()
             return output, encr_output
 
@@ -263,9 +259,7 @@ class TestAutograd:
             intermediate2 = intermediate1.add(1.0).add(intermediate1.mul(2.0))
             output = intermediate2.pow(2.0).sum()
             encr_intermediate1 = encr_input.mul(3.0).add(2.0).square()  # Shardwise
-            encr_intermediate2 = encr_intermediate1.add(1.0).add(
-                encr_intermediate1.mul(2.0)
-            )
+            encr_intermediate2 = encr_intermediate1.add(1.0).add(encr_intermediate1.mul(2.0))
             encr_output = encr_intermediate2.square().sum()
             return output, encr_output
 
@@ -273,16 +267,12 @@ class TestAutograd:
             intermediate1 = input.mul(3.0)  # PyTorch
             intermediate2 = input.add(2.0).pow(2.0)
             intermediate3 = input.pow(2.0)
-            output = (
-                torch.cat([intermediate1, intermediate2, intermediate3]).mul(0.5).sum()
-            )
+            output = torch.cat([intermediate1, intermediate2, intermediate3]).mul(0.5).sum()
             encr_intermediate1 = encr_input.mul(3.0)  # Shardwise
             encr_intermediate2 = encr_input.add(2.0).square()
             encr_intermediate3 = encr_input.pow(2.0)
             encr_output = (
-                shardwise.cat(
-                    [encr_intermediate1, encr_intermediate2, encr_intermediate3]
-                )
+                shardwise.cat([encr_intermediate1, encr_intermediate2, encr_intermediate3])
                 .mul(0.5)
                 .sum()
             )
@@ -295,14 +285,10 @@ class TestAutograd:
             intermediate1 = input.gather(0, idx1).gather(1, idx3).pow(2.0)  # PyTorch
             intermediate2 = input.gather(0, idx2).gather(1, idx3).add(-2.0)
             output = torch.cat([intermediate1, intermediate2]).mul(0.5).sum()
-            encr_intermediate1 = (
-                encr_input.gather(0, idx1).gather(1, idx3).square()
-            )  # Shardwise
+            encr_intermediate1 = encr_input.gather(0, idx1).gather(1, idx3).square()  # Shardwise
             encr_intermediate2 = encr_input.gather(0, idx2).gather(1, idx3).add(-2.0)
             encr_output = (
-                shardwise.cat([encr_intermediate1, encr_intermediate2], dim=0)
-                .mul(0.5)
-                .sum()
+                shardwise.cat([encr_intermediate1, encr_intermediate2], dim=0).mul(0.5).sum()
             )
             return output, encr_output
 
@@ -329,9 +315,7 @@ class TestAutograd:
             encr_intermediate2 = shardwise.cat([encr_input, encr_intermediate1])
             encr_intermediate3 = encr_intermediate2.pow(2.0)
             encr_output = (
-                shardwise.cat([encr_input, encr_intermediate2, encr_intermediate3])
-                .add(-1)
-                .sum()
+                shardwise.cat([encr_input, encr_intermediate2, encr_intermediate3]).add(-1).sum()
             )
 
             return output, encr_output
@@ -361,9 +345,7 @@ class TestAutograd:
 
             # perform multiple forward computations on input that get combined:
             output, encr_output = test_case(input, encr_input)
-            self._check(
-                encr_output._tensor, output, "forward for test case %d failed" % idx
-            )
+            self._check(encr_output._tensor, output, "forward for test case %d failed" % idx)
             self.assertTrue(
                 encr_output.requires_grad,
                 "requires_grad incorrect for test case %d" % idx,
@@ -372,9 +354,7 @@ class TestAutograd:
             # perform backward computation:
             output.backward()
             encr_output.backward()
-            self._check(
-                encr_input.grad, input.grad, "backward for test case %d failed" % idx
-            )
+            self._check(encr_input.grad, input.grad, "backward for test case %d failed" % idx)
 
         # test cases in which tensor gets combined with itself:
         for func_name in ["sub", "add", "mul"]:
@@ -390,7 +370,7 @@ class TestAutograd:
             self.assertTrue(encr_output.requires_grad, "requires_grad incorrect")
             output.backward()
             encr_output.backward()
-            self._check(encr_input.grad, input.grad, "%s backward failed" % func_name)
+            self._check(encr_input.grad, input.grad, f"{func_name} backward failed")
 
     def test_autograd(self) -> None:
         """Tests autograd graph construction and backprop."""
@@ -408,8 +388,7 @@ class TestAutograd:
             # get test case:
             number_of_inputs, ops = test
             inputs = [
-                get_random_test_tensor(size=(12, 5), is_float=True)
-                for _ in range(number_of_inputs)
+                get_random_test_tensor(size=(12, 5), is_float=True) for _ in range(number_of_inputs)
             ]
             encr_inputs = [shardwise.tensor(input) for input in inputs]
 
@@ -479,22 +458,22 @@ class TestTFP(MultiProcessTestCase, TestAutograd):
     def setUp(self) -> None:
         self._original_provider = cfg.mpc.provider
         cfg.mpc.provider = "TFP"
-        super(TestTFP, self).setUp()
+        super().setUp()
 
     def tearDown(self) -> None:
         cfg.mpc.provider = self._original_provider
-        super(TestTFP, self).tearDown()
+        super().tearDown()
 
 
 class TestTTP(MultiProcessTestCase, TestAutograd):
     def setUp(self) -> None:
         self._original_provider = cfg.mpc.provider
         cfg.mpc.provider = "TTP"
-        super(TestTTP, self).setUp()
+        super().setUp()
 
     def tearDown(self) -> None:
         cfg.mpc.provider = self._original_provider
-        super(TestTTP, self).tearDown()
+        super().tearDown()
 
 
 # This code only runs when executing the file outside the test harness

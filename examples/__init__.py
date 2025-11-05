@@ -5,7 +5,6 @@ from .meters import AccuracyMeter, AverageMeter
 from .multiprocess_launcher import MultiProcessLauncher
 from .util import NoopContextManager
 
-
 __all__ = [
     "AverageMeter",
     "AccuracyMeter",

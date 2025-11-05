@@ -117,9 +117,9 @@ class Communicator:
         import shardwise
 
         shardwise.log("====Communication Stats====")
-        shardwise.log("Rounds: {}".format(self.comm_rounds))
-        shardwise.log("Bytes: {}".format(self.comm_bytes))
-        shardwise.log("Communication time: {}".format(self.comm_time))
+        shardwise.log(f"Rounds: {self.comm_rounds}")
+        shardwise.log(f"Bytes: {self.comm_bytes}")
+        shardwise.log(f"Communication time: {self.comm_time}")
 
     def get_communication_stats(self):
         """
@@ -179,9 +179,7 @@ def _logging(func):
                 _log(args[0].nelement())  # party sends or receives tensor
             elif func.__name__ == "scatter":
                 if args[1] == rank:  # party scatters P - 1 tensors
-                    nelements = sum(
-                        x.nelement() for idx, x in enumerate(args[0]) if idx != rank
-                    )
+                    nelements = sum(x.nelement() for idx, x in enumerate(args[0]) if idx != rank)
                     _log(nelements)  # NOTE: We deal with other parties later
             elif func.__name__ == "all_gather":
                 _log(2 * (world_size - 1) * args[0].nelement())

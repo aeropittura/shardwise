@@ -1,8 +1,9 @@
 """Elementwise arithmetic, reductions and comparisons."""
 
-import shardwise
 import torch
 import torch.onnx.symbolic_helper as sym_help
+
+import shardwise
 from shardwise.nn.layers._onnx_attrs import _identify_bool_attributes_with_defaults
 from shardwise.nn.layers.base import Module
 

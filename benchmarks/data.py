@@ -8,10 +8,10 @@ import os
 from pathlib import Path
 
 import PIL
-import torch
-import torch.nn.functional as F
 from sklearn.datasets import make_classification
 from sklearn.model_selection import train_test_split
+import torch
+import torch.nn.functional as F
 from torchvision import transforms
 
 
@@ -67,9 +67,7 @@ class Images:
                 transforms.Resize(256),
                 transforms.CenterCrop(224),
                 transforms.ToTensor(),
-                transforms.Normalize(
-                    mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
-                ),
+                transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
             ]
         )
         input_tensor = preprocess(input_image)

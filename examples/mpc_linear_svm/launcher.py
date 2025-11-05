@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 
-
 """
 To run mpc_linear_svm example in multiprocess mode:
 
@@ -23,7 +22,6 @@ import os
 from examples.multiprocess_launcher import (
     MultiProcessLauncher,
 )
-
 
 parser = argparse.ArgumentParser(description="Shardwise Linear SVM Training")
 parser.add_argument(
@@ -73,9 +71,7 @@ def _run_experiment(args):
     )
     from mpc_linear_svm import run_mpc_linear_svm
 
-    run_mpc_linear_svm(
-        args.epochs, args.examples, args.features, args.lr, args.skip_plaintext
-    )
+    run_mpc_linear_svm(args.epochs, args.examples, args.features, args.lr, args.skip_plaintext)
 
 
 def main(run_experiment):

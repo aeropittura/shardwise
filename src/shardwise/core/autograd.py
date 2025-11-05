@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
 
-import shardwise
 import torch
 
+import shardwise
 from shardwise.core.grad_fns import AutogradContext as _AutogradContext
 
 

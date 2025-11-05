@@ -1,13 +1,10 @@
 #!/usr/bin/env python3
 
 
-
 from functools import wraps
 
+from shardwise.debug.tools import MultiprocessingPdb, configure_logging, validate_correctness
 from shardwise.settings import cfg
-
-from shardwise.debug.tools import configure_logging, MultiprocessingPdb, validate_correctness
-
 
 pdb = MultiprocessingPdb()
 

@@ -11,7 +11,7 @@ __BITS = torch.iinfo(torch.long).bits
 __LOG_BITS = int(math.log2(torch.iinfo(torch.long).bits))
 
 
-@functools.lru_cache(maxsize=None)
+@functools.cache
 def __SPK_circuit_constants(device):
     """
     Generate the __MASKS, __OUT_MASKS, and __MULTIPLIERS constants

@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 
 
-import shardwise
 import torch
 from torch.optim.optimizer import required
+
+import shardwise
 
 
 class Optimizer(torch.optim.Optimizer):

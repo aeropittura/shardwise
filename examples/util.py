@@ -25,9 +25,7 @@ def onehot(indices):
     """
     assert indices.dtype == torch.long, "indices must be long integers"
     assert indices.min() >= 0, "indices must be non-negative"
-    onehot_vector = torch.zeros(
-        indices.nelement(), indices.max() + 1, dtype=torch.uint8
-    )
+    onehot_vector = torch.zeros(indices.nelement(), indices.max() + 1, dtype=torch.uint8)
     onehot_vector.scatter_(1, indices.view(indices.nelement(), 1), 1)
     return onehot_vector
 
@@ -36,9 +34,9 @@ def kmeans_inference(data, clusters, hard=True, bandwidth=1.0):
     """
     Computes cluster assignments for a k-means clustering.
     """
-    assert clusters.size(1) == data.size(
-        1
-    ), "cluster dimensionality does not match data dimensionality"
+    assert clusters.size(1) == data.size(1), (
+        "cluster dimensionality does not match data dimensionality"
+    )
 
     # compute all pairwise distances:
     d2_sum = data.pow(2.0).sum(1, keepdim=True)
@@ -70,9 +68,7 @@ def kmeans(data, K, max_iter=100):
         assignments = kmeans_inference(data, clusters)
         if prev_assignments is not None:
             num_changes = assignments.ne(prev_assignments).sum()
-            logging.info(
-                "K-means iteration %d: %d assignments changed" % (iter, num_changes)
-            )
+            logging.info("K-means iteration %d: %d assignments changed" % (iter, num_changes))
             if num_changes == 0:
                 break
 

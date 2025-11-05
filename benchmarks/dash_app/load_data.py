@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 
-
 import os
 
 import pandas as pd
@@ -28,9 +27,7 @@ def get_aggregated_data(base_dir, subdirs):
 
     for subdir in subdirs:
         func_df_cpu, model_df_cpu = read_subdir(base_dir, available_dates, subdir)
-        func_df_gpu, model_df_gpu = read_subdir(
-            base_dir, available_dates, subdir, cuda=True
-        )
+        func_df_gpu, model_df_gpu = read_subdir(base_dir, available_dates, subdir, cuda=True)
         tmp_func_df = pd.concat([func_df_cpu, func_df_gpu])
         tmp_model_df = pd.concat([model_df_cpu, model_df_gpu])
 

@@ -3,10 +3,10 @@
 
 import math
 
-import shardwise
 import torch
-from shardwise.settings import cfg
 
+import shardwise
+from shardwise.settings import cfg
 
 __all__ = [
     "exp",
@@ -347,9 +347,7 @@ def tanh(self):
         terms = cfg.functions.sigmoid_tanh_terms
         coeffs = shardwise.utils.helpers.chebyshev_series(torch.tanh, 1, terms)[1::2]
         tanh_polys = _chebyshev_polynomials(self, terms)
-        tanh_polys_flipped = (
-            tanh_polys.unsqueeze(dim=-1).transpose(0, -1).squeeze(dim=0)
-        )
+        tanh_polys_flipped = tanh_polys.unsqueeze(dim=-1).transpose(0, -1).squeeze(dim=0)
         out = tanh_polys_flipped.matmul(coeffs)
 
         # truncate outside [-maxval, maxval]
@@ -407,7 +405,7 @@ def softmax(self, dim, **kwargs):
     # 0-d case
     if self.dim() == 0:
         assert dim == 0, "Improper dim argument"
-        return self.new(torch.ones_like((self.data)))
+        return self.new(torch.ones_like(self.data))
 
     if self.size(dim) == 1:
         return self.new(torch.ones_like(self.data))

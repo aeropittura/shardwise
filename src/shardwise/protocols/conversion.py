@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 
 
-import shardwise.comm as comm
 import torch
-from shardwise.core.encoding import FixedPointEncoder
 
-from shardwise.sharing.ptype import ptype as Ptype
+import shardwise.comm as comm
+from shardwise.core.encoding import FixedPointEncoder
 from shardwise.protocols import beaver
 from shardwise.protocols.arithmetic import ArithmeticSharedTensor
 from shardwise.protocols.binary import BinarySharedTensor
+from shardwise.sharing.ptype import ptype as Ptype
 
 
 def _A2B(arithmetic_tensor):
@@ -42,9 +42,7 @@ def _B2A(binary_tensor, precision=None, bits=None):
         binary_bit = binary_tensor & 1
         arithmetic_tensor = beaver.B2A_single_bit(binary_bit)
     else:
-        binary_bits = BinarySharedTensor.stack(
-            [binary_tensor >> i for i in range(bits)]
-        )
+        binary_bits = BinarySharedTensor.stack([binary_tensor >> i for i in range(bits)])
         binary_bits = binary_bits & 1
         arithmetic_bits = beaver.B2A_single_bit(binary_bits)
 
@@ -74,4 +72,4 @@ def convert(tensor, ptype, **kwargs):
     elif isinstance(tensor, BinarySharedTensor) and ptype == Ptype.arithmetic:
         return _B2A(tensor, **kwargs)
     else:
-        raise TypeError("Cannot convert %s to %s" % (type(tensor), ptype.__name__))
+        raise TypeError(f"Cannot convert {type(tensor)} to {ptype.__name__}")

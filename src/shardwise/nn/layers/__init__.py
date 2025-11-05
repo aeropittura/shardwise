@@ -1,92 +1,92 @@
 """Shardwise neural-network layers, grouped by kind."""
 
-from shardwise.nn.layers.base import (  # noqa: F401
-    Module,
-    Container,
-    Graph,
-    Sequential,
-    ModuleList,
-    ModuleDict,
-    Parameter,
-    Constant,
-    ConstantOfShape,
+from shardwise.nn.layers._onnx_attrs import (  # noqa: F401
+    _all_the_same,
+    _identify_bool_attributes_with_defaults,
+)
+from shardwise.nn.layers.activation import (  # noqa: F401
+    Hardtanh,
+    LogSoftmax,
+    ReLU,
+    ReLU6,
+    Sigmoid,
+    Softmax,
 )
 from shardwise.nn.layers.arithmetic import (  # noqa: F401
     Add,
-    Sub,
-    Mul,
-    Div,
-    Pow,
-    Sqrt,
-    Exp,
-    Erf,
-    _Reduce,
-    Mean,
-    Sum,
     Cast,
-    Range,
+    Div,
     Equal,
+    Erf,
+    Exp,
+    Mean,
+    Mul,
+    Pow,
+    Range,
+    Sqrt,
+    Sub,
+    Sum,
     Where,
+    _Reduce,
 )
-from shardwise.nn.layers.shape import (  # noqa: F401
-    Transpose,
-    Squeeze,
-    Unsqueeze,
-    Slice,
-    Expand,
-    Flatten,
-    Shape,
-    Concat,
-    Reshape,
-    Gather,
-    _ConstantPad,
-    ConstantPad1d,
-    ConstantPad2d,
-    ConstantPad3d,
-)
-from shardwise.nn.layers.dropout import (  # noqa: F401
-    Dropout,
-    DropoutNd,
-    Dropout2d,
-    Dropout3d,
-)
-from shardwise.nn.layers.linear import (  # noqa: F401
-    Gemm,
-    Linear,
-    MatMul,
+from shardwise.nn.layers.base import (  # noqa: F401
+    Constant,
+    ConstantOfShape,
+    Container,
+    Graph,
+    Module,
+    ModuleDict,
+    ModuleList,
+    Parameter,
+    Sequential,
 )
 from shardwise.nn.layers.conv import (  # noqa: F401
     Conv,
     Conv1d,
     Conv2d,
 )
-from shardwise.nn.layers.activation import (  # noqa: F401
-    ReLU,
-    Hardtanh,
-    ReLU6,
-    Sigmoid,
-    Softmax,
-    LogSoftmax,
+from shardwise.nn.layers.dropout import (  # noqa: F401
+    Dropout,
+    Dropout2d,
+    Dropout3d,
+    DropoutNd,
 )
-from shardwise.nn.layers.pooling import (  # noqa: F401
-    _Pool2d,
-    AvgPool2d,
-    MaxPool2d,
-    AdaptiveAvgPool2d,
-    AdaptiveMaxPool2d,
-    GlobalAveragePool,
+from shardwise.nn.layers.linear import (  # noqa: F401
+    Gemm,
+    Linear,
+    MatMul,
 )
 from shardwise.nn.layers.normalization import (  # noqa: F401
-    BatchNormalization,
-    _BatchNorm,
     BatchNorm1d,
     BatchNorm2d,
     BatchNorm3d,
+    BatchNormalization,
     GroupNorm,
+    _BatchNorm,
 )
-from shardwise.nn.layers._onnx_attrs import (  # noqa: F401
-    _all_the_same,
-    _identify_bool_attributes_with_defaults,
+from shardwise.nn.layers.pooling import (  # noqa: F401
+    AdaptiveAvgPool2d,
+    AdaptiveMaxPool2d,
+    AvgPool2d,
+    GlobalAveragePool,
+    MaxPool2d,
+    _Pool2d,
+)
+from shardwise.nn.layers.shape import (  # noqa: F401
+    Concat,
+    ConstantPad1d,
+    ConstantPad2d,
+    ConstantPad3d,
+    Expand,
+    Flatten,
+    Gather,
+    Reshape,
+    Shape,
+    Slice,
+    Squeeze,
+    Transpose,
+    Unsqueeze,
+    _ConstantPad,
 )
 
 __all__ = [

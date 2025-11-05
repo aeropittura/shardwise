@@ -4,16 +4,15 @@
 import pathlib
 
 import dash
+from dash.dependencies import Input, Output
 import dash_core_components as dcc
 import dash_html_components as html
+from load_data import get_aggregated_data, get_available_dates
 import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-from dash.dependencies import Input, Output
-from load_data import get_aggregated_data, get_available_dates
 from plotly.subplots import make_subplots
-
 
 external_stylesheets = ["https://codepen.io/chriddyp/pen/bWLwgP.css"]
 
@@ -39,9 +38,7 @@ template = "simple_white"
 # the exception.
 app.config.suppress_callback_exceptions = True
 
-app.layout = html.Div(
-    [dcc.Location(id="url", refresh=False), html.Div(id="page-content")]
-)
+app.layout = html.Div([dcc.Location(id="url", refresh=False), html.Div(id="page-content")])
 
 index_page = html.Div(
     children=[
@@ -100,10 +97,7 @@ index_page = html.Div(
             [
                 dcc.Dropdown(
                     id="select_date",
-                    options=[
-                        {"label": date, "value": date}
-                        for date in sorted(available_dates)
-                    ],
+                    options=[{"label": date, "value": date} for date in sorted(available_dates)],
                     value=sorted(available_dates)[-1],
                 ),
                 html.Div(
@@ -149,9 +143,7 @@ index_page = html.Div(
                 ),
                 html.Div(
                     [
-                        html.Div(
-                            [dcc.Graph(id="func-abs-error")], className="six columns"
-                        ),
+                        html.Div([dcc.Graph(id="func-abs-error")], className="six columns"),
                         html.Div(
                             [dcc.Graph(id="func-relative-error")],
                             className="six columns",
@@ -248,11 +240,7 @@ comparison_layout = html.Div(
                     id="title",
                 ),
                 html.Div(
-                    [
-                        html.A(
-                            html.Button("Benchmarks", id="learn-more-button"), href="/"
-                        )
-                    ],
+                    [html.A(html.Button("Benchmarks", id="learn-more-button"), href="/")],
                     className="one-third column",
                     id="button",
                 ),
@@ -266,17 +254,13 @@ comparison_layout = html.Div(
                 html.H6("Previous Date"),
                 dcc.Dropdown(
                     id="start_date",
-                    options=[
-                        {"label": date, "value": date} for date in available_dates
-                    ],
+                    options=[{"label": date, "value": date} for date in available_dates],
                     value=sorted(available_dates)[0],
                 ),
                 html.H6("Current Date"),
                 dcc.Dropdown(
                     id="end_date",
-                    options=[
-                        {"label": date, "value": date} for date in available_dates
-                    ],
+                    options=[{"label": date, "value": date} for date in available_dates],
                     value=sorted(available_dates)[-1],
                 ),
                 html.Div(
@@ -303,9 +287,7 @@ comparison_layout = html.Div(
                 ),
                 html.Div(
                     [
-                        html.Div(
-                            [dcc.Graph(id="runtime-diff")], className="six columns"
-                        ),
+                        html.Div([dcc.Graph(id="runtime-diff")], className="six columns"),
                         html.Div([dcc.Graph(id="error-diff")], className="six columns"),
                     ],
                     className="row",
@@ -320,9 +302,7 @@ comparison_layout = html.Div(
                             [dcc.Graph(id="runtime-timeseries")],
                             className="six columns",
                         ),
-                        html.Div(
-                            [dcc.Graph(id="error-timeseries")], className="six columns"
-                        ),
+                        html.Div([dcc.Graph(id="error-timeseries")], className="six columns"),
                     ],
                     className="row",
                 ),
@@ -464,15 +444,11 @@ def process_comparison_options(filter_df, option):
     color = "type"
     if option == "CPU vs Plaintext":
         filter_df = filter_df[filter_df["device"] == "cpu"]
-        filter_df["type"] = np.where(
-            filter_df["is plain text"], "Plain Text", "Shardwise"
-        )
+        filter_df["type"] = np.where(filter_df["is plain text"], "Plain Text", "Shardwise")
     elif option == "GPU vs Plaintext":
         filter_df = filter_df[filter_df["device"] == "gpu"]
         if not filter_df.empty:
-            filter_df["type"] = np.where(
-                filter_df["is plain text"], "Plain Text", "Shardwise"
-            )
+            filter_df["type"] = np.where(filter_df["is plain text"], "Plain Text", "Shardwise")
     elif option == "CPU vs GPU":
         filter_df = filter_df[filter_df["is plain text"] is False]
         color = "device"
@@ -718,9 +694,7 @@ def update_runtime_timeseries(funcs):
     except KeyError:
         return render_emtpy_figure()
 
-    fig = px.line(
-        filtered_df, x="date", y="runtime shardwise", template=template, color="function"
-    )
+    fig = px.line(filtered_df, x="date", y="runtime shardwise", template=template, color="function")
 
     return fig
 
@@ -735,9 +709,7 @@ def update_error_timeseries(funcs):
     except KeyError:
         return render_emtpy_figure()
 
-    fig = px.line(
-        filtered_df, x="date", y="total abs error", template=template, color="function"
-    )
+    fig = px.line(filtered_df, x="date", y="total abs error", template=template, color="function")
 
     return fig
 

@@ -4,5 +4,4 @@
 from shardwise.protocols.arithmetic import ArithmeticSharedTensor
 from shardwise.protocols.binary import BinarySharedTensor
 
-
 __all__ = ["ArithmeticSharedTensor", "BinarySharedTensor"]

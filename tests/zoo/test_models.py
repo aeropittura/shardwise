@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
 
 
-
 import unittest
 
-# from tests.support.multiprocess import get_random_test_tensor
-
-import shardwise
 import torch
 import torchvision
+
+# from tests.support.multiprocess import get_random_test_tensor
+import shardwise
 from tests.support.multiprocess import MultiProcessTestCase
 
 
@@ -32,21 +31,17 @@ class TestModels(MultiProcessTestCase):
         msg += " in modules."
 
         # Check modules()
-        shardwise_modules = [m for m in shardwise_model.modules()]
-        torchvision_modules = [m for m in torchvision_model.modules()]
+        shardwise_modules = list(shardwise_model.modules())
+        torchvision_modules = list(torchvision_model.modules())
         self.assertTrue(len(shardwise_modules) == len(torchvision_modules), msg)
         for i, module in enumerate(shardwise_modules):
-            self.assertEqual(
-                type(module).__name__, type(torchvision_modules[i]).__name__, msg
-            )
+            self.assertEqual(type(module).__name__, type(torchvision_modules[i]).__name__, msg)
 
         # Check named_modules()
         shardwise_named_modules = dict(shardwise_model.named_modules())
         torchvision_named_modules = dict(torchvision_model.named_modules())
 
-        self.assertEqual(
-            len(shardwise_named_modules), len(torchvision_named_modules), msg
-        )
+        self.assertEqual(len(shardwise_named_modules), len(torchvision_named_modules), msg)
         for k in shardwise_named_modules.keys():
             self.assertTrue(k in torchvision_named_modules, msg)
 
@@ -56,8 +51,8 @@ class TestModels(MultiProcessTestCase):
             msg = f"Pretrained {msg}"
 
         # Test parameters()
-        shardwise_params = [p for p in shardwise_model.parameters()]
-        torchvision_params = [p for p in torchvision_model.parameters()]
+        shardwise_params = list(shardwise_model.parameters())
+        torchvision_params = list(torchvision_model.parameters())
         self.assertEqual(len(shardwise_params), len(torchvision_params), msg)
         for i, shardwise_param in enumerate(shardwise_params):
             torchvision_param = torchvision_params[i]
@@ -66,9 +61,7 @@ class TestModels(MultiProcessTestCase):
             if pretrained:
                 if isinstance(shardwise_param, shardwise.ShardTensor):
                     shardwise_param = shardwise_param.get_plain_text()
-                self.assertTrue(
-                    torch.allclose(shardwise_param, torchvision_param, atol=1e-4)
-                )
+                self.assertTrue(torch.allclose(shardwise_param, torchvision_param, atol=1e-4))
 
         # Test named_parameters()
         shardwise_named_params = dict(shardwise_model.named_parameters())

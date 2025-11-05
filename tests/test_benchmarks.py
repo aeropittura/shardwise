@@ -3,10 +3,8 @@
 
 import unittest
 
-import shardwise
-
-
 from benchmarks import benchmark
+import shardwise
 
 
 class TestBenchmark(unittest.TestCase):
@@ -78,8 +76,7 @@ class TestBenchmark(unittest.TestCase):
             msg="inference time should be greater than 0",
         )
         self.assertTrue(
-            all(model_benchmarks.df["accuracy"] > 0)
-            and all(model_benchmarks.df["accuracy"] < 1.0),
+            all(model_benchmarks.df["accuracy"] > 0) and all(model_benchmarks.df["accuracy"] < 1.0),
             msg="accuracy should be between 0 and 1.0",
         )
 
@@ -89,9 +86,7 @@ class TestBenchmark(unittest.TestCase):
         model_benchmarks = benchmark.ModelBenchmarks(advanced_models=False)
         self.assertTrue(all(not model.advanced for model in model_benchmarks.models))
         all_model_benchmarks = benchmark.ModelBenchmarks(advanced_models=True)
-        self.assertGreater(
-            len(all_model_benchmarks.models), len(model_benchmarks.models)
-        )
+        self.assertGreater(len(all_model_benchmarks.models), len(model_benchmarks.models))
 
 
 # This code only runs when executing the file outside the test harness

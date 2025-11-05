@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
 
 
-import random
 from hashlib import sha256
-from typing import List
+import random
 
 import shardwise.comm as comm
-
 
 """
     I dont think random modular is secure enough, but we can live with it for testing purpose
@@ -37,7 +35,7 @@ class BaseOT:
         self.partner_rank = partner_rank
         return
 
-    def send(self, message0s: List[str], message1s: List[str]):
+    def send(self, message0s: list[str], message1s: list[str]):
         """
         sender's input is two message lists
         """
@@ -98,7 +96,7 @@ class BaseOT:
             comm.get().send_obj(message0_enc, self.partner_rank)
             comm.get().send_obj(message1_enc, self.partner_rank)
 
-    def receive(self, choices: List[bool]):
+    def receive(self, choices: list[bool]):
         """
         choice:
             false: pick message0
@@ -120,9 +118,7 @@ class BaseOT:
             mask_for_message1 = comm.get().recv_obj(self.partner_rank)
             masks_for_message1s.append(mask_for_message1)
             if choices[i]:
-                masks_for_choices[i] = (
-                    masks_for_choices[i] * mask_for_message1
-                ) % self.__prime
+                masks_for_choices[i] = (masks_for_choices[i] * mask_for_message1) % self.__prime
 
         for i in range(len(choices)):
             # send mask_for_choice

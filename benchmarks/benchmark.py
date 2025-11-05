@@ -25,18 +25,18 @@ $ python benchmark.py -p ~/Downloads/
 """
 
 import argparse
+from collections import namedtuple
 import functools
 import os
 import timeit
-from collections import namedtuple
 
-import shardwise
-import shardwise.comm as comm
 import numpy as np
 import pandas as pd
 import torch
-from examples import multiprocess_launcher
 
+from examples import multiprocess_launcher
+import shardwise
+import shardwise.comm as comm
 
 try:
     from . import data, models
@@ -306,9 +306,7 @@ class FuncBenchmarks:
 
         self.df = pd.DataFrame.from_dict(
             {
-                "function": FuncBenchmarks.UNARY
-                + FuncBenchmarks.BINARY
-                + FuncBenchmarks.LAYERS,
+                "function": FuncBenchmarks.UNARY + FuncBenchmarks.BINARY + FuncBenchmarks.LAYERS,
                 "runtime": [r.mid for r in runtimes],
                 "runtime Q1": [r.q1 for r in runtimes],
                 "runtime Q3": [r.q3 for r in runtimes],
@@ -429,9 +427,7 @@ class ModelBenchmarks:
             if hasattr(model_shardwise, "to"):
                 model_shardwise = model_shardwise.to(self.device)
             model_enc = model_shardwise.encrypt()
-            runtime_enc, _ = self.train_shardwise(
-                model_enc, x_enc, y_enc, 1, model.lr, model.loss
-            )
+            runtime_enc, _ = self.train_shardwise(model_enc, x_enc, y_enc, 1, model.lr, model.loss)
             runtimes_enc.append(runtime_enc)
 
         return runtimes, runtimes_enc
@@ -492,9 +488,7 @@ class ModelBenchmarks:
                 model_plain = model_plain.to(self.device)
             x, y = model.data.x, model.data.y
             x, y = x.to(device=self.device), y.to(device=self.device)
-            _, model_plain = self.train(
-                model_plain, x, y, model.epochs, model.lr, model.loss
-            )
+            _, model_plain = self.train(model_plain, x, y, model.epochs, model.lr, model.loss)
 
             x_test = model.data.x_test.to(device=self.device)
             y_test = model.data.y_test.to(device=self.device)
@@ -622,9 +616,9 @@ def multiprocess_caller(args):
     """Runs multiparty benchmarks and prints/saves from source 0"""
     rank = comm.get().get_rank()
     if args.multi_gpu:
-        assert (
-            args.world_size >= torch.cuda.device_count()
-        ), f"Got {args.world_size} parties, but only {torch.cuda.device_count()} GPUs found"
+        assert args.world_size >= torch.cuda.device_count(), (
+            f"Got {args.world_size} parties, but only {torch.cuda.device_count()} GPUs found"
+        )
         device = torch.device(f"cuda:{rank}")
     else:
         device = torch.device(args.device)

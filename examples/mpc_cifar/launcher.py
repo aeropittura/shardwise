@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 
-
 """
 To run mpc_cifar example in multiprocess mode:
 
@@ -35,7 +34,6 @@ import os
 from examples.multiprocess_launcher import (
     MultiProcessLauncher,
 )
-
 
 parser = argparse.ArgumentParser(description="Shardwise Cifar Training")
 parser.add_argument(
@@ -107,9 +105,7 @@ parser.add_argument(
     action="store_true",
     help="evaluate model on validation set",
 )
-parser.add_argument(
-    "--seed", default=None, type=int, help="seed for initializing training. "
-)
+parser.add_argument("--seed", default=None, type=int, help="seed for initializing training. ")
 parser.add_argument("--lr-decay", default=0.1, type=float, help="lr decay factor")
 parser.add_argument(
     "--skip-plaintext",

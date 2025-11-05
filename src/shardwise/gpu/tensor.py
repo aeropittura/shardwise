@@ -61,9 +61,7 @@ class CUDALongTensor:
         if device is None:
             device = "cuda" if (data is None or not data.is_cuda) else data.device
         else:
-            assert device.startswith(
-                "cuda"
-            ), "cannot specify a non-cuda device for CUDALongTensor"
+            assert device.startswith("cuda"), "cannot specify a non-cuda device for CUDALongTensor"
 
         self._tensor = None
         if data is None:
@@ -88,14 +86,12 @@ class CUDALongTensor:
             if isinstance(result, list):
                 return [CUDALongTensor(t) if torch.is_tensor(t) else t for t in result]
             if isinstance(result, tuple):
-                return tuple(
-                    CUDALongTensor(t) if torch.is_tensor(t) else t for t in result
-                )
+                return tuple(CUDALongTensor(t) if torch.is_tensor(t) else t for t in result)
             return result
         return HANDLED_FUNCTIONS[func](*args, **kwargs)
 
     def __repr__(self):
-        return "CUDALongTensor({})".format(self._tensor)
+        return f"CUDALongTensor({self._tensor})"
 
     def __setitem__(self, index, value):
         self._tensor[index] = value.data
@@ -157,9 +153,7 @@ class CUDALongTensor:
         nb = num_blocks
         bks = CUDALongTensor.__BLOCK_SIZE[num_blocks]
 
-        x_block = CUDALongTensor.stack(
-            [(x >> (bks * i)) & (2**bks - 1) for i in range(nb)]
-        )
+        x_block = CUDALongTensor.stack([(x >> (bks * i)) & (2**bks - 1) for i in range(nb)])
 
         return x_block.double()
 
@@ -186,9 +180,7 @@ class CUDALongTensor:
     def __patched_conv_ops(op, x, y, *args, **kwargs):
         if "groups" in kwargs:
             groups = kwargs["groups"]
-            assert (
-                groups == 1
-            ), f"more than one group is unsupported on GPU (groups = {groups})"
+            assert groups == 1, f"more than one group is unsupported on GPU (groups = {groups})"
             del kwargs["groups"]
 
         bs, c, *img = x.size()
@@ -210,12 +202,8 @@ class CUDALongTensor:
 
         c_z = c_out if op in ["conv1d", "conv2d"] else c_in
 
-        z_encoded = getattr(torch, op)(
-            x_enc_span, y_enc_span, *args, **kwargs, groups=nb2
-        )
-        z_encoded = z_encoded.reshape(bs, nb2, c_z, *z_encoded.size()[2:]).transpose_(
-            0, 1
-        )
+        z_encoded = getattr(torch, op)(x_enc_span, y_enc_span, *args, **kwargs, groups=nb2)
+        z_encoded = z_encoded.reshape(bs, nb2, c_z, *z_encoded.size()[2:]).transpose_(0, 1)
         return CUDALongTensor.__decode_as_int64(z_encoded, nb)
 
     @staticmethod
@@ -276,30 +264,22 @@ class CUDALongTensor:
     @staticmethod
     @implements(torch.conv1d)
     def conv1d(input, weight, *args, **kwargs):
-        return CUDALongTensor.__patched_conv_ops(
-            "conv1d", input, weight, *args, **kwargs
-        )
+        return CUDALongTensor.__patched_conv_ops("conv1d", input, weight, *args, **kwargs)
 
     @staticmethod
     @implements(torch.conv_transpose1d)
     def conv_transpose1d(input, weight, *args, **kwargs):
-        return CUDALongTensor.__patched_conv_ops(
-            "conv_transpose1d", input, weight, *args, **kwargs
-        )
+        return CUDALongTensor.__patched_conv_ops("conv_transpose1d", input, weight, *args, **kwargs)
 
     @staticmethod
     @implements(torch.conv2d)
     def conv2d(input, weight, *args, **kwargs):
-        return CUDALongTensor.__patched_conv_ops(
-            "conv2d", input, weight, *args, **kwargs
-        )
+        return CUDALongTensor.__patched_conv_ops("conv2d", input, weight, *args, **kwargs)
 
     @staticmethod
     @implements(torch.conv_transpose2d)
     def conv_transpose2d(input, weight, *args, **kwargs):
-        return CUDALongTensor.__patched_conv_ops(
-            "conv_transpose2d", input, weight, *args, **kwargs
-        )
+        return CUDALongTensor.__patched_conv_ops("conv_transpose2d", input, weight, *args, **kwargs)
 
     @staticmethod
     @implements(torch.nn.functional.avg_pool2d)
@@ -317,9 +297,7 @@ class CUDALongTensor:
         )
 
         z_enc = z_encoded.reshape(nb, bs, *z_encoded.shape[1:]).long()
-        z = torch.zeros(
-            (nb, bs, *z_encoded.shape[1:]), device=x.device, dtype=torch.long
-        )
+        z = torch.zeros((nb, bs, *z_encoded.shape[1:]), device=x.device, dtype=torch.long)
         z += z_enc << torch.tensor([bks * i for i in range(nb)], device=x.device).view(
             nb, 1, 1, 1, 1
         )

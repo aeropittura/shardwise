@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
 
-import shardwise
 import torch
 
+import shardwise
 from shardwise.nn.layers import Module
 
 
@@ -13,7 +13,7 @@ class _Loss(Module):
     """
 
     def __init__(self, reduction="mean", skip_forward=False):
-        super(_Loss, self).__init__()
+        super().__init__()
         if reduction != "mean":
             raise NotImplementedError("reduction %s not supported")
         self.reduction = reduction
@@ -31,9 +31,7 @@ class _Loss(Module):
 
         def forward_function(*args, **kwargs):
             """Silently encrypt Torch tensors if needed."""
-            if self.encrypted or any(
-                isinstance(arg, shardwise.ShardTensor) for arg in args
-            ):
+            if self.encrypted or any(isinstance(arg, shardwise.ShardTensor) for arg in args):
                 args = list(args)
                 for idx, arg in enumerate(args):
                     if torch.is_tensor(arg):
@@ -188,7 +186,7 @@ class RAPPORLoss(_Loss):
     """
 
     def __init__(self, alpha, reduction="mean", skip_forward=False):
-        super(RAPPORLoss, self).__init__(reduction=reduction, skip_forward=skip_forward)
+        super().__init__(reduction=reduction, skip_forward=skip_forward)
         self.alpha = alpha
 
     def forward(self, x, y):

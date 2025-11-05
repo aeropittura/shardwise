@@ -1,16 +1,15 @@
 #!/usr/bin/env python3
 
 
-
 import copy
 import io
 
 import onnx
+from onnx import numpy_helper
 import torch
+from torch.onnx import OperatorExportTypes
 import torch.onnx.symbolic_helper as sym_help
 import torch.onnx.utils
-from onnx import numpy_helper
-from torch.onnx import OperatorExportTypes
 
 from shardwise.nn import layers
 
@@ -91,9 +90,7 @@ def from_tensorflow(tensorflow_graph_def, inputs, outputs):
             output_names=outputs,
         )
     onnx_graph = tf2onnx.optimizer.optimize_graph(g)
-    model_proto = onnx_graph.make_model(
-        "converted from {}".format(tensorflow_graph_def)
-    )
+    model_proto = onnx_graph.make_model(f"converted from {tensorflow_graph_def}")
     f = io.BytesIO()
     f.write(model_proto.SerializeToString())
 
@@ -241,16 +238,14 @@ def _get_attribute_value(attr):
         return list(attr.ints)
     elif len(attr.floats) > 0:
         return list(attr.floats)
-    raise ValueError("Unknown attribute type for attribute %s." % attr.name)
+    raise ValueError(f"Unknown attribute type for attribute {attr.name}.")
 
 
 def _get_operator_class(node_op_type, attributes):
     """
     Returns the `shardwise.nn.Module` type corresponding to an ONNX node.
     """
-    shardwise_class = getattr(
-        layers, node_op_type, ONNX_TO_SHARDWISE.get(node_op_type, None)
-    )
+    shardwise_class = getattr(layers, node_op_type, ONNX_TO_SHARDWISE.get(node_op_type, None))
     if shardwise_class is None:
         raise ValueError(f"Shardwise does not support ONNX op {node_op_type}.")
     return shardwise_class
@@ -266,17 +261,11 @@ def _update_onnx_symbolic_registry():
         for version_key, version_val in sym_registry._registry.items():
             for function_key in version_val.keys():
                 if function_key == "softmax":
-                    sym_registry._registry[version_key][function_key] = (
-                        _onnx_shardwise_softmax
-                    )
+                    sym_registry._registry[version_key][function_key] = _onnx_shardwise_softmax
                 if function_key == "log_softmax":
-                    sym_registry._registry[version_key][function_key] = (
-                        _onnx_shardwise_logsoftmax
-                    )
+                    sym_registry._registry[version_key][function_key] = _onnx_shardwise_logsoftmax
                 if function_key == "dropout":
-                    sym_registry._registry[version_key][function_key] = (
-                        _onnx_shardwise_dropout
-                    )
+                    sym_registry._registry[version_key][function_key] = _onnx_shardwise_dropout
                 if function_key == "feature_dropout":
                     sym_registry._registry[version_key][function_key] = (
                         _onnx_shardwise_feature_dropout

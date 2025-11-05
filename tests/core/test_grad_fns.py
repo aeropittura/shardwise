@@ -1,26 +1,24 @@
 #!/usr/bin/env python3
 
 
-
-
+from collections import namedtuple
 import copy
 import itertools
 import logging
 import unittest
-from collections import namedtuple
 
-import shardwise
 import torch
 import torch.nn.functional as F
-from shardwise.utils.dtypes import is_float_tensor
-from shardwise.settings import cfg
+
+import shardwise
 from shardwise.core.grad_fns import AutogradContext
+from shardwise.settings import cfg
+from shardwise.utils.dtypes import is_float_tensor
 from tests.support.multiprocess import (
-    get_random_test_tensor,
     MultiProcessTestCase,
+    get_random_test_tensor,
     onehot,
 )
-
 
 # Sizes for tensor operations
 SIZES = [
@@ -68,7 +66,7 @@ class TestGradients:
         test_passed = test_passed.gt(0).all().item() == 1
         if not test_passed:
             logging.info(msg)
-            logging.info("Result %s" % tensor)
+            logging.info(f"Result {tensor}")
             logging.info("Result - Reference = %s" % (tensor - reference))
         self.assertTrue(test_passed, msg=msg)
 
@@ -127,9 +125,7 @@ class TestGradients:
             self._check(encrypted_out, reference, msg + " in forward")
 
             # check backward pass
-            grad_output = get_random_test_tensor(
-                max_value=2, size=reference.size(), is_float=True
-            )
+            grad_output = get_random_test_tensor(max_value=2, size=reference.size(), is_float=True)
             grad_output_encr = shardwise.tensor(grad_output)
             reference.backward(grad_output)
             encrypted_out.backward(grad_output_encr)
@@ -165,7 +161,7 @@ class TestGradients:
         elif hasattr(F, func_name):
             return getattr(F, func_name)
         else:
-            raise ValueError("unknown PyTorch function: %s" % func_name)
+            raise ValueError(f"unknown PyTorch function: {func_name}")
 
     def test_arithmetic(self):
         """Tests arithmetic functions with broadcasting."""
@@ -264,9 +260,7 @@ class TestGradients:
                     # check when keepdim is provided as a kwarg
                     for keepdim in [False, True]:
                         if method is None:
-                            self._check_forward_backward(
-                                reduction, tensor, dim, keepdim=keepdim
-                            )
+                            self._check_forward_backward(reduction, tensor, dim, keepdim=keepdim)
                             self._check_forward_backward(
                                 reduction, tensor, dim=dim, keepdim=keepdim
                             )
@@ -310,9 +304,7 @@ class TestGradients:
                 tensor1 = get_random_test_tensor(size=sizes[0], is_float=True)
                 tensor2 = get_random_test_tensor(size=sizes[1], is_float=True)
 
-                self._check_forward_backward(
-                    func, tensor1, tensor2, torch_func_name=torch_funcs[i]
-                )
+                self._check_forward_backward(func, tensor1, tensor2, torch_func_name=torch_funcs[i])
 
     def test_unary_functions(self):
         """Test unary functions on tensors of various sizes."""
@@ -359,9 +351,7 @@ class TestGradients:
 
         functions = ["dropout", "_feature_dropout"]
         for func in functions:
-            warning_str = (
-                f"Shardwise {func} does not support inplace computation during training."
-            )
+            warning_str = f"Shardwise {func} does not support inplace computation during training."
             with self.assertLogs(logger=logging.getLogger(), level="WARNING") as cm:
                 getattr(encrypted, func)(inplace=True)
             self.assertTrue(f"WARNING:root:{warning_str}" in cm.output)
@@ -566,9 +556,7 @@ class TestGradients:
             size = (batches, channels, *image_size)
             image = get_random_test_tensor(size=size, is_float=True)
 
-            for padding, stride, ceil_mode in itertools.product(
-                paddings, strides, ceil_modes
-            ):
+            for padding, stride, ceil_mode in itertools.product(paddings, strides, ceil_modes):
                 # Skip invalid padding sizes
                 if kernel_size == 1 and padding == 1:
                     continue
@@ -622,9 +610,7 @@ class TestGradients:
             # PyTorch can produce improperly sized outputs with Inf values using ceil_mode in some cases
             if ceil_mode:
                 return
-            self.assertTrue(
-                out.size() == out_enc.size(), "max_pool2d forward incorrect"
-            )
+            self.assertTrue(out.size() == out_enc.size(), "max_pool2d forward incorrect")
             return  # backward will break if output is -inf
         else:
             self._check(out_enc, out, "max_pool2d forward incorrect")
@@ -639,8 +625,7 @@ class TestGradients:
         shardwise_grad = image_enc.grad.get_plain_text()
         non_matching_indices = (image.grad - shardwise_grad).abs() > tol
         sum_is_close = (
-            shardwise_grad[non_matching_indices].sum()
-            - image.grad[non_matching_indices].sum()
+            shardwise_grad[non_matching_indices].sum() - image.grad[non_matching_indices].sum()
         ) < tol
         if not sum_is_close:
             msg = "max_pool2d backward failed"
@@ -741,8 +726,7 @@ class TestGradients:
                                 for _ in range(num_tensors)
                             ]
                             encrypted_tensors = [
-                                shardwise.tensor(t, requires_grad=True)
-                                for t in tensors
+                                shardwise.tensor(t, requires_grad=True) for t in tensors
                             ]
                             for i in range(len(tensors)):
                                 tensors[i].grad = None
@@ -752,12 +736,8 @@ class TestGradients:
 
                             # Forward
                             reference = getattr(torch, func)(tensors, dim=dim)
-                            encrypted_out = getattr(module, func)(
-                                encrypted_tensors, dim=dim
-                            )
-                            self._check(
-                                encrypted_out, reference, f"{func} forward failed"
-                            )
+                            encrypted_out = getattr(module, func)(encrypted_tensors, dim=dim)
+                            self._check(encrypted_out, reference, f"{func} forward failed")
 
                             # Backward
                             grad_output = get_random_test_tensor(
@@ -789,9 +769,7 @@ class TestGradients:
                         )
                         if use_zeros:
                             # turn the first row to all zeros
-                            index = [1] + [
-                                slice(0, tensor.size(i)) for i in range(1, tensor.dim())
-                            ]
+                            index = [1] + [slice(0, tensor.size(i)) for i in range(1, tensor.dim())]
                             tensor[index] = 0.0
 
                         encr_tensor = shardwise.tensor(tensor, requires_grad=True)
@@ -800,14 +778,11 @@ class TestGradients:
 
                         # Check the scaling for non-zero elements
                         scaled_tensor = tensor / (1 - prob)
-                        reference = dropout_tensor.where(
-                            dropout_tensor == 0.0, scaled_tensor
-                        )
+                        reference = dropout_tensor.where(dropout_tensor == 0.0, scaled_tensor)
                         self._check(
                             encr_tensor_out,
                             reference,
-                            "dropout failed with size {}, use_zeros {}, and "
-                            "probability {}".format(size, use_zeros, prob),
+                            f"dropout failed with size {size}, use_zeros {use_zeros}, and probability {prob}",
                         )
 
     def test_batchnorm(self) -> None:
@@ -868,15 +843,12 @@ class TestGradients:
                 self._check(
                     encrypted_out,
                     reference,
-                    "batchnorm forward failed with training "
-                    f"{is_training} on {tensor.dim()}-D",
+                    f"batchnorm forward failed with training {is_training} on {tensor.dim()}-D",
                     tolerance=tolerance,
                 )
 
                 # check backward (input, weight, and bias gradients):
-                grad_input = get_random_test_tensor(
-                    size=reference.size(), is_float=True
-                )
+                grad_input = get_random_test_tensor(size=reference.size(), is_float=True)
                 reference.backward(grad_input)
                 with shardwise.no_grad():
                     enc_grad_input = shardwise.tensor(grad_input)
@@ -915,18 +887,14 @@ class TestGradients:
                         )
                         tensor = tensor.abs().add_(0.001)
                     else:
-                        tensor = get_random_test_tensor(
-                            size=(batch_size,), is_float=True
-                        )
+                        tensor = get_random_test_tensor(size=(batch_size,), is_float=True)
 
                     target = get_random_test_tensor(size=(batch_size,), is_float=True)
                     target = target.gt(0.0).float()
                     target_encr = shardwise.tensor(target)
                 else:
                     tensor = get_random_test_tensor(size=size, is_float=True)
-                    target = get_random_test_tensor(
-                        size=(batch_size,), max_value=num_targets - 1
-                    )
+                    target = get_random_test_tensor(size=(batch_size,), max_value=num_targets - 1)
                     target = onehot(target.abs(), num_targets=num_targets)
                     target_encr = shardwise.tensor(target)
                     # Shardwise, unlike PyTorch, uses one-hot targets
@@ -936,9 +904,7 @@ class TestGradients:
                 tensor.requires_grad = True
                 tensor_encr = shardwise.tensor(tensor, requires_grad=True)
                 reference = getattr(torch.nn.functional, loss)(tensor, target)
-                out_encr = getattr(tensor_encr, loss)(
-                    target_encr, skip_forward=skip_forward
-                )
+                out_encr = getattr(tensor_encr, loss)(target_encr, skip_forward=skip_forward)
                 if not skip_forward:
                     self._check(out_encr, reference, f"{loss} forward failed")
 
@@ -968,9 +934,7 @@ class TestGradients:
                 reference = alpha * reference + (1 - alpha) * (1 - reference)
 
                 reference = torch.nn.functional.binary_cross_entropy(reference, target)
-                out_encr = tensor_encr.rappor_loss(
-                    target_encr, alpha, skip_forward=skip_forward
-                )
+                out_encr = tensor_encr.rappor_loss(target_encr, alpha, skip_forward=skip_forward)
 
                 if not skip_forward:
                     self._check(out_encr, reference, "rappor_loss forward failed")
@@ -978,9 +942,7 @@ class TestGradients:
                 # backward
                 reference.backward()
                 out_encr.backward()
-                self._check(
-                    tensor_encr.grad, tensor.grad, "rappor_loss backward failed"
-                )
+                self._check(tensor_encr.grad, tensor.grad, "rappor_loss backward failed")
 
     def test_cosine_similarity(self) -> None:
         """Tests cosine_similarity"""
@@ -991,9 +953,7 @@ class TestGradients:
             # Check dim 0 if tensor is 0-dimensional
             dims = 1 if len(size) == 0 else len(size)
             for dim in range(dims):
-                self._check_forward_backward(
-                    "cosine_similarity", tensor0, tensor1, dim=dim
-                )
+                self._check_forward_backward("cosine_similarity", tensor0, tensor1, dim=dim)
 
     def test_view_reshape(self) -> None:
         """Tests view and reshape gradients"""
@@ -1053,9 +1013,7 @@ class TestGradients:
                     reference = getattr(tensor, func)(dim, index, src)
                     out_encr = getattr(tensor_encr, func)(dim, index, src)
 
-                self._check(
-                    out_encr, reference, f"{func} forward failed with index {index}"
-                )
+                self._check(out_encr, reference, f"{func} forward failed with index {index}")
 
                 grad_out = get_random_test_tensor(size=reference.shape, is_float=True)
                 grad_out_encr = shardwise.tensor(grad_out)
@@ -1157,9 +1115,7 @@ class TestGradients:
 
             reference = tensor.pow(power)
             out_encr = tensor_encr.pos_pow(power)
-            self._check(
-                out_encr, reference, f"pos_pow forward failed with power {power}"
-            )
+            self._check(out_encr, reference, f"pos_pow forward failed with power {power}")
 
             grad_out = get_random_test_tensor(is_float=True)
             grad_out_encr = shardwise.tensor(grad_out)
@@ -1210,22 +1166,22 @@ class TestTFP(MultiProcessTestCase, TestGradients):
     def setUp(self) -> None:
         self._original_provider = cfg.mpc.provider
         cfg.mpc.provider = "TFP"
-        super(TestTFP, self).setUp()
+        super().setUp()
 
     def tearDown(self) -> None:
         cfg.mpc.provider = self._original_provider
-        super(TestTFP, self).tearDown()
+        super().tearDown()
 
 
 class TestTTP(MultiProcessTestCase, TestGradients):
     def setUp(self) -> None:
         self._original_provider = cfg.mpc.provider
         cfg.mpc.provider = "TTP"
-        super(TestTTP, self).setUp()
+        super().setUp()
 
     def tearDown(self) -> None:
         cfg.mpc.provider = self._original_provider
-        super(TestTTP, self).tearDown()
+        super().tearDown()
 
 
 class TestPTT(unittest.TestCase, TestGradients):
@@ -1233,12 +1189,12 @@ class TestPTT(unittest.TestCase, TestGradients):
         self.default_tolerance = 0.5
         self._original_backend = shardwise.get_default_tensor_type()
         shardwise.set_default_tensor_type("ptt")
-        super(TestPTT, self).setUp()
+        super().setUp()
         shardwise.init()
 
     def tearDown(self) -> None:
         shardwise.set_default_tensor_type(self._original_backend)
-        super(TestPTT, self).setUp()
+        super().setUp()
 
 
 # This code only runs when executing the file outside the test harness

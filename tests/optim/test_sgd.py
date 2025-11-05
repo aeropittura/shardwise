@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 
 
-
 import itertools
 import logging
 
-import shardwise
 import torch
-from shardwise.utils.dtypes import is_float_tensor
+
+import shardwise
 from shardwise.settings import cfg
-from tests.support.multiprocess import get_random_test_tensor, MultiProcessTestCase
+from shardwise.utils.dtypes import is_float_tensor
+from tests.support.multiprocess import MultiProcessTestCase, get_random_test_tensor
 
 
 class TestOptim:
@@ -34,8 +34,8 @@ class TestOptim:
             test_passed = (tensor == reference).all().item() == 1
         if not test_passed:
             logging.info(msg)
-            logging.info("Result: %s" % tensor)
-            logging.info("Reference: %s" % reference)
+            logging.info(f"Result: {tensor}")
+            logging.info(f"Reference: {reference}")
         self.assertTrue(test_passed, msg=msg)
 
     def test_sgd(self) -> None:
@@ -91,9 +91,7 @@ class TestOptim:
             torch_params = list(torch_model.parameters())
             shardwise_params = list(shardwise_model.parameters())
             for i in range(len(torch_params)):
-                self._check(
-                    shardwise_params[i], torch_params[i], "Parameter update mismatch"
-                )
+                self._check(shardwise_params[i], torch_params[i], "Parameter update mismatch")
 
             torch_optimizer.zero_grad()
             shardwise_optimizer.zero_grad()
@@ -105,19 +103,19 @@ class TestTFP(MultiProcessTestCase, TestOptim):
     def setUp(self) -> None:
         self._original_provider = cfg.mpc.provider
         cfg.mpc.provider = "TFP"
-        super(TestTFP, self).setUp()
+        super().setUp()
 
     def tearDown(self) -> None:
         cfg.mpc.provider = self._original_provider
-        super(TestTFP, self).tearDown()
+        super().tearDown()
 
 
 class TestTTP(MultiProcessTestCase, TestOptim):
     def setUp(self) -> None:
         self._original_provider = cfg.mpc.provider
         cfg.mpc.provider = "TTP"
-        super(TestTTP, self).setUp()
+        super().setUp()
 
     def tearDown(self) -> None:
         cfg.mpc.provider = self._original_provider
-        super(TestTTP, self).tearDown()
+        super().tearDown()

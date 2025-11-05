@@ -21,14 +21,15 @@ import logging
 import os
 import random
 
-import examples.util
 import torch
+from torchvision.datasets.mnist import MNIST
 import visdom
+
 from examples.multiprocess_launcher import (
     MultiProcessLauncher,
 )
+import examples.util
 from examples.util import NoopContextManager, process_mnist_files
-from torchvision.datasets.mnist import MNIST
 
 
 def learning_curve(visualizer, idx, value, window=None, title=""):
@@ -56,9 +57,7 @@ def download_mnist(split="train"):
     # If need to downkload MNIST dataset and uncompress,
     # it is necessary to create a separate for each process.
     mnist_exists = os.path.exists(
-        os.path.join(
-            "/tmp/MNIST/processed", MNIST.training_file if train else MNIST.test_file
-        )
+        os.path.join("/tmp/MNIST/processed", MNIST.training_file if train else MNIST.test_file)
     )
 
     if mnist_exists:
@@ -100,12 +99,10 @@ def load_data(
 
     # compute rewards (based on clustering if clusters defined, 0-1 otherwise):
     if clusters is not None:
-        assert clusters.size(1) == context.size(
-            1
-        ), "cluster dimensionality does not match data dimensionality"
-        rewards = examples.util.kmeans_inference(
-            context, clusters, hard=False, bandwidth=bandwidth
+        assert clusters.size(1) == context.size(1), (
+            "cluster dimensionality does not match data dimensionality"
         )
+        rewards = examples.util.kmeans_inference(context, clusters, hard=False, bandwidth=bandwidth)
     else:
         rewards = examples.util.onehot(mnist.targets.long())
 
@@ -163,9 +160,7 @@ def parse_args(hostname):
         default=2,
         help="The number of parties to launch. Each party acts as its own process",
     )
-    parser.add_argument(
-        "--plaintext", action="store_true", help="use a non-private algorithm"
-    )
+    parser.add_argument("--plaintext", action="store_true", help="use a non-private algorithm")
     parser.add_argument(
         "--backend", default="mpc", type=str, help="shardwise backend: mpc (default)"
     )
@@ -193,14 +188,12 @@ def parse_args(hostname):
         type=float,
         help="exploration parameter (default = 0.01)",
     )
-    parser.add_argument(
-        "--visualize", action="store_true", help="visualize results with visdom"
-    )
+    parser.add_argument("--visualize", action="store_true", help="visualize results with visdom")
     parser.add_argument(
         "--visdom",
         default=hostname,
         type=str,
-        help="visdom server to use (default = %s)" % hostname,
+        help=f"visdom server to use (default = {hostname})",
     )
     parser.add_argument(
         "--pca", default=20, type=int, help="Number of PCA dimensions (0 for raw data)"
@@ -247,9 +240,7 @@ def parse_args(hostname):
         type=int,
         help="checkpoint every K iterations",
     )
-    parser.add_argument(
-        "--permfile", default=None, type=str, help="file with sampling permutation"
-    )
+    parser.add_argument("--permfile", default=None, type=str, help="file with sampling permutation")
     parser.add_argument("--seed", default=None, type=int, help="Seed the torch rng")
     parser.add_argument(
         "--multiprocess",
@@ -275,8 +266,9 @@ def get_monitor_func(args, buffers, visualizer, window, title, progress_iter):
                 buffers[key] = [item for item in val if item is not None]
         if finished or (idx > 0 and idx % progress_iter == 0):
             logging.info(
-                "Sample %s; average reward = %2.5f, time %.3f (sec/iter) "
-                % (idx, mean(buffers["reward"]), mean(buffers["iter_time"]))
+                "Sample {}; average reward = {:2.5f}, time {:.3f} (sec/iter) ".format(
+                    idx, mean(buffers["reward"]), mean(buffers["iter_time"])
+                )
             )
             if args.visualize:
                 window[0] = learning_curve(
@@ -308,9 +300,7 @@ def get_checkpoint_func(args):
     def checkpoint_func(idx, model):
         if "RANK" not in os.environ or os.environ["RANK"] == 0:
             if args.checkpoint_folder is not None:
-                checkpoint_file = os.path.join(
-                    args.checkpoint_folder, "iter_%05d.torch" % idx
-                )
+                checkpoint_file = os.path.join(args.checkpoint_folder, "iter_%05d.torch" % idx)
                 torch.save(model, checkpoint_file)
 
     return checkpoint_func
@@ -343,26 +333,18 @@ def build_learner(args, bandits, download_mnist):
 
     # set up variables for progress monitoring:
     window = [None]
-    title = "Cumulative reward (encrypted %s, epsilon = %2.2f)" % (
-        args.learner,
-        args.epsilon,
-    )
+    title = f"Cumulative reward (encrypted {args.learner}, epsilon = {args.epsilon:2.2f})"
     progress_iter = 100
     buffers = {
-        key: [None] * progress_iter
-        for key in ["idx", "reward", "cumulative_reward", "iter_time"]
+        key: [None] * progress_iter for key in ["idx", "reward", "cumulative_reward", "iter_time"]
     }
 
     # closures that perform progress monitoring and checkpointing:
-    monitor_func = get_monitor_func(
-        args, buffers, visualizer, window, title, progress_iter
-    )
+    monitor_func = get_monitor_func(args, buffers, visualizer, window, title, progress_iter)
     checkpoint_func = get_checkpoint_func(args)
 
     # compute pca:
-    context, _ = load_data(
-        split=args.mnist_split, pca=None, download_mnist_func=download_mnist
-    )
+    context, _ = load_data(split=args.mnist_split, pca=None, download_mnist_func=download_mnist)
     pca = examples.util.pca(context, args.pca)
 
     # create or load clustering if custom number of arms is used:
@@ -383,10 +365,7 @@ def build_learner(args, bandits, download_mnist):
             clusters = context.new((args.number_arms, context.size(1)))
 
             # run clustering in process 0:
-            if (
-                not torch.distributed.is_initialized()
-                or torch.distributed.get_rank() == 0
-            ):
+            if not torch.distributed.is_initialized() or torch.distributed.get_rank() == 0:
                 logging.info("Performing clustering to get arms...")
                 clusters = examples.util.kmeans(context, args.number_arms)
                 torch.save(clusters, clusters_file)
@@ -405,7 +384,7 @@ def build_learner(args, bandits, download_mnist):
         permfile=args.permfile,
         download_mnist_func=download_mnist,
     )
-    assert hasattr(bandits, args.learner), "unknown learner: %s" % args.learner
+    assert hasattr(bandits, args.learner), f"unknown learner: {args.learner}"
 
     def learner_func():
         getattr(bandits, args.learner)(

@@ -44,9 +44,9 @@ def shardwise_print(*args, dst=0, **kwargs):
     """
     if isinstance(dst, int):
         dst = [dst]
-    assert isinstance(
-        dst, (list, tuple)
-    ), "print destination must be a list or tuple of party ranks"
+    assert isinstance(dst, (list, tuple)), (
+        "print destination must be a list or tuple of party ranks"
+    )
     import shardwise.comm as comm
 
     if comm.get().get_rank() in dst:
@@ -61,9 +61,7 @@ def shardwise_log(*args, level=logging.INFO, dst=0, **kwargs):
     """
     if isinstance(dst, int):
         dst = [dst]
-    assert isinstance(
-        dst, (list, tuple)
-    ), "log destination must be a list or tuple of party ranks"
+    assert isinstance(dst, (list, tuple)), "log destination must be a list or tuple of party ranks"
     import shardwise.comm as comm
 
     if comm.get().get_rank() in dst:
@@ -84,8 +82,9 @@ def shardwise_print_in_order(*args, **kwargs):
 
 
 def validate_correctness(self, func, func_name, tolerance=0.5):
-    import shardwise
     import torch
+
+    import shardwise
 
     if not hasattr(torch.tensor([]), func_name):
         return func
@@ -119,9 +118,7 @@ def validate_correctness(self, func, func_name, tolerance=0.5):
 
             # Check sizes match
             if result.size() != reference.size():
-                shardwise_log(
-                    f"Size mismatch: Expected {reference.size()} but got {result.size()}"
-                )
+                shardwise_log(f"Size mismatch: Expected {reference.size()} but got {result.size()}")
                 raise ValueError(f"Function {func_name} returned incorrect size")
 
             # Check that results match
@@ -131,7 +128,7 @@ def validate_correctness(self, func, func_name, tolerance=0.5):
             test_passed = test_passed.gt(0).all().item() == 1
             if not test_passed:
                 shardwise_log(f"Function {func_name} returned incorrect values")
-                shardwise_log("Result %s" % result)
+                shardwise_log(f"Result {result}")
                 shardwise_log("Result - Reference = %s" % (result - reference))
                 raise ValueError(f"Function {func_name} returned incorrect values")
 

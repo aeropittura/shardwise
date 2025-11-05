@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
 
 
+from functools import reduce
 import logging
 import math
-from functools import reduce
 
-import shardwise
 import torch
 
+import shardwise
 from shardwise.utils.helpers import _grad_input_padding
-
 
 # registry that maps function names to AutogradFunctions:
 FUNCTION_REGISTRY = {}
@@ -21,11 +20,9 @@ def register_function(name):
     def register_function_cls(cls):
         """Function performing the actual registration."""
         if name in FUNCTION_REGISTRY:
-            raise ValueError("Cannot register duplicate function ({})".format(name))
+            raise ValueError(f"Cannot register duplicate function ({name})")
         if not issubclass(cls, AutogradFunction):
-            raise ValueError(
-                "Function (%s: %s) must extend AutogradFunction" % (name, cls.__name__)
-            )
+            raise ValueError(f"Function ({name}: {cls.__name__}) must extend AutogradFunction")
         cls.name = name
         FUNCTION_REGISTRY[name] = cls
         return cls
@@ -320,9 +317,7 @@ class AutogradTake(AutogradFunction):
             grad = grad_flat.reshape(size)
         else:
             flat_index = index.flatten()
-            grad_output_flat = grad_output.flatten(
-                start_dim=dim, end_dim=(dim + index.dim() - 1)
-            )
+            grad_output_flat = grad_output.flatten(start_dim=dim, end_dim=(dim + index.dim() - 1))
             grad.index_add_(dim, flat_index, grad_output_flat)
         return grad
 
@@ -505,9 +500,7 @@ class AutogradDropout(AutogradFunction):
 
         # training mode:
         generator = shardwise.generators["global"][input.device]
-        random_tensor = torch.rand(
-            input.size(), generator=generator, device=input.device
-        )
+        random_tensor = torch.rand(input.size(), generator=generator, device=input.device)
         boolean_mask = (random_tensor > p).to(input.device, dtype=torch.float)
         if inplace:
             result = input.mul_(boolean_mask.div(1.0 - p))
@@ -581,12 +574,8 @@ class AutogradTanh(AutogradFunction):
 class AutogradHardtanh(AutogradFunction):
     @staticmethod
     def forward(ctx, input, min_val=-1, max_val=1):
-        assert isinstance(
-            min_val, (int, float)
-        ), "hardtanh min_val must be an int or float"
-        assert isinstance(
-            max_val, (int, float)
-        ), "hardtanh max_val must be an int or float"
+        assert isinstance(min_val, (int, float)), "hardtanh min_val must be an int or float"
+        assert isinstance(max_val, (int, float)), "hardtanh max_val must be an int or float"
         if min_val == max_val:
             grad = input.new(torch.zeros(input.size()))
             ctx.save_for_backward(grad)
@@ -1207,14 +1196,10 @@ class AutogradMean(AutogradFunction):
         if len(input_size) == 0:
             return grad_output
 
-        nelement = float(
-            reduce(lambda x, y: x * y, input_size) if dim is None else input_size[dim]
-        )
+        nelement = float(reduce(lambda x, y: x * y, input_size) if dim is None else input_size[dim])
         if not keepdim and dim is not None:
             grad_output = grad_output.unsqueeze(dim)
-        return grad_output.mul(
-            torch.ones(input_size, device=grad_output.device).div_(nelement)
-        )
+        return grad_output.mul(torch.ones(input_size, device=grad_output.device).div_(nelement))
 
 
 @register_function("var")
@@ -1395,9 +1380,7 @@ class AutogradSoftmax(AutogradFunction):
         probs, dim = ctx.saved_tensors
         if grad_output.dim() == 0 or grad_output.size(dim) == 1:
             return grad_output.new(torch.zeros(grad_output.size()))
-        return grad_output.add(-probs.mul(grad_output).sum(dim, keepdim=True)).mul_(
-            probs
-        )
+        return grad_output.add(-probs.mul(grad_output).sum(dim, keepdim=True)).mul_(probs)
 
 
 @register_function("log_softmax")
@@ -1455,9 +1438,7 @@ class AutogradAvgPool2D(AutogradFunction):
         output = input.avg_pool2d(kernel_size, padding=padding, stride=stride)
 
         # store information for backward pass:
-        ctx.save_multiple_for_backward(
-            (input.shape, output, kernel_size, padding, stride)
-        )
+        ctx.save_multiple_for_backward((input.shape, output, kernel_size, padding, stride))
         return output
 
     @staticmethod
@@ -1579,9 +1560,7 @@ class AutogradConv1D(AutogradFunction):
             padding = (padding,)
         if isinstance(dilation, (int, float)):
             dilation = (dilation,)
-        ctx.save_multiple_for_backward(
-            (input, kernel, padding, stride, dilation, groups)
-        )
+        ctx.save_multiple_for_backward((input, kernel, padding, stride, dilation, groups))
         return input.conv1d(
             kernel, padding=padding, stride=stride, dilation=dilation, groups=groups
         )
@@ -1641,9 +1620,7 @@ class AutogradConv1D(AutogradFunction):
             batch_size, grad_kernel.size(1) // batch_size, grad_kernel.size(2)
         )
         grad_kernel = grad_kernel.sum(dim=0)
-        grad_kernel = grad_kernel.view(
-            in_channels // groups, out_channels, grad_kernel.size(1)
-        )
+        grad_kernel = grad_kernel.view(in_channels // groups, out_channels, grad_kernel.size(1))
         grad_kernel = grad_kernel.transpose(0, 1).narrow(2, 0, kernel_size)
         return (grad_input, grad_kernel)
 
@@ -1658,9 +1635,7 @@ class AutogradConv2D(AutogradFunction):
             padding = (padding, padding)
         if isinstance(dilation, (int, float)):
             dilation = (dilation, dilation)
-        ctx.save_multiple_for_backward(
-            (input, kernel, padding, stride, dilation, groups)
-        )
+        ctx.save_multiple_for_backward((input, kernel, padding, stride, dilation, groups))
         return input.conv2d(
             kernel, stride=stride, padding=padding, dilation=dilation, groups=groups
         )
@@ -1711,9 +1686,7 @@ class AutogradConv2D(AutogradFunction):
             grad_output.size(2),
             grad_output.size(3),
         )
-        input = input.view(
-            1, input.size(0) * input.size(1), input.size(2), input.size(3)
-        )
+        input = input.view(1, input.size(0) * input.size(1), input.size(2), input.size(3))
         # dilation and stride are swapped based on PyTorch's conv2d_weight implementation
         grad_kernel = input.conv2d(
             grad_output,
@@ -1803,9 +1776,7 @@ class AutogradBatchNorm(AutogradFunction):
                 running_mean.set(running_mean * (1.0 - momentum) + mean * momentum)
         else:
             if running_mean is None or running_var is None:
-                raise ValueError(
-                    "Must provide running_mean and running_var when training is False"
-                )
+                raise ValueError("Must provide running_mean and running_var when training is False")
             mean = running_mean
             variance = running_var
 
@@ -1903,9 +1874,7 @@ class AutogradBinaryCrossEntropy(AutogradFunction):
             return pred.new(0)
 
         # Compute full forward pass
-        log_pos, log_neg = (
-            shardwise.stack([pred, 1.0 - pred]).log(input_in_01=True).unbind(dim=0)
-        )
+        log_pos, log_neg = shardwise.stack([pred, 1.0 - pred]).log(input_in_01=True).unbind(dim=0)
         loss_values = target * log_pos + ((1.0 - target) * log_neg)
         return -(loss_values.mean())
 
@@ -1924,9 +1893,9 @@ class AutogradBinaryCrossEntropyWithLogits(AutogradFunction):
     @staticmethod
     def forward(ctx, logit, target, skip_forward=False):
         sigmoid_out = logit.sigmoid()
-        assert (
-            sigmoid_out.size() == target.size()
-        ), "Incorrect input sizes for binary_cross_entropy_with_logits"
+        assert sigmoid_out.size() == target.size(), (
+            "Incorrect input sizes for binary_cross_entropy_with_logits"
+        )
         ctx.mark_non_differentiable(target)
         ctx.save_multiple_for_backward([target, sigmoid_out])
         if skip_forward:
@@ -1934,9 +1903,7 @@ class AutogradBinaryCrossEntropyWithLogits(AutogradFunction):
 
         # Compute full forward pass
         log_pos, log_neg = (
-            shardwise.stack([sigmoid_out, 1.0 - sigmoid_out])
-            .log(input_in_01=True)
-            .unbind(dim=0)
+            shardwise.stack([sigmoid_out, 1.0 - sigmoid_out]).log(input_in_01=True).unbind(dim=0)
         )
         loss_values = target * log_pos + ((1.0 - target) * log_neg)
         return -(loss_values.mean())
@@ -1951,9 +1918,7 @@ class AutogradBinaryCrossEntropyWithLogits(AutogradFunction):
 class AutogradRAPPORLoss(AutogradFunction):
     @staticmethod
     def forward(ctx, logit, target, alpha, skip_forward=False):
-        assert (
-            logit.size() == target.size()
-        ), "Logit and target sizes must match for rappor loss"
+        assert logit.size() == target.size(), "Logit and target sizes must match for rappor loss"
         pred = logit.sigmoid()
         ctx.mark_non_differentiable(target)
         if alpha == 0.0:
@@ -1965,9 +1930,7 @@ class AutogradRAPPORLoss(AutogradFunction):
             grad_correction *= (pred_normalized * (1 - pred_normalized)).reciprocal(
                 input_in_01=True
             )
-            ctx.save_multiple_for_backward(
-                [target, pred_normalized, grad_correction, alpha]
-            )
+            ctx.save_multiple_for_backward([target, pred_normalized, grad_correction, alpha])
 
         if skip_forward:
             return pred.new(0)

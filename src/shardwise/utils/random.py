@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
-import shardwise
 import torch
+
+import shardwise
 from shardwise.gpu import CUDALongTensor
 
 

@@ -1,20 +1,20 @@
 #!/usr/bin/env python3
 
 
-
 import collections
 import itertools
 import logging
 import unittest
 
-import shardwise
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from shardwise.settings import cfg
+
+import shardwise
 from shardwise.gpu import CUDALongTensor
-from tests.support.multiprocess import get_random_test_tensor, MultiProcessTestCase
+from shardwise.settings import cfg
 from tests.sharing.test_secure_tensor import TestMPC
+from tests.support.multiprocess import MultiProcessTestCase, get_random_test_tensor
 
 
 class MLP(nn.Module):
@@ -50,8 +50,8 @@ class TestCUDA(TestMPC):
 
         if not is_eq:
             logging.info(msg)
-            logging.info("Result %s" % result)
-            logging.info("Reference %s" % reference)
+            logging.info(f"Result {result}")
+            logging.info(f"Reference {reference}")
             logging.info("Result - Reference = %s" % (result - reference))
 
         self.assertTrue(is_eq, msg=msg)
@@ -65,9 +65,7 @@ class TestCUDA(TestMPC):
         model.encrypt()
         model.train()
 
-        rand_in = shardwise.tensor(
-            torch.rand([32, 128], device=self.device), requires_grad=True
-        )
+        rand_in = shardwise.tensor(torch.rand([32, 128], device=self.device), requires_grad=True)
         output = model(rand_in)
 
         model.zero_grad()
@@ -110,9 +108,7 @@ class TestCUDA(TestMPC):
             y_cuda = CUDALongTensor(y)
 
             z = torch.matmul(x_cuda, y_cuda)
-            self.assertTrue(
-                type(z) == CUDALongTensor, "result should be a CUDALongTensor"
-            )
+            self.assertTrue(type(z) == CUDALongTensor, "result should be a CUDALongTensor")
 
             reference = torch.matmul(x, y)
             self._check_int(z.cpu(), reference, "matmul failed for cuda_patches")
@@ -154,9 +150,7 @@ class TestCUDA(TestMPC):
                 out_channels,
                 padding,
                 stride,
-            ) in itertools.product(
-                nbatches, kernel_sizes, ochannels, paddings, strides
-            ):
+            ) in itertools.product(nbatches, kernel_sizes, ochannels, paddings, strides):
                 input_size = (batches, in_channels, signal_size)
                 signal = get_random_test_tensor(size=input_size, is_float=False)
 
@@ -169,15 +163,11 @@ class TestCUDA(TestMPC):
                 signal_cuda = CUDALongTensor(signal)
                 kernel_cuda = CUDALongTensor(kernel)
 
-                reference = getattr(F, func_name)(
-                    signal, kernel, padding=padding, stride=stride
-                )
+                reference = getattr(F, func_name)(signal, kernel, padding=padding, stride=stride)
                 result = getattr(F, func_name)(
                     signal_cuda, kernel_cuda, padding=padding, stride=stride
                 )
-                self.assertTrue(
-                    type(result) == CUDALongTensor, "result should be a CUDALongTensor"
-                )
+                self.assertTrue(type(result) == CUDALongTensor, "result should be a CUDALongTensor")
                 result = result.data.cpu()
 
                 self._check_int(result, reference, f"{func_name} failed")
@@ -250,16 +240,12 @@ class TestCUDA(TestMPC):
                 result = getattr(F, func_name)(
                     input_cuda, kernel_cuda, padding=padding, stride=stride
                 )
-                self.assertTrue(
-                    type(result) == CUDALongTensor, "result should be a CUDALongTensor"
-                )
+                self.assertTrue(type(result) == CUDALongTensor, "result should be a CUDALongTensor")
                 result = result.data.cpu()
 
                 # check that result is correct:
-                reference = getattr(F, func_name)(
-                    input, kernel, padding=padding, stride=stride
-                )
-                self._check_int(result, reference, "%s failed" % func_name)
+                reference = getattr(F, func_name)(input, kernel, padding=padding, stride=stride)
+                self._check_int(result, reference, f"{func_name} failed")
 
     def test_torch_arithmetic(self) -> None:
         """Test torch arithmetic on CUDALongTensor"""
@@ -278,13 +264,11 @@ class TestCUDA(TestMPC):
             result2 = getattr(a_cuda, op)(b_cuda, **kwargs)
 
             self.assertTrue(type(result), CUDALongTensor)
-            self._check_int(
-                reference, result.cpu(), "torch.{} failed for CUDALongTensor".format(op)
-            )
+            self._check_int(reference, result.cpu(), f"torch.{op} failed for CUDALongTensor")
             self._check_int(
                 reference,
                 result2.cpu(),
-                "torch.{} failed for CUDALongTensor".format(op),
+                f"torch.{op} failed for CUDALongTensor",
             )
 
     def test_torch_comparators(self) -> None:
@@ -300,14 +284,10 @@ class TestCUDA(TestMPC):
             result1 = getattr(t_cuda, comp)(t2_cuda)
             result2 = getattr(torch, comp)(t_cuda, t2_cuda)
 
-            self.assertTrue(
-                type(result1) == CUDALongTensor, "result should be a CUDALongTensor"
-            )
-            self.assertTrue(
-                type(result2) == CUDALongTensor, "result should be a CUDALongTensor"
-            )
-            self._check_int(result1.cpu(), reference, "%s comparator failed" % comp)
-            self._check_int(result2.cpu(), reference, "%s comparator failed" % comp)
+            self.assertTrue(type(result1) == CUDALongTensor, "result should be a CUDALongTensor")
+            self.assertTrue(type(result2) == CUDALongTensor, "result should be a CUDALongTensor")
+            self._check_int(result1.cpu(), reference, f"{comp} comparator failed")
+            self._check_int(result2.cpu(), reference, f"{comp} comparator failed")
 
     def test_torch_avg_pool2d(self) -> None:
         """Test avg_pool2d on CUDALongTensor"""
@@ -334,9 +314,7 @@ class TestCUDA(TestMPC):
                                 divisor_override=divisor_override,
                             )
 
-                            self._check_int(
-                                result.cpu(), reference, "avg_pool2d failed"
-                            )
+                            self._check_int(result.cpu(), reference, "avg_pool2d failed")
 
     def test_torch_stack_cat(self) -> None:
         """Test torch.cat/torch.stack on CUDALongTensor"""
@@ -349,12 +327,8 @@ class TestCUDA(TestMPC):
             reference = getattr(torch, op)(tensors)
             result = getattr(CUDALongTensor, op)(tensors_cuda)
 
-            self.assertTrue(
-                type(result) == CUDALongTensor, "result should be a CUDALongTensor"
-            )
-            self._check_int(
-                reference, result.cpu(), "torch.{} failed for CUDALongTensor".format(op)
-            )
+            self.assertTrue(type(result) == CUDALongTensor, "result should be a CUDALongTensor")
+            self._check_int(reference, result.cpu(), f"torch.{op} failed for CUDALongTensor")
 
     def test_torch_broadcast_tensor(self) -> None:
         """Test torch.broadcast_tensor on CUDALongTensor"""
@@ -367,18 +341,10 @@ class TestCUDA(TestMPC):
         a, b = torch.broadcast_tensors(x, y)
         a_cuda, b_cuda = torch.broadcast_tensors(x_cuda, y_cuda)
 
-        self.assertTrue(
-            type(a_cuda) == CUDALongTensor, "result should be a CUDALongTensor"
-        )
-        self.assertTrue(
-            type(b_cuda) == CUDALongTensor, "result should be a CUDALongTensor"
-        )
-        self._check_int(
-            a, a_cuda.cpu(), "torch.broadcast_tensor failed for CUDALongTensor"
-        )
-        self._check_int(
-            b, b_cuda.cpu(), "torch.broadcast_tensor failed for CUDALongTensor"
-        )
+        self.assertTrue(type(a_cuda) == CUDALongTensor, "result should be a CUDALongTensor")
+        self.assertTrue(type(b_cuda) == CUDALongTensor, "result should be a CUDALongTensor")
+        self._check_int(a, a_cuda.cpu(), "torch.broadcast_tensor failed for CUDALongTensor")
+        self._check_int(b, b_cuda.cpu(), "torch.broadcast_tensor failed for CUDALongTensor")
 
     def test_torch_split(self) -> None:
         """Test torch.split on CUDALongTensor"""
@@ -493,12 +459,8 @@ class TestCUDA(TestMPC):
                 result = t_cuda.gather(dim, idx_cuda)
                 result2 = torch.gather(t_cuda, dim, idx_cuda)
 
-                self._check_int(
-                    result.cpu(), reference, f"gather failed with size {size}"
-                )
-                self._check_int(
-                    result2.cpu(), reference, f"gather failed with size {size}"
-                )
+                self._check_int(result.cpu(), reference, f"gather failed with size {size}")
+                self._check_int(result2.cpu(), reference, f"gather failed with size {size}")
 
     @unittest.skip("torch.scatter behaves inconsistently on CUDA")
     def test_torch_scatter(self) -> None:
@@ -534,8 +496,8 @@ class TestCUDA(TestMPC):
                         type(result2) == CUDALongTensor,
                         "result should be a CUDALongTensor",
                     )
-                    self._check_int(result.cpu(), reference, "{} failed".format(func))
-                    self._check_int(result2.cpu(), reference, "{} failed".format(func))
+                    self._check_int(result.cpu(), reference, f"{func} failed")
+                    self._check_int(result2.cpu(), reference, f"{func} failed")
 
     def test_torch_nonzero(self) -> None:
         """Test torch.nonzero on CUDALongTensor"""
@@ -550,9 +512,7 @@ class TestCUDA(TestMPC):
             result = t1_cuda.nonzero(as_tuple=False)
             result_tuple = t1_cuda.nonzero(as_tuple=True)
 
-            self.assertTrue(
-                type(result) == CUDALongTensor, "result should be a CUDALongTensor"
-            )
+            self.assertTrue(type(result) == CUDALongTensor, "result should be a CUDALongTensor")
             self._check_int(result.cpu(), ref, "nonzero failed")
             for i in range(len(result_tuple)):
                 self.assertTrue(
@@ -580,12 +540,12 @@ class TestTFP(MultiProcessTestCase, TestCUDA):
         self._original_provider = cfg.mpc.provider
         shardwise.ShardTensor.set_grad_enabled(False)
         cfg.mpc.provider = "TFP"
-        super(TestTFP, self).setUp()
+        super().setUp()
 
     def tearDown(self) -> None:
         cfg.mpc.provider = self._original_provider
         shardwise.ShardTensor.set_grad_enabled(True)
-        super(TestTFP, self).tearDown()
+        super().tearDown()
 
 
 class TestTTP(MultiProcessTestCase, TestCUDA):
@@ -597,12 +557,12 @@ class TestTTP(MultiProcessTestCase, TestCUDA):
         self._original_provider = cfg.mpc.provider
         shardwise.ShardTensor.set_grad_enabled(False)
         cfg.mpc.provider = "TTP"
-        super(TestTTP, self).setUp()
+        super().setUp()
 
     def tearDown(self) -> None:
         cfg.mpc.provider = self._original_provider
         shardwise.ShardTensor.set_grad_enabled(True)
-        super(TestTTP, self).tearDown()
+        super().tearDown()
 
 
 # This code only runs when executing the file outside the test harness (e.g.

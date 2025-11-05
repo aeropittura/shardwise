@@ -1,24 +1,23 @@
 #!/usr/bin/env python3
 
 
-
-
+from collections import defaultdict
 import itertools
 import logging
 import math
 import random
 import unittest
-from collections import defaultdict
+
+import torch
+from torch import nn
+import torch.nn.functional as F
 
 import shardwise
 import shardwise.comm as comm
-import torch
-import torch.nn.functional as F
+from shardwise.settings import cfg
 from shardwise.utils import serialization
 from shardwise.utils.dtypes import is_float_tensor
-from shardwise.settings import cfg
-from tests.support.multiprocess import get_random_test_tensor, MultiProcessTestCase
-from torch import nn
+from tests.support.multiprocess import MultiProcessTestCase, get_random_test_tensor
 
 
 class TestShardwise(MultiProcessTestCase):
@@ -47,8 +46,8 @@ class TestShardwise(MultiProcessTestCase):
         test_passed = test_passed.gt(0).all().item() == 1
         if not test_passed:
             logging.info(msg)
-            logging.info("Result %s" % tensor)
-            logging.info("Result = %s;\nreference = %s" % (tensor, reference))
+            logging.info(f"Result {tensor}")
+            logging.info(f"Result = {tensor};\nreference = {reference}")
         self.assertTrue(test_passed, msg=msg)
 
     def test_przs_generators(self):
@@ -150,14 +149,12 @@ class TestShardwise(MultiProcessTestCase):
             for op in ["cat", "stack"]:
                 reference = getattr(torch, op)([tensor1, tensor2])
                 encrypted_out = getattr(module, op)([encrypted1, encrypted2])
-                self._check(encrypted_out, reference, "%s failed" % op)
+                self._check(encrypted_out, reference, f"{op} failed")
 
                 for dim in range(4):
                     reference = getattr(torch, op)([tensor1, tensor2], dim=dim)
-                    encrypted_out = getattr(module, op)(
-                        [encrypted1, encrypted2], dim=dim
-                    )
-                    self._check(encrypted_out, reference, "%s failed" % op)
+                    encrypted_out = getattr(module, op)([encrypted1, encrypted2], dim=dim)
+                    self._check(encrypted_out, reference, f"{op} failed")
 
     def test_print_log(self):
         """Tests shardwise.print and shardwise.log logging functions."""
@@ -170,17 +167,13 @@ class TestShardwise(MultiProcessTestCase):
             randvec = shardwise.rand(*size)
             self.assertTrue(randvec.size() == size, "Incorrect size")
             tensor = randvec.get_plain_text()
-            self.assertTrue(
-                (tensor >= 0).all() and (tensor < 1).all(), "Invalid values"
-            )
+            self.assertTrue((tensor >= 0).all() and (tensor < 1).all(), "Invalid values")
 
         randvec = shardwise.rand(int(1e6)).get_plain_text()
         mean = torch.mean(randvec)
         var = torch.var(randvec)
         self.assertTrue(torch.isclose(mean, torch.tensor([0.5]), rtol=1e-3, atol=1e-3))
-        self.assertTrue(
-            torch.isclose(var, torch.tensor([1.0 / 12]), rtol=1e-3, atol=1e-3)
-        )
+        self.assertTrue(torch.isclose(var, torch.tensor([1.0 / 12]), rtol=1e-3, atol=1e-3))
 
     def test_bernoulli(self):
         for size in [(10,), (10, 10), (10, 10, 10)]:
@@ -251,18 +244,14 @@ class TestShardwise(MultiProcessTestCase):
 
         for i, save_closure in enumerate(all_save_fns):
             load_closure = all_load_fns[i]
-            f = [
-                io.BytesIO() for i in range(shardwise.comm.get().get_world_size())
-            ]
+            f = [io.BytesIO() for i in range(shardwise.comm.get().get_world_size())]
             shardwise.save(shard_tensor1, f[self.rank], save_closure=save_closure)
             f[self.rank].seek(0)
             shard_tensor2 = shardwise.load(f[self.rank], load_closure=load_closure)
             # test whether share matches
             self.assertTrue(shard_tensor1.share.allclose(shard_tensor2.share))
             # test whether tensor matches
-            self.assertTrue(
-                shard_tensor1.get_plain_text().allclose(shard_tensor2.get_plain_text())
-            )
+            self.assertTrue(shard_tensor1.get_plain_text().allclose(shard_tensor2.get_plain_text()))
             attributes = [
                 a
                 for a in dir(shard_tensor1)
@@ -330,9 +319,7 @@ class TestShardwise(MultiProcessTestCase):
                     self.assertEqual(encrypted_load.size(), reference_size)
 
                     size_out = [src + 1] * dimensions
-                    reference = (
-                        tensor if self.rank == src else torch.empty(size=size_out)
-                    )
+                    reference = tensor if self.rank == src else torch.empty(size=size_out)
                     comm.get().broadcast(reference, src)
                     self._check(encrypted_load, reference, "shardwise.load() failed")
 
@@ -343,9 +330,7 @@ class TestShardwise(MultiProcessTestCase):
                         )
 
                     # test pre-loaded
-                    encrypted_preloaded = shardwise.load_from_party(
-                        src=src, preloaded=tensor
-                    )
+                    encrypted_preloaded = shardwise.load_from_party(src=src, preloaded=tensor)
                     self._check(
                         encrypted_preloaded,
                         reference,
@@ -373,9 +358,7 @@ class TestShardwise(MultiProcessTestCase):
                 result = shardwise.load_from_party(filename, src=src)
                 if src == rank:
                     for param in result.parameters(recurse=True):
-                        self.assertTrue(
-                            param.eq(rank).all().item(), "Model load failed"
-                        )
+                        self.assertTrue(param.eq(rank).all().item(), "Model load failed")
                 self.assertEqual(result.src, src)
 
     def test_where(self) -> None:
@@ -389,34 +372,26 @@ class TestShardwise(MultiProcessTestCase):
             tensor2 = get_random_test_tensor(size=size, is_float=True)
             encrypted_tensor2 = y_type(tensor2)
 
-            condition_tensor = (
-                get_random_test_tensor(max_value=1, size=size, is_float=False) + 1
-            )
+            condition_tensor = get_random_test_tensor(max_value=1, size=size, is_float=False) + 1
             condition_encrypted = shardwise.tensor(condition_tensor)
             condition_bool = condition_tensor.bool()
 
             reference_out = torch.where(condition_bool, tensor1, tensor2)
 
-            encrypted_out = shardwise.where(
-                condition_bool, encrypted_tensor1, encrypted_tensor2
-            )
+            encrypted_out = shardwise.where(condition_bool, encrypted_tensor1, encrypted_tensor2)
 
             y_is_private = shardwise.is_encrypted_tensor(tensor2)
             self._check(
                 encrypted_out,
                 reference_out,
-                f"{'private' if y_is_private else 'public'} y "
-                "where failed with public condition",
+                f"{'private' if y_is_private else 'public'} y where failed with public condition",
             )
 
-            encrypted_out = encrypted_tensor1.where(
-                condition_encrypted, encrypted_tensor2
-            )
+            encrypted_out = encrypted_tensor1.where(condition_encrypted, encrypted_tensor2)
             self._check(
                 encrypted_out,
                 reference_out,
-                f"{'private' if y_is_private else 'public'} y "
-                "where failed with private condition",
+                f"{'private' if y_is_private else 'public'} y where failed with private condition",
             )
 
     @unittest.skip("Test is flaky, with successes, failures and timeouts as outcomes")
@@ -443,7 +418,7 @@ class TestShardwise(MultiProcessTestCase):
 # Modules used for testing saveing / loading of modules
 class TestModule(nn.Module):
     def __init__(self, input_features, output_features):
-        super(TestModule, self).__init__()
+        super().__init__()
         self.fc1 = nn.Linear(input_features, 100)
         self.fc2 = nn.Linear(100, 50)
         self.fc3 = nn.Linear(50, output_features)
@@ -465,7 +440,7 @@ class TestModule(nn.Module):
 
 class NestedTestModule(nn.Module):
     def __init__(self, input_features, output_features):
-        super(NestedTestModule, self).__init__()
+        super().__init__()
         self.fc1 = nn.Linear(input_features, input_features)
         self.nested = TestModule(input_features, output_features)
 

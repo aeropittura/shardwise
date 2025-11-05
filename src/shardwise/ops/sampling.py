@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
 
-import shardwise
 import torch
 
+import shardwise
 
 __all__ = [
     "bernoulli",

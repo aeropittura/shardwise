@@ -1,7 +1,8 @@
 """Layers that reshape, slice, gather, concatenate or pad tensors."""
 
-import shardwise
 import torch
+
+import shardwise
 from shardwise.nn.layers.base import Module
 
 
@@ -305,16 +306,16 @@ class Reshape(Module):
     """
 
     def __init__(self, shape=None):
-        super(Reshape, self).__init__()
+        super().__init__()
         self.shape = shape
 
     def forward(self, tensor, shape=None):
         if isinstance(tensor, list) and len(tensor) == 2:
             tensor, shape = tensor
         shape = shape if shape is not None else self.shape
-        assert (
-            shape is not None
-        ), "Reshape requires a shape in forward if not supplied in initialization"
+        assert shape is not None, (
+            "Reshape requires a shape in forward if not supplied in initialization"
+        )
         if torch.is_tensor(shape):
             shape = torch.Size(shape.long())
         return tensor.reshape(shape)
@@ -426,7 +427,7 @@ class ConstantPad1d(_ConstantPad):
     """
 
     def __init__(self, padding, value, mode="constant"):
-        super(ConstantPad1d, self).__init__(padding, value, 1, mode=mode)
+        super().__init__(padding, value, 1, mode=mode)
 
 
 class ConstantPad2d(_ConstantPad):
@@ -435,7 +436,7 @@ class ConstantPad2d(_ConstantPad):
     """
 
     def __init__(self, padding, value, mode="constant"):
-        super(ConstantPad2d, self).__init__(padding, value, 2, mode=mode)
+        super().__init__(padding, value, 2, mode=mode)
 
 
 class ConstantPad3d(_ConstantPad):
@@ -444,4 +445,4 @@ class ConstantPad3d(_ConstantPad):
     """
 
     def __init__(self, padding, value, mode="constant"):
-        super(ConstantPad3d, self).__init__(padding, value, 3, mode=mode)
+        super().__init__(padding, value, 3, mode=mode)

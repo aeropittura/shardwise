@@ -1,9 +1,11 @@
 """Module base classes and containers."""
 
-import warnings
 from collections import OrderedDict
-import shardwise
+import warnings
+
 import torch
+
+import shardwise
 
 
 class Module:
@@ -113,7 +115,7 @@ class Module:
         parameters in child modules.
         """
         if name in self._parameters or hasattr(self, name):
-            raise ValueError("Parameter or field %s already exists." % name)
+            raise ValueError(f"Parameter or field {name} already exists.")
         param.requires_grad = requires_grad
         self._parameters[name] = param
         setattr(self, name, param)
@@ -124,7 +126,7 @@ class Module:
         parameters in child modules.
         """
         if name not in self._parameters or not hasattr(self, name):
-            raise ValueError("Parameter %s does not exist." % name)
+            raise ValueError(f"Parameter {name} does not exist.")
         self._parameters[name] = param
         setattr(self, name, param)
 
@@ -143,11 +145,11 @@ class Module:
         # functionality is only supported when parameters are SecureTensors:
         assert self.encrypted, "can only set parameters from shares in encrypted models"
         if name not in self._parameters or not hasattr(self, name):
-            raise ValueError("Parameter %s does not exist." % name)
+            raise ValueError(f"Parameter {name} does not exist.")
         cls = type(self._parameters[name])
-        assert hasattr(
-            self._parameters[name], "from_shares"
-        ), "parameter type {} does not supporting setting from shares".format(cls)
+        assert hasattr(self._parameters[name], "from_shares"), (
+            f"parameter type {cls} does not supporting setting from shares"
+        )
 
         # load parameters from shares:
         self._parameters[name] = cls.from_shares(share, **kwargs)
@@ -227,16 +229,14 @@ class Module:
         """
 
         # get state dict for just the current module (without children)
-        local_state = {
-            key: val for key, val in self.named_parameters() if val is not None
-        }
+        local_state = {key: val for key, val in self.named_parameters() if val is not None}
 
         # in strict mode, check for missing keys in the state_dict:
         if strict:
             for name in local_state.keys():
                 key = prefix + name
                 if key not in state_dict:
-                    raise ValueError("Key {} not found in state dict.".format(key))
+                    raise ValueError(f"Key {key} not found in state dict.")
 
         # loop over parameters / buffers in module:
         for name, param in local_state.items():
@@ -246,22 +246,18 @@ class Module:
             # size in state_dict should match size of parameters:
             if input_param.size() != param.size():
                 raise ValueError(
-                    "Size mismatch for {}: copying a param with"
-                    "shape {} from checkpoint, the shape in"
-                    "current model is {}.".format(key, input_param.size(), param.size())
+                    f"Size mismatch for {key}: copying a param with"
+                    f"shape {input_param.size()} from checkpoint, the shape in"
+                    f"current model is {param.size()}."
                 )
                 continue
 
             # cannot copy encrypted tensors into unencrypted models and vice versa:
             param_encrypted = isinstance(input_param, shardwise.ShardTensor)
             if param_encrypted:
-                assert (
-                    self.encrypted
-                ), "cannot copy encrypted parameters into unencrypted model"
+                assert self.encrypted, "cannot copy encrypted parameters into unencrypted model"
             else:
-                assert (
-                    not self.encrypted
-                ), "cannot copy unencrypted parameters into encrypted model"
+                assert not self.encrypted, "cannot copy unencrypted parameters into encrypted model"
 
             # copy parameters from state_dict:
             with shardwise.no_grad(), torch.no_grad():
@@ -280,9 +276,7 @@ class Module:
                 raise ValueError("Specified state_dict does not have metadata.")
             version = metadata.get("version", -1)
             if version != Module._version:
-                raise ValueError(
-                    "Specified state_dict has incorrect version: {}".format(version)
-                )
+                raise ValueError(f"Specified state_dict has incorrect version: {version}")
 
         # make copy state_dict so that load() can modify it:
         state_dict = state_dict.copy()
@@ -342,7 +336,7 @@ class Module:
         they are not updated by parameter updates.
         """
         if name in self._buffers or hasattr(self, name):
-            raise ValueError("Buffer or field %s already exists." % name)
+            raise ValueError(f"Buffer or field {name} already exists.")
         buffer.requires_grad = False
         self._buffers[name] = buffer
         setattr(self, name, buffer)
@@ -353,7 +347,7 @@ class Module:
         parameters in child modules.
         """
         if name not in self._buffers or not hasattr(self, name):
-            raise ValueError("Buffer %s does not exist." % name)
+            raise ValueError(f"Buffer {name} does not exist.")
         self._buffers[name] = buffer
         setattr(self, name, buffer)
 
@@ -468,9 +462,7 @@ class Module:
                 if mode:  # encrypt parameter
                     self.set_parameter(
                         name,
-                        shardwise.tensor(
-                            param, **{"src": src}, requires_grad=requires_grad
-                        ),
+                        shardwise.tensor(param, **{"src": src}, requires_grad=requires_grad),
                     )
                 else:  # decrypt parameter
                     self.set_parameter(name, param.get_plain_text())
@@ -539,9 +531,7 @@ class Module:
             buffers = self.__dict__["_buffers"]
             if name in buffers:
                 return buffers[name]
-        raise AttributeError(
-            "'{}' object has no attribute '{}'".format(type(self).__name__, name)
-        )
+        raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")
 
     def __setattr__(self, name, value):
         """Redefine __setattr__ so that any submodules created
@@ -557,18 +547,14 @@ class Module:
         modules = self.__dict__.get("_modules")
         if isinstance(value, Module):
             if modules is None:
-                raise AttributeError(
-                    "cannot assign module before Module.__init__() call"
-                )
+                raise AttributeError("cannot assign module before Module.__init__() call")
             remove_from(self.__dict__, self._parameters, self._buffers)
             modules[name] = value
         elif modules is not None and name in modules:
             if value is not None:
                 raise TypeError(
-                    "cannot assign '{}' as child module '{}' "
-                    "(torch.nn.Module or None expected)".format(
-                        torch.typename(value), name
-                    )
+                    f"cannot assign '{torch.typename(value)}' as child module '{name}' "
+                    "(torch.nn.Module or None expected)"
                 )
             modules[name] = value
         else:
@@ -581,7 +567,7 @@ class Module:
 
     def add_module(self, name, module):
         """Adds and registers a submodule with a given name"""
-        assert name not in self._modules.keys(), "Module %s already exists." % name
+        assert name not in self._modules.keys(), f"Module {name} already exists."
         self.register_module(name, module)
 
 
@@ -636,7 +622,7 @@ class Graph(Container):
 
         Both `input_names` and `output_names` are expected to be ordered.
         """
-        assert name not in self._graph, "Module %s already exists." % name
+        assert name not in self._graph, f"Module {name} already exists."
         self.register_module(name, module)
         if input_names is not None:
             self._graph[name] = input_names
@@ -644,16 +630,15 @@ class Graph(Container):
             module._output_names = output_names
 
     def forward(self, *args):
-        assert len(args) == len(
-            self.input_names
-        ), f"Expected {len(self.input_names)} inputs but received {len(args)}."
+        assert len(args) == len(self.input_names), (
+            f"Expected {len(self.input_names)} inputs but received {len(args)}."
+        )
 
         # keep track of all values that have been computed:
         values = {self.input_names[idx]: args[idx] for idx in range(len(args))}
-        computed = {key: False for key in self._graph.keys()}
+        computed = dict.fromkeys(self._graph.keys(), False)
         inputs_available = {
-            key: [False for _ in range(len(value_list))]
-            for key, value_list in self._graph.items()
+            key: [False for _ in range(len(value_list))] for key, value_list in self._graph.items()
         }
 
         def _mark_as_computed(name):
@@ -712,12 +697,12 @@ class Graph(Container):
 
             # or multiple outputs:
             else:
-                assert isinstance(
-                    output, tuple
-                ), f"expected outputs {output_names} of {module} to be tuple, not {type(output)}"
-                assert (
-                    len(output_names) == len(output)
-                ), f"expected {len(output_names)} outputs from {module}, received {len(output)}"
+                assert isinstance(output, tuple), (
+                    f"expected outputs {output_names} of {module} to be tuple, not {type(output)}"
+                )
+                assert len(output_names) == len(output), (
+                    f"expected {len(output_names)} outputs from {module}, received {len(output)}"
+                )
                 for node, value in zip(output_names, output):
                     values[node] = value
                     _mark_as_computed(node)
@@ -740,9 +725,7 @@ class Graph(Container):
         if not hasattr(self, "pytorch_model"):
             raise AttributeError("Shardwise Graph detached from PyTorch model.")
         if self.encrypted:
-            raise ValueError(
-                "Shardwise model must be decrypted before calling to_pytorch()"
-            )
+            raise ValueError("Shardwise model must be decrypted before calling to_pytorch()")
         with torch.no_grad():
             for name, param in self.pytorch_model.named_parameters():
                 param.set_(self._modules[name].data)
@@ -804,12 +787,12 @@ class ModuleList(Module):
     """
 
     def __init__(self, modules=None):
-        super(ModuleList, self).__init__()
+        super().__init__()
         if modules is not None:
             self += modules
 
     def __dir__(self):
-        keys = super(ModuleList, self).__dir__()
+        keys = super().__dir__()
         keys = [key for key in keys if not key.isdigit()]
         return keys
 
@@ -869,14 +852,10 @@ class ModuleDict(Module):
         class MyModule(nn.Module):
             def __init__(self):
                 super(MyModule, self).__init__()
-                self.choices = nn.ModuleDict({
-                        'conv': nn.Conv2d(10, 10, 3),
-                        'pool': nn.MaxPool2d(3)
-                })
-                self.activations = nn.ModuleDict([
-                        ['lrelu', nn.LeakyReLU()],
-                        ['prelu', nn.PReLU()]
-                ])
+                self.choices = nn.ModuleDict(
+                    {"conv": nn.Conv2d(10, 10, 3), "pool": nn.MaxPool2d(3)}
+                )
+                self.activations = nn.ModuleDict([["lrelu", nn.LeakyReLU()], ["prelu", nn.PReLU()]])
 
             def forward(self, x, choice, act):
                 x = self.choices[choice](x)
@@ -885,7 +864,7 @@ class ModuleDict(Module):
     """
 
     def __init__(self, modules=None):
-        super(ModuleDict, self).__init__()
+        super().__init__()
         if modules is not None:
             self.update(modules)
 
@@ -926,9 +905,9 @@ class Parameter(Module):
         super().__init__()
 
         # ensure that input is a PyTorch or Shardwise tensor:
-        assert torch.is_tensor(param) or shardwise.is_encrypted_tensor(
-            param
-        ), f"param must be PyTorch of Shardwise tensor, not {type(param)}"
+        assert torch.is_tensor(param) or shardwise.is_encrypted_tensor(param), (
+            f"param must be PyTorch of Shardwise tensor, not {type(param)}"
+        )
         if isinstance(param, torch.nn.parameter.Parameter):
             param = param.data
 
@@ -963,9 +942,7 @@ class Constant(Module):
         super().__init__()
         if not torch.is_tensor(value):
             value = torch.tensor(value)
-        assert torch.is_tensor(
-            value
-        ), f"value must be PyTorch tensor, not {type(value)}"
+        assert torch.is_tensor(value), f"value must be PyTorch tensor, not {type(value)}"
         self.value = value.to(dtype=torch.float)
 
     def forward(self, input):
@@ -994,17 +971,13 @@ class ConstantOfShape(Module):
         super().__init__()
         if not torch.is_tensor(value):
             value = torch.tensor(value)
-        assert torch.is_tensor(
-            value
-        ), f"value must be PyTorch tensor, not {type(value)}"
+        assert torch.is_tensor(value), f"value must be PyTorch tensor, not {type(value)}"
         self.value = value.to(dtype=torch.float)
 
     def forward(self, size):
         if torch.is_tensor(size):
             size = size.int().tolist()
-        assert isinstance(
-            size, (list, tuple)
-        ), f"size must be list or tuple, not {type(size)}"
+        assert isinstance(size, (list, tuple)), f"size must be list or tuple, not {type(size)}"
         return self.value.expand(*size)
 
     @staticmethod

@@ -8,7 +8,6 @@ Run via Jupyter
 
 from benchmark import ModelBenchmarks
 
-
 # get_ipython().run_line_magic("load_ext", "snakeviz")
 
 

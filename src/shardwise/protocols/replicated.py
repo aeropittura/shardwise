@@ -4,8 +4,9 @@
 # This file implements Replicated Secret Sharing protocols
 # from the CryptGPU repo
 
-import shardwise.comm as comm
 import torch
+
+import shardwise.comm as comm
 
 
 def replicate_shares(share_list):
@@ -107,9 +108,7 @@ def truncate(x, y):
     provide statistical guarantees equivalent to 2-out-of-2 truncation.
     """
     if comm.get().get_world_size() != 3:
-        raise NotImplementedError(
-            "RSS truncation is only implemented for world_size == 3."
-        )
+        raise NotImplementedError("RSS truncation is only implemented for world_size == 3.")
 
     rank = x.rank
 

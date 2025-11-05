@@ -1,6 +1,7 @@
 """Convolution layers."""
 
 import torch
+
 from shardwise.nn.layers.base import Module
 
 
@@ -30,9 +31,7 @@ class Conv(Module):
         # prepare inputs into convolution function:
         dim = weight.dim() - 2
         if dim < 1 or dim > 2:
-            raise ValueError(
-                f"Convolution on {dim}-dimensional input is not supported."
-            )
+            raise ValueError(f"Convolution on {dim}-dimensional input is not supported.")
         args = [weight]
         kwargs = {
             "stride": self.stride,

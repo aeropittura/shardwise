@@ -1,20 +1,19 @@
 #!/usr/bin/env python3
 
 
-
 import unittest
 
-import shardwise
-import shardwise.comm as comm
 import numpy
 import torch
 import torch.distributed as dist
 import torch.nn as nn
 import torch.nn.functional as F
-from shardwise.utils import serialization
-from shardwise.settings import cfg
-from tests.support.multiprocess import get_random_test_tensor, MultiProcessTestCase
 
+import shardwise
+import shardwise.comm as comm
+from shardwise.settings import cfg
+from shardwise.utils import serialization
+from tests.support.multiprocess import MultiProcessTestCase, get_random_test_tensor
 
 # TODO: Commenting this out until we figure out why `thread.join() hangs
 #       Perhaps the thread to be joined has somehow exited
@@ -210,9 +209,7 @@ class TestCommunicator:
                     test_obj_params = list(test_obj.parameters())
                     reference_params = list(reference.parameters())
                     for i, param in enumerate(reference_params):
-                        self.assertTrue(
-                            test_obj_params[i].eq(param).all(), "broadcast_obj failed"
-                        )
+                        self.assertTrue(test_obj_params[i].eq(param).all(), "broadcast_obj failed")
                 else:
                     self.assertEqual(test_obj, reference, "broadcast_obj failed")
 
@@ -222,16 +219,10 @@ class TestCommunicator:
                 if self.rank == src:
                     # Mimic send_obj without pickling invalid bytestream
                     size = torch.tensor(len(invalid_obj), dtype=torch.int32)
-                    arr = torch.from_numpy(
-                        numpy.frombuffer(invalid_obj, dtype=numpy.int8)
-                    )
+                    arr = torch.from_numpy(numpy.frombuffer(invalid_obj, dtype=numpy.int8))
 
-                    r0 = dist.isend(
-                        size, dst=(1 - self.rank), group=comm.get().main_group
-                    )
-                    r1 = dist.isend(
-                        arr, dst=(1 - self.rank), group=comm.get().main_group
-                    )
+                    r0 = dist.isend(size, dst=(1 - self.rank), group=comm.get().main_group)
+                    r1 = dist.isend(arr, dst=(1 - self.rank), group=comm.get().main_group)
 
                     r0.wait()
                     r1.wait()
@@ -260,9 +251,7 @@ class TestCommunicator:
                     test_obj_params = list(test_obj.parameters())
                     reference_params = list(reference.parameters())
                     for i, param in enumerate(reference_params):
-                        self.assertTrue(
-                            test_obj_params[i].eq(param).all(), "broadcast_obj failed"
-                        )
+                        self.assertTrue(test_obj_params[i].eq(param).all(), "broadcast_obj failed")
                 else:
                     self.assertEqual(test_obj, reference, "broadcast_obj failed")
 
@@ -272,9 +261,7 @@ class TestCommunicator:
                 if self.rank == src:
                     # Mimic broadcast_obj without pickling invalid bytestream
                     size = torch.tensor(len(invalid_obj), dtype=torch.int32)
-                    arr = torch.from_numpy(
-                        numpy.frombuffer(invalid_obj, dtype=numpy.int8)
-                    )
+                    arr = torch.from_numpy(numpy.frombuffer(invalid_obj, dtype=numpy.int8))
 
                     dist.broadcast(size, src, group=comm.get().main_group)
                     dist.broadcast(arr, src, group=comm.get().main_group)
@@ -386,7 +373,7 @@ class TestCommunicatorMultiProcess(TestCommunicator, MultiProcessTestCase):
 
 class CNN(nn.Module):
     def __init__(self):
-        super(CNN, self).__init__()
+        super().__init__()
         self.conv1 = nn.Conv2d(1, 16, kernel_size=5, padding=1)
         self.fc1 = nn.Linear(16 * 13 * 13, 100)
         self.fc2 = nn.Linear(100, 2)

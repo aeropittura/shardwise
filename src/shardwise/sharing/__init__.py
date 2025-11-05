@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
 
 
-from shardwise.settings import cfg
 from shardwise import protocols, providers  # noqa: F401
-
+from shardwise.settings import cfg
 from shardwise.sharing.launch import run_multiprocess
-from shardwise.sharing.tensor import SecureTensor
 from shardwise.sharing.ptype import ptype
-
+from shardwise.sharing.tensor import SecureTensor
 
 __all__ = [
     "SecureTensor",

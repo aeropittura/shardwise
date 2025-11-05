@@ -1,24 +1,24 @@
 #!/usr/bin/env python3
 
 
-
 import copy
 import itertools
 import logging
 import unittest
 
-import shardwise
-import shardwise.comm as comm
 import torch
 import torch.nn.functional as F
-from shardwise.utils.random import generate_random_ring_element
-from shardwise.utils.dtypes import is_float_tensor
-from shardwise.settings import cfg
+
+import shardwise
+import shardwise.comm as comm
 from shardwise.core.encoding import FixedPointEncoder
+from shardwise.settings import cfg
+from shardwise.utils.dtypes import is_float_tensor
+from shardwise.utils.random import generate_random_ring_element
 from tests.support.multiprocess import (
+    MultiProcessTestCase,
     get_random_linear,
     get_random_test_tensor,
-    MultiProcessTestCase,
     onehot,
 )
 
@@ -57,7 +57,7 @@ class TestNN:
             test_passed = (tensor == reference).all().item() == 1
         if not test_passed:
             logging.info(msg)
-            logging.info("Result %s" % tensor)
+            logging.info(f"Result {tensor}")
             logging.info("Result - Reference = %s" % (tensor - reference))
         self.assertTrue(test_passed, msg=msg)
 
@@ -165,9 +165,7 @@ class TestNN:
         for prob in prob_list:
             for compute_gradients in [True, False]:
                 # generate inputs:
-                input = get_random_test_tensor(
-                    size=input_size, is_float=True, ex_zero=True
-                )
+                input = get_random_test_tensor(size=input_size, is_float=True, ex_zero=True)
                 input.requires_grad = True
                 encr_input = shardwise.tensor(input)
                 encr_input.requires_grad = compute_gradients
@@ -276,17 +274,15 @@ class TestNN:
             "Add": lambda x: x[0] + x[1],
             "Concat": lambda x: torch.cat((x[0], x[1])),
             "Constant": lambda _: torch.tensor(module_args["Constant"][0]),
-            "ConstantOfShape": lambda x: torch.tensor(
-                module_args["ConstantOfShape"][0]
-            ).expand(x[0]),
+            "ConstantOfShape": lambda x: torch.tensor(module_args["ConstantOfShape"][0]).expand(
+                x[0]
+            ),
             "Div": lambda x: torch.div(x[0], x[1]),
             "Erf": lambda x: torch.erf(x),
             "Equal": lambda x: x[0].eq(x[1]),
             "Exp": lambda x: torch.exp(x),
             "Expand": lambda x: x[0].expand(x[1]),
-            "Gather": lambda x: torch.from_numpy(
-                x[0].numpy().take(x[1], module_args["Gather"][0])
-            ),
+            "Gather": lambda x: torch.from_numpy(x[0].numpy().take(x[1], module_args["Gather"][0])),
             "Gemm": lambda x: x[0].matmul(x[1]).add(x[2]),
             "MatMul": lambda x: torch.matmul(x[0], x[1]),
             "Mean": lambda x: torch.mean(
@@ -297,9 +293,7 @@ class TestNN:
             "Range": lambda x: torch.arange(x[0], x[1], x[2]),
             "Reshape": lambda x: x[0].reshape(module_args["Reshape"][0]),
             "Shape": lambda x: torch.tensor(x.size()).float(),
-            "Slice": lambda x: x[
-                module_args["Slice"][0][0] : module_args["Slice"][1][0], :
-            ],
+            "Slice": lambda x: x[module_args["Slice"][0][0] : module_args["Slice"][1][0], :],
             "Sqrt": lambda x: x.sqrt(),
             "Sub": lambda x: x[0] - x[1],
             "Sum": lambda x: torch.sum(
@@ -430,7 +424,7 @@ class TestNN:
                     msg=f"{module_name} has incorrect SUPPORTS_PLAINTEXT_INPUTS value",
                 )
                 encr_output = shardwise.tensor(encr_output)
-            self._check(encr_output, reference, "%s failed" % module_name)
+            self._check(encr_output, reference, f"{module_name} failed")
 
             # create attributes for static from_onnx function
             local_attr = {}
@@ -446,9 +440,7 @@ class TestNN:
             if module_name == "ReduceSum":
                 local_attr["keepdims"] = 1 if module_args["ReduceSum"][1] is True else 0
             if module_name == "ReduceMean":
-                local_attr["keepdims"] = (
-                    1 if module_args["ReduceMean"][1] is True else 0
-                )
+                local_attr["keepdims"] = 1 if module_args["ReduceMean"][1] is True else 0
             if module_name == "Reshape":
                 local_attr["shape"] = module_args["Reshape"][0]
 
@@ -462,7 +454,7 @@ class TestNN:
                     msg=f"{module_name} has incorrect SUPPORTS_PLAINTEXT_INPUTS value",
                 )
                 encr_output = shardwise.tensor(encr_output)
-            self._check(encr_output, reference, "%s failed" % module_name)
+            self._check(encr_output, reference, f"{module_name} failed")
 
     def test_pytorch_modules(self):
         """
@@ -579,7 +571,7 @@ class TestNN:
                         # check that they are consistent with source parameter value
                         reference = getattr(module, key)
                         src_reference = comm.get().broadcast(reference, 0)
-                        msg = "parameter %s in %s incorrect" % (key, module_name)
+                        msg = f"parameter {key} in {module_name} incorrect"
                         if isinstance(encr_param, shardwise.nn.Parameter):
                             encr_param = encr_param.data
                         if not shardwise.is_encrypted_tensor(encr_param):
@@ -674,12 +666,8 @@ class TestNN:
                 reference.backward(torch.ones(reference.size()))
                 encr_output.backward(encr_output.new(torch.ones(encr_output.size())))
                 if compute_gradients:
-                    self._check(
-                        encr_input.grad, input.grad, "Conv backward on input failed"
-                    )
-                    self._check(
-                        encr_kernel.grad, kernel.grad, "Conv backward on weight failed"
-                    )
+                    self._check(encr_input.grad, input.grad, "Conv backward on input failed")
+                    self._check(encr_kernel.grad, kernel.grad, "Conv backward on weight failed")
                 else:
                     self.assertIsNone(encr_input.grad)
                     self.assertIsNone(encr_kernel.grad)
@@ -719,9 +707,7 @@ class TestNN:
                 reference.backward(torch.ones(reference.size()))
                 encr_output.backward(encr_output.new(torch.ones(encr_output.size())))
                 if compute_gradients:
-                    self._check(
-                        encr_input.grad, input.grad, "Linear backward on input failed"
-                    )
+                    self._check(encr_input.grad, input.grad, "Linear backward on input failed")
                 else:
                     self.assertIsNone(encr_input.grad)
                 for name, param in module.named_parameters():
@@ -729,7 +715,7 @@ class TestNN:
                     self._check(
                         encr_param.grad,
                         param.grad,
-                        "Linear backward on %s failed" % name,
+                        f"Linear backward on {name} failed",
                     )
 
     def test_parameter_module(self):
@@ -808,12 +794,8 @@ class TestNN:
             "ReLU6",
         ]
         for module in modules:
-            module_str = (
-                module if module not in ["Dropout2d", "Dropout3d"] else "DropoutNd"
-            )
-            warning_str = (
-                f"Shardwise {module_str} module does not support inplace computation."
-            )
+            module_str = module if module not in ["Dropout2d", "Dropout3d"] else "DropoutNd"
+            warning_str = f"Shardwise {module_str} module does not support inplace computation."
             with self.assertLogs(logger=logging.getLogger(), level="WARNING") as cm:
                 getattr(shardwise.nn, module)(inplace=True)
             self.assertTrue(f"WARNING:root:{warning_str}" in cm.output)
@@ -847,9 +829,7 @@ class TestNN:
                         )
                     )
                     torch_module_list[i].bias = torch.nn.Parameter(
-                        get_random_test_tensor(
-                            size=torch_module_list[i].bias.size(), is_float=True
-                        )
+                        get_random_test_tensor(size=torch_module_list[i].bias.size(), is_float=True)
                     )
                     shardwise_module_list[i].weight = torch_module_list[i].weight
                     shardwise_module_list[i].bias = torch_module_list[i].bias
@@ -860,9 +840,7 @@ class TestNN:
                 shardwise_sequential.encrypt()
 
                 # check container:
-                self.assertTrue(
-                    shardwise_sequential.encrypted, "nn.Sequential not encrypted"
-                )
+                self.assertTrue(shardwise_sequential.encrypted, "nn.Sequential not encrypted")
                 for module in shardwise_sequential.modules():
                     self.assertTrue(module.encrypted, "module not encrypted")
                 assert len(list(shardwise_sequential.modules())) == len(
@@ -950,12 +928,8 @@ class TestNN:
         # test forward() function of all simple losses:
         for loss_name in losses:
             for skip_forward in [False, True]:
-                enc_loss_object = getattr(shardwise.nn, loss_name)(
-                    skip_forward=skip_forward
-                )
-                self.assertEqual(
-                    enc_loss_object.reduction, "mean", "Reduction used is not 'mean'"
-                )
+                enc_loss_object = getattr(shardwise.nn, loss_name)(skip_forward=skip_forward)
+                self.assertEqual(enc_loss_object.reduction, "mean", "Reduction used is not 'mean'")
 
                 input.requires_grad = True
                 input.grad = None
@@ -963,49 +937,35 @@ class TestNN:
                 loss = getattr(torch.nn, loss_name)()(input, target)
                 encrypted_loss = enc_loss_object(encrypted_input, encrypted_target)
                 if not skip_forward:
-                    self._check(
-                        encrypted_loss, loss, f"{loss_name} failed forward w/o grad"
-                    )
+                    self._check(encrypted_loss, loss, f"{loss_name} failed forward w/o grad")
 
                 encrypted_input.requires_grad = True
                 encrypted_input.grad = None
 
                 encrypted_loss = enc_loss_object(encrypted_input, encrypted_target)
                 if not skip_forward:
-                    self._check(
-                        encrypted_loss, loss, f"{loss_name} failed forward with grad"
-                    )
+                    self._check(encrypted_loss, loss, f"{loss_name} failed forward with grad")
 
                 # Check backward
                 loss.backward()
                 encrypted_loss.backward()
-                self._check(
-                    encrypted_input.grad, input.grad, f"{loss_name} grad failed"
-                )
+                self._check(encrypted_input.grad, input.grad, f"{loss_name} grad failed")
 
         # test forward() function of cross-entropy loss:
         batch_size, num_targets = 16, 5
         input = get_random_test_tensor(size=(batch_size, num_targets), is_float=True)
-        target = get_random_test_tensor(
-            size=(batch_size,), max_value=num_targets - 1
-        ).abs()
+        target = get_random_test_tensor(size=(batch_size,), max_value=num_targets - 1).abs()
         encrypted_input = shardwise.tensor(input)
         encrypted_target = shardwise.tensor(onehot(target, num_targets=num_targets))
         enc_loss_object = shardwise.nn.CrossEntropyLoss()
-        self.assertEqual(
-            enc_loss_object.reduction, "mean", "Reduction used is not 'mean'"
-        )
+        self.assertEqual(enc_loss_object.reduction, "mean", "Reduction used is not 'mean'")
 
         loss = torch.nn.CrossEntropyLoss()(input, target)
-        encrypted_loss = shardwise.nn.CrossEntropyLoss()(
-            encrypted_input, encrypted_target
-        )
+        encrypted_loss = shardwise.nn.CrossEntropyLoss()(encrypted_input, encrypted_target)
         self._check(encrypted_loss, loss, "cross-entropy loss failed")
         encrypted_input.requires_grad = True
         encrypted_target.requires_grad = True
-        encrypted_loss = shardwise.nn.CrossEntropyLoss()(
-            encrypted_input, encrypted_target
-        )
+        encrypted_loss = shardwise.nn.CrossEntropyLoss()(encrypted_input, encrypted_target)
         self._check(encrypted_loss, loss, "cross-entropy loss failed")
 
     def test_distances(self):
@@ -1064,9 +1024,7 @@ class TestNN:
         self.assertTrue("fc1" in model._modules.keys(), "modules __setattr__ failed")
         self._check(model.sample_buffer, tensor1, "buffer __getattr__ failed")
         self._check(model.sample_param, tensor2, "parameter __getattr__ failed")
-        self.assertTrue(
-            isinstance(model.fc1, shardwise.nn.Linear), "modules __getattr__ failed"
-        )
+        self.assertTrue(isinstance(model.fc1, shardwise.nn.Linear), "modules __getattr__ failed")
 
         """
         assign to model.weight should change model._parameters["weight"]
@@ -1082,9 +1040,7 @@ class TestNN:
         assign to  model._parameters["weight"] should change model.weight
         """
         model.fc1._parameters["weight"] = torch.nn.Parameter(torch.ones((2, 3)))
-        self.assertEqual(
-            model.fc1.weight.tolist(), torch.nn.Parameter(torch.ones((2, 3))).tolist()
-        )
+        self.assertEqual(model.fc1.weight.tolist(), torch.nn.Parameter(torch.ones((2, 3))).tolist())
 
         """
         assign to  model._buffers["bufferedItem"] should change model.bufferedItem
@@ -1126,9 +1082,7 @@ class TestNN:
         for _ in range(10):
             for compute_gradients in [True, False]:
                 # get training sample:
-                input = get_random_test_tensor(
-                    size=(batch_size, num_inputs), is_float=True
-                )
+                input = get_random_test_tensor(size=(batch_size, num_inputs), is_float=True)
                 target = input.mean(dim=1, keepdim=True)
 
                 # encrypt training sample:
@@ -1152,9 +1106,7 @@ class TestNN:
 
                 # perform parameter update:
                 reference = {}
-                reference = self._compute_reference_parameters(
-                    "", reference, model, learning_rate
-                )
+                reference = self._compute_reference_parameters("", reference, model, learning_rate)
                 model.update_parameters(learning_rate)
                 self._check_reference_parameters("", reference, model)
 
@@ -1213,15 +1165,11 @@ class TestNN:
                 loss_value.backward()
                 for param in model.parameters():
                     if param.requires_grad:
-                        self.assertIsNotNone(
-                            param.grad, "required parameter gradient not created"
-                        )
+                        self.assertIsNotNone(param.grad, "required parameter gradient not created")
 
                 # update parameters
                 orig_parameters, upd_parameters = {}, {}
-                orig_parameters = self._compute_reference_parameters(
-                    "", orig_parameters, model, 0
-                )
+                orig_parameters = self._compute_reference_parameters("", orig_parameters, model, 0)
                 model.update_parameters(learning_rate)
                 upd_parameters = self._compute_reference_parameters(
                     "", upd_parameters, model, learning_rate
@@ -1233,9 +1181,7 @@ class TestNN:
                         unchanged = torch.allclose(upd_parameters[name], value)
                         if unchanged is False:
                             parameter_changed = True
-                        self.assertTrue(
-                            parameter_changed, "no parameter changed in training step"
-                        )
+                        self.assertTrue(parameter_changed, "no parameter changed in training step")
 
                 # record initial and current loss
                 if i == 0:
@@ -1268,12 +1214,8 @@ class TestNN:
                 # sample random weight and bias:
                 C = size[1]
                 params = {
-                    "weight": get_random_test_tensor(
-                        size=[C], max_value=1, is_float=True
-                    ),
-                    "bias": get_random_test_tensor(
-                        size=[C], max_value=1, is_float=True
-                    ),
+                    "weight": get_random_test_tensor(size=[C], max_value=1, is_float=True),
+                    "bias": get_random_test_tensor(size=[C], max_value=1, is_float=True),
                 }
                 for param in params.values():
                     param.requires_grad = True
@@ -1430,7 +1372,7 @@ class TestNN:
             # get all parameters, buffers, and names from model:
             params_buffers = {}
             for func in ["named_parameters", "named_buffers"]:
-                params_buffers.update({k: v for k, v in getattr(model, func)()})
+                params_buffers.update(dict(getattr(model, func)()))
 
             # do all the checks:
             self.assertEqual(len(params_buffers), len(state_dict))
@@ -1516,8 +1458,7 @@ class TestNN:
                     shardwise.save(model.state_dict(), f)
                     f.seek(0)
                     module_list = [
-                        shardwise.nn.Linear(num_feat, num_feat - 1)
-                        for num_feat in layer_idx
+                        shardwise.nn.Linear(num_feat, num_feat - 1) for num_feat in layer_idx
                     ]
                     new_model2 = shardwise.nn.Sequential(*module_list)
                     new_model2.encrypt()
@@ -1749,11 +1690,7 @@ class TestNN:
             # Coordinate model weights across parties
             with torch.no_grad():
                 for p in torch_model.parameters():
-                    p.set_(
-                        get_random_test_tensor(
-                            max_value=1.0, size=p.size(), is_float=True
-                        )
-                    )
+                    p.set_(get_random_test_tensor(max_value=1.0, size=p.size(), is_float=True))
 
             # Create Shardwise model
             dummy_input = torch.empty(input_size)
@@ -1761,23 +1698,19 @@ class TestNN:
             shardwise_model.encrypt()
 
             # Create test inputs
-            test_input = get_random_test_tensor(
-                max_value=2.0, size=input_size, is_float=True
-            )
+            test_input = get_random_test_tensor(max_value=2.0, size=input_size, is_float=True)
             test_input_encr = shardwise.tensor(test_input)
 
             # Test model forward function
             torch_output = torch_model(test_input)
             shardwise_output = shardwise_model(test_input_encr)
 
-            self._check(
-                shardwise_output, torch_output, f"from_pytorch failed for {torch_class}"
-            )
+            self._check(shardwise_output, torch_output, f"from_pytorch failed for {torch_class}")
 
 
 class AliceNet(torch.nn.Module):
     def __init__(self):
-        super(AliceNet, self).__init__()
+        super().__init__()
         self.fc1 = torch.nn.Linear(50, 20)
         self.fc2 = torch.nn.Linear(20, 2)
 
@@ -1790,7 +1723,7 @@ class AliceNet(torch.nn.Module):
 
 class AliceNet2(torch.nn.Module):
     def __init__(self):
-        super(AliceNet2, self).__init__()
+        super().__init__()
         self.conv1 = torch.nn.Conv2d(1, 16, kernel_size=5, padding=0)
         self.conv2 = torch.nn.Conv2d(16, 16, kernel_size=5, padding=0)
         self.fc1 = torch.nn.Linear(16 * 4 * 4, 100)
@@ -1821,22 +1754,22 @@ class TestTFP(MultiProcessTestCase, TestNN):
     def setUp(self) -> None:
         self._original_provider = cfg.mpc.provider
         cfg.mpc.provider = "TFP"
-        super(TestTFP, self).setUp()
+        super().setUp()
 
     def tearDown(self) -> None:
         cfg.mpc.provider = self._original_provider
-        super(TestTFP, self).tearDown()
+        super().tearDown()
 
 
 class TestTTP(MultiProcessTestCase, TestNN):
     def setUp(self) -> None:
         self._original_provider = cfg.mpc.provider
         cfg.mpc.provider = "TTP"
-        super(TestTTP, self).setUp()
+        super().setUp()
 
     def tearDown(self) -> None:
         cfg.mpc.provider = self._original_provider
-        super(TestTTP, self).tearDown()
+        super().tearDown()
 
 
 # This code only runs when executing the file outside the test harness

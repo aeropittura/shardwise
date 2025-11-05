@@ -5,7 +5,6 @@ from shardwise.comm.base import Communicator
 from shardwise.comm.distributed import DistributedCommunicator
 from shardwise.comm.in_process import InProcessCommunicator
 
-
 __use_threads = False
 
 

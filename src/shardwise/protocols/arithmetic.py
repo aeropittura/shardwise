@@ -1,21 +1,19 @@
 #!/usr/bin/env python3
 
 
-import shardwise.comm as comm
-
 # dependencies:
 import torch
+
+import shardwise.comm as comm
+from shardwise.core.base import ShardTensor
+from shardwise.core.encoding import FixedPointEncoder
+from shardwise.gpu import CUDALongTensor
 from shardwise.ops import elementwise
-from shardwise.utils.random import generate_random_ring_element
+from shardwise.protocols import beaver, replicated  # noqa: F401
+from shardwise.settings import cfg
 from shardwise.utils.dtypes import is_float_tensor, is_int_tensor, is_tensor
 from shardwise.utils.helpers import torch_stack
-from shardwise.settings import cfg
-from shardwise.core.base import ShardTensor
-from shardwise.gpu import CUDALongTensor
-from shardwise.core.encoding import FixedPointEncoder
-
-from shardwise.protocols import beaver, replicated  # noqa: F401
-
+from shardwise.utils.random import generate_random_ring_element
 
 SENTINEL = -1
 
@@ -63,19 +61,17 @@ class ArithmeticSharedTensor:
             return
 
         # assertions on inputs:
-        assert (
-            isinstance(src, int) and src >= 0 and src < comm.get().get_world_size()
-        ), "specified source party does not exist"
+        assert isinstance(src, int) and src >= 0 and src < comm.get().get_world_size(), (
+            "specified source party does not exist"
+        )
         if self.rank == src:
             assert tensor is not None, "source must provide a data tensor"
             if hasattr(tensor, "src"):
-                assert (
-                    tensor.src == src
-                ), "source of data tensor must match source of encryption"
+                assert tensor.src == src, "source of data tensor must match source of encryption"
         if not broadcast_size:
-            assert (
-                tensor is not None or size is not None
-            ), "must specify tensor or size, or set broadcast_size"
+            assert tensor is not None or size is not None, (
+                "must specify tensor or size, or set broadcast_size"
+            )
 
         # if device is unspecified, try and get it from tensor:
         if device is None and tensor is not None and hasattr(tensor, "device"):
@@ -220,7 +216,7 @@ class ArithmeticSharedTensor:
         if isinstance(value, (int, float)) or is_tensor(value):
             value = ArithmeticSharedTensor(value)
         assert isinstance(value, ArithmeticSharedTensor), (
-            "Unsupported input type %s for __setitem__" % type(value)
+            f"Unsupported input type {type(value)} for __setitem__"
         )
         self.share.__setitem__(index, value.share)
 
@@ -228,33 +224,21 @@ class ArithmeticSharedTensor:
         """
         Pads the input tensor with values provided in `value`.
         """
-        assert mode == "constant", (
-            "Padding with mode %s is currently unsupported" % mode
-        )
+        assert mode == "constant", f"Padding with mode {mode} is currently unsupported"
 
         result = self.shallow_copy()
         if isinstance(value, (int, float)):
             value = self.encoder.encode(value).item()
             if result.rank == 0:
-                result.share = torch.nn.functional.pad(
-                    result.share, pad, mode=mode, value=value
-                )
+                result.share = torch.nn.functional.pad(result.share, pad, mode=mode, value=value)
             else:
-                result.share = torch.nn.functional.pad(
-                    result.share, pad, mode=mode, value=0
-                )
+                result.share = torch.nn.functional.pad(result.share, pad, mode=mode, value=0)
         elif isinstance(value, ArithmeticSharedTensor):
-            assert (
-                value.dim() == 0
-            ), "Private values used for padding must be 0-dimensional"
+            assert value.dim() == 0, "Private values used for padding must be 0-dimensional"
             value = value.share.item()
-            result.share = torch.nn.functional.pad(
-                result.share, pad, mode=mode, value=value
-            )
+            result.share = torch.nn.functional.pad(result.share, pad, mode=mode, value=value)
         else:
-            raise TypeError(
-                "Cannot pad ArithmeticSharedTensor with a %s value" % type(value)
-            )
+            raise TypeError(f"Cannot pad ArithmeticSharedTensor with a {type(value)} value")
 
         return result
 
@@ -265,13 +249,11 @@ class ArithmeticSharedTensor:
             if is_tensor(tensor):
                 tensors[i] = ArithmeticSharedTensor(tensor)
             assert isinstance(tensors[i], ArithmeticSharedTensor), (
-                "Can't stack %s with ArithmeticSharedTensor" % type(tensor)
+                f"Can't stack {type(tensor)} with ArithmeticSharedTensor"
             )
 
         result = tensors[0].shallow_copy()
-        result.share = torch_stack(
-            [tensor.share for tensor in tensors], *args, **kwargs
-        )
+        result.share = torch_stack([tensor.share for tensor in tensors], *args, **kwargs)
         return result
 
     @staticmethod
@@ -280,9 +262,9 @@ class ArithmeticSharedTensor:
         if isinstance(tensor_or_list, ArithmeticSharedTensor):
             return tensor_or_list.reveal(dst=dst)
 
-        assert isinstance(
-            tensor_or_list, list
-        ), f"Invalid input type into reveal {type(tensor_or_list)}"
+        assert isinstance(tensor_or_list, list), (
+            f"Invalid input type into reveal {type(tensor_or_list)}"
+        )
         shares = [tensor.share for tensor in tensor_or_list]
         if dst is None:
             return comm.get().all_reduce(shares, batched=True)
@@ -376,11 +358,9 @@ class ArithmeticSharedTensor:
                 result.share = getattr(result.share, op)(y.share)
             else:  # ['mul', 'matmul', 'convNd', 'conv_transposeNd']
                 protocol = globals()[cfg.mpc.protocol]
-                result.share.set_(
-                    getattr(protocol, op)(result, y, *args, **kwargs).share.data
-                )
+                result.share.set_(getattr(protocol, op)(result, y, *args, **kwargs).share.data)
         else:
-            raise TypeError("Cannot %s %s with %s" % (op, type(y), type(self)))
+            raise TypeError(f"Cannot {op} {type(y)} with {type(self)}")
 
         # Scale by encoder scale if necessary
         if not additive_func:
@@ -463,9 +443,7 @@ class ArithmeticSharedTensor:
 
             # Validate
             if validate:
-                if not torch.lt(
-                    torch.abs(self.get_plain_text() * y - tensor), tolerance
-                ).all():
+                if not torch.lt(torch.abs(self.get_plain_text() * y - tensor), tolerance).all():
                     raise ValueError("Final result of division is incorrect.")
 
             return self
@@ -474,7 +452,7 @@ class ArithmeticSharedTensor:
         if isinstance(y, float):
             y = torch.tensor([y], dtype=torch.float, device=self.device)
 
-        assert is_float_tensor(y), "Unsupported type for div_: %s" % type(y)
+        assert is_float_tensor(y), f"Unsupported type for div_: {type(y)}"
         return self.mul_(y.reciprocal())
 
     def matmul(self, y):
@@ -553,13 +531,9 @@ class ArithmeticSharedTensor:
         """
         # TODO: Add check for whether ceil_mode would change size of output and allow ceil_mode when it wouldn't
         if ceil_mode:
-            raise NotImplementedError(
-                "Shardwise does not support `ceil_mode` for `avg_pool2d`"
-            )
+            raise NotImplementedError("Shardwise does not support `ceil_mode` for `avg_pool2d`")
 
-        z = self._sum_pool2d(
-            kernel_size, stride=stride, padding=padding, ceil_mode=ceil_mode
-        )
+        z = self._sum_pool2d(kernel_size, stride=stride, padding=padding, ceil_mode=ceil_mode)
         if isinstance(kernel_size, (int, float)):
             pool_size = kernel_size**2
         else:
@@ -627,7 +601,7 @@ class ArithmeticSharedTensor:
         if is_tensor(src):
             src = ArithmeticSharedTensor(src)
         assert isinstance(src, ArithmeticSharedTensor), (
-            "Unrecognized scatter src type: %s" % type(src)
+            f"Unrecognized scatter src type: {type(src)}"
         )
         self.share.scatter_(dim, index, src.share)
         return self

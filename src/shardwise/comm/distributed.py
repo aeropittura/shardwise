@@ -10,10 +10,10 @@ import string
 import numpy
 import torch
 import torch.distributed as dist
-from shardwise.utils import serialization
 from torch.distributed import ReduceOp
 
-from shardwise.comm.base import _logging, Communicator
+from shardwise.comm.base import Communicator, _logging
+from shardwise.utils import serialization
 
 
 class DistributedCommunicator(Communicator):
@@ -32,7 +32,7 @@ class DistributedCommunicator(Communicator):
             # get configuration variables from environmens:
             for key in ["distributed_backend", "rendezvous", "world_size", "rank"]:
                 if key.upper() not in os.environ:
-                    raise ValueError("Environment variable %s must be set." % key)
+                    raise ValueError(f"Environment variable {key} must be set.")
                 setattr(self, key.lower(), os.environ[key.upper()])
 
             # make sure world size and rank are integers; comms stats are reset:
@@ -78,9 +78,7 @@ class DistributedCommunicator(Communicator):
             )
 
         # set default arguments for communicator:
-        randomized_path = "shardwise-".join(
-            random.choice(string.ascii_letters) for i in range(10)
-        )
+        randomized_path = "shardwise-".join(random.choice(string.ascii_letters) for i in range(10))
         default_args = {
             "DISTRIBUTED_BACKEND": "gloo",
             "RENDEZVOUS": f"file:///tmp/{randomized_path}",
@@ -100,9 +98,7 @@ class DistributedCommunicator(Communicator):
     @classmethod
     def shutdown(cls):
         if dist.get_rank() == 0 and cls.instance.ttp_initialized:
-            cls.instance.send_obj(
-                "terminate", cls.instance.get_ttp_rank(), cls.instance.ttp_group
-            )
+            cls.instance.send_obj("terminate", cls.instance.get_ttp_rank(), cls.instance.ttp_group)
         dist.destroy_process_group(cls.instance.main_group)
         dist.destroy_process_group(cls.instance.ttp_group)
         dist.destroy_process_group()
@@ -165,16 +161,12 @@ class DistributedCommunicator(Communicator):
             result = [x.clone().data for x in input]
             for tensor in result:
                 reqs.append(
-                    dist.reduce(
-                        tensor.data, dst, op=op, group=self.main_group, async_op=True
-                    )
+                    dist.reduce(tensor.data, dst, op=op, group=self.main_group, async_op=True)
                 )
             for req in reqs:
                 req.wait()
         else:
-            assert torch.is_tensor(
-                input.data
-            ), "unbatched input for reduce must be a torch tensor"
+            assert torch.is_tensor(input.data), "unbatched input for reduce must be a torch tensor"
             result = input.clone()
             dist.reduce(result.data, dst, op=op, group=self.main_group)
 
@@ -191,16 +183,12 @@ class DistributedCommunicator(Communicator):
             result = [x.clone() for x in input]
             for tensor in result:
                 reqs.append(
-                    dist.all_reduce(
-                        tensor.data, op=op, group=self.main_group, async_op=True
-                    )
+                    dist.all_reduce(tensor.data, op=op, group=self.main_group, async_op=True)
                 )
             for req in reqs:
                 req.wait()
         else:
-            assert torch.is_tensor(
-                input.data
-            ), "unbatched input for reduce must be a torch tensor"
+            assert torch.is_tensor(input.data), "unbatched input for reduce must be a torch tensor"
             result = input.clone()
             dist.all_reduce(result.data, op=op, group=self.main_group)
         return result
@@ -213,9 +201,7 @@ class DistributedCommunicator(Communicator):
             result = []
             device = tensor.data.device
             for _ in range(self.get_world_size()):
-                result.append(
-                    torch.empty(size=tensor.size(), dtype=torch.long, device=device)
-                )
+                result.append(torch.empty(size=tensor.size(), dtype=torch.long, device=device))
             dist.gather(tensor.data, result, dst, group=self.main_group)
             return result
         dist.gather(tensor.data, [], dst, group=self.main_group)
@@ -228,9 +214,7 @@ class DistributedCommunicator(Communicator):
         result = []
         device = tensor.data.device
         for _ in range(self.get_world_size()):
-            result.append(
-                torch.empty(size=tensor.size(), dtype=torch.long, device=device)
-            )
+            result.append(torch.empty(size=tensor.size(), dtype=torch.long, device=device))
         dist.all_gather(result, tensor.data, group=self.main_group)
         return result
 
@@ -243,15 +227,11 @@ class DistributedCommunicator(Communicator):
             assert isinstance(input, list), "batched reduce input must be a list"
             reqs = []
             for tensor in input:
-                reqs.append(
-                    dist.broadcast(tensor.data, src, group=group, async_op=True)
-                )
+                reqs.append(dist.broadcast(tensor.data, src, group=group, async_op=True))
             for req in reqs:
                 req.wait()
         else:
-            assert torch.is_tensor(
-                input.data
-            ), "unbatched input for reduce must be a torch tensor"
+            assert torch.is_tensor(input.data), "unbatched input for reduce must be a torch tensor"
             dist.broadcast(input.data, src, group=group)
         return input
 
@@ -335,9 +315,7 @@ class DistributedCommunicator(Communicator):
 
     def set_name(self, name):
         """Sets the party name of the current process."""
-        assert isinstance(
-            name, str
-        ), f"Improper name provided to process on rank {self.get_rank()}"
+        assert isinstance(name, str), f"Improper name provided to process on rank {self.get_rank()}"
         self._name = name
 
     def get_name(self):
