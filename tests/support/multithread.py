@@ -24,14 +24,14 @@ class MultiThreadTestCase(unittest.TestCase):
         return InProcessCommunicator.get().rank
 
     @property
-    def world_size(self):
+    def world_size(self) -> int:
         return 2
 
-    def __init__(self, methodName):
+    def __init__(self, methodName) -> None:
         super().__init__(methodName)
 
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls) -> None:
         for attr in dir(cls):
             if attr.startswith("test"):
                 fn = getattr(cls, attr)
@@ -40,7 +40,7 @@ class MultiThreadTestCase(unittest.TestCase):
     @staticmethod
     def join_or_run(fn):
         @wraps(fn)
-        def wrapper(self):
+        def wrapper(self) -> None:
             if threading.current_thread() == threading.main_thread():
                 self._join_threads()
             else:
@@ -64,7 +64,7 @@ class MultiThreadTestCase(unittest.TestCase):
         # self.id() == e.g. '__main__.TestDistributed.TestAdditive.test_get_rank'
         return self.id().split(".")[-1]
 
-    def setUp(self):
+    def setUp(self) -> None:
         super().setUp()
 
         if threading.current_thread() != threading.main_thread():
@@ -79,7 +79,7 @@ class MultiThreadTestCase(unittest.TestCase):
         for t in self.threads:
             t.start()
 
-    def _run(self, test_fn, rank, world_size):
+    def _run(self, test_fn, rank, world_size) -> None:
         shardwise.init_thread(rank, world_size)
 
         self.setUp()

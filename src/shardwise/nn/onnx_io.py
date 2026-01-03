@@ -251,7 +251,7 @@ def _get_operator_class(node_op_type, attributes):
     return shardwise_class
 
 
-def _update_onnx_symbolic_registry():
+def _update_onnx_symbolic_registry() -> None:
     """
     Updates the ONNX symbolic registry for operators that need a Shardwise-specific
     implementation and custom operators.

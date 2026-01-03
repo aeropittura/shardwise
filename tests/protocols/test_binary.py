@@ -24,7 +24,7 @@ class TestBinary(MultiProcessTestCase):
         if self.rank >= 0:
             shardwise.init()
 
-    def _check(self, encrypted_tensor, reference, msg, dst=None, tolerance=None):
+    def _check(self, encrypted_tensor, reference, msg, dst=None, tolerance=None) -> None:
         if tolerance is None:
             tolerance = getattr(self, "default_tolerance", 0.05)
         tensor = encrypted_tensor.get_plain_text(dst=dst)

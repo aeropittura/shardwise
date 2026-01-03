@@ -20,7 +20,7 @@ class Dropout(Module):
         - Output: :math:`(*)`. Output is of the same shape as input
     """
 
-    def __init__(self, p=0.5, inplace=False):
+    def __init__(self, p: float = 0.5, inplace: bool = False) -> None:
         super().__init__()
         if inplace:
             logging.warning("Shardwise Dropout module does not support inplace computation.")
@@ -47,7 +47,7 @@ class DropoutNd(Module):
         p (float, optional): probability of an element to be zero-ed.
     """
 
-    def __init__(self, p=0.5, inplace=False):
+    def __init__(self, p: float = 0.5, inplace: bool = False) -> None:
         super().__init__()
         if inplace:
             logging.warning("Shardwise DropoutNd module does not support inplace computation.")

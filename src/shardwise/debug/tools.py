@@ -14,7 +14,7 @@ class MultiprocessingPdb(pythondebugger.Pdb):
 
     """
 
-    def interaction(self, *args, **kwargs):
+    def interaction(self, *args, **kwargs) -> None:
         _stdin = sys.stdin
         try:
             with open("/dev/stdin") as file:
@@ -24,7 +24,7 @@ class MultiprocessingPdb(pythondebugger.Pdb):
             sys.stdin = _stdin
 
 
-def configure_logging():
+def configure_logging() -> None:
     """Configures a logging template useful for debugging multiple processes."""
 
     level = logging.INFO
@@ -38,7 +38,7 @@ def configure_logging():
     )
 
 
-def shardwise_print(*args, dst=0, **kwargs):
+def shardwise_print(*args, dst: int = 0, **kwargs) -> None:
     """
     Prints a message to only parties whose rank is contained by `dst` kwarg (default: 0).
     """
@@ -53,7 +53,7 @@ def shardwise_print(*args, dst=0, **kwargs):
         print(*args, **kwargs)
 
 
-def shardwise_log(*args, level=logging.INFO, dst=0, **kwargs):
+def shardwise_log(*args, level=logging.INFO, dst: int = 0, **kwargs) -> None:
     """
     Logs a message to logger of parties whose rank is contained by `dst` kwarg (default: 0).
 
@@ -68,7 +68,7 @@ def shardwise_log(*args, level=logging.INFO, dst=0, **kwargs):
         logging.log(level, *args, **kwargs)
 
 
-def shardwise_print_in_order(*args, **kwargs):
+def shardwise_print_in_order(*args, **kwargs) -> None:
     """
     Calls print(*args, **kwargs) on each party in rank order to ensure each party
     can print its full message uninterrupted and the full output is deterministic
@@ -81,7 +81,7 @@ def shardwise_print_in_order(*args, **kwargs):
         comm.get().barrier()
 
 
-def validate_correctness(self, func, func_name, tolerance=0.5):
+def validate_correctness(self, func, func_name, tolerance: float = 0.5):
     import torch
 
     import shardwise

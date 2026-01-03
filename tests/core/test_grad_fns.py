@@ -45,13 +45,13 @@ class TestGradients:
     This class tests all autograd functions implemented in gradients.py.
     """
 
-    def setUp(self):
+    def setUp(self) -> None:
         super().setUp()
         # We don't want the main process (rank -1) to initialize the communicator
         if self.rank >= 0:
             shardwise.init()
 
-    def _check(self, encrypted_tensor, reference, msg, tolerance=None):
+    def _check(self, encrypted_tensor, reference, msg, tolerance=None) -> None:
         if tolerance is None:
             tolerance = getattr(self, "default_tolerance", 0.05)
         tensor = encrypted_tensor.get_plain_text()
@@ -79,7 +79,7 @@ class TestGradients:
         msg=None,
         addl_args=None,
         **kwargs,
-    ):
+    ) -> None:
         """Checks forward and backward against PyTorch
 
         Args:
@@ -134,7 +134,7 @@ class TestGradients:
                 if shardwise.is_encrypted_tensor(arg_encr):
                     self._check(arg_encr.grad, args[i].grad, msg + " in backward args")
 
-    def _set_grad_to_zero(self, args, make_private=False):
+    def _set_grad_to_zero(self, args, make_private: bool = False):
         """Sets gradients for args to zero
 
         Args:
@@ -163,7 +163,7 @@ class TestGradients:
         else:
             raise ValueError(f"unknown PyTorch function: {func_name}")
 
-    def test_arithmetic(self):
+    def test_arithmetic(self) -> None:
         """Tests arithmetic functions with broadcasting."""
         arithmetic_functions = ["add", "sub", "mul"]
         for func in arithmetic_functions:
@@ -189,16 +189,16 @@ class TestGradients:
                         self._check_forward_backward(ofunc, tensor1, scalar)
                         self._check_forward_backward(rfunc, tensor1, scalar)
 
-    def test_div(self):
+    def test_div(self) -> None:
         self._div_helper("div")
 
-    def test_truediv(self):
+    def test_truediv(self) -> None:
         self._div_helper("__truediv__")
 
-    def test_rtruediv(self):
+    def test_rtruediv(self) -> None:
         self._div_helper("__rtruediv__")
 
-    def _div_helper(self, func):
+    def _div_helper(self, func) -> None:
         for size1 in SIZES:
             tensor1 = get_random_test_tensor(size=size1, is_float=True)
             for size2 in SIZES:
@@ -216,27 +216,27 @@ class TestGradients:
             else:
                 self._check_forward_backward(func, tensor1, 2.0)
 
-    def test_sum_mean_reductions(self):
+    def test_sum_mean_reductions(self) -> None:
         reductions = ["sum", "mean"]
         self._reductions_helper(reductions)
 
-    def test_max_min_reductions_pairwise(self):
+    def test_max_min_reductions_pairwise(self) -> None:
         reductions = ["max", "min"]
         self._reductions_helper(reductions, "pairwise")
 
-    def test_max_min_reductions_log_reduction(self):
+    def test_max_min_reductions_log_reduction(self) -> None:
         reductions = ["max", "min"]
         self._reductions_helper(reductions, "log_reduction")
 
-    def test_max_min_reductions_double_log_reduction(self):
+    def test_max_min_reductions_double_log_reduction(self) -> None:
         reductions = ["max", "min"]
         self._reductions_helper(reductions, "double_log_reduction")
 
-    def test_max_min_reductions_accelerated_cascade(self):
+    def test_max_min_reductions_accelerated_cascade(self) -> None:
         reductions = ["max", "min"]
         self._reductions_helper(reductions, "accelerated_cascade")
 
-    def _reductions_helper(self, input_reductions, method=None):
+    def _reductions_helper(self, input_reductions, method=None) -> None:
         """Tests input reductions on tensors of various sizes."""
         for size in SIZES[: min(5, len(SIZES))]:
             tensor = get_random_test_tensor(size=size, is_float=True)
@@ -273,7 +273,7 @@ class TestGradients:
                                     reduction, tensor, dim=dim, keepdim=keepdim
                                 )
 
-    def test_matmul(self):
+    def test_matmul(self) -> None:
         """Test matmul with broadcasting."""
         matmul_sizes = [(1, 1), (1, 5), (5, 1), (5, 5)]
         batch_dims = [(), (1,), (5,), (1, 1), (1, 5), (5, 5)]
@@ -306,7 +306,7 @@ class TestGradients:
 
                 self._check_forward_backward(func, tensor1, tensor2, torch_func_name=torch_funcs[i])
 
-    def test_unary_functions(self):
+    def test_unary_functions(self) -> None:
         """Test unary functions on tensors of various sizes."""
         unary_functions = [
             "neg",
@@ -335,14 +335,14 @@ class TestGradients:
 
                 self._check_forward_backward(func, tensor)
 
-    def test_hardtanh(self):
+    def test_hardtanh(self) -> None:
         tensor = torch.arange(-10, 10, dtype=torch.float32)
         for minval in range(-10, 10):
             for maxval in range(minval, 11):
                 self._check_forward_backward("hardtanh", tensor, minval, maxval)
         self._check_forward_backward("relu6", tensor)
 
-    def test_inplace_warning(self):
+    def test_inplace_warning(self) -> None:
         """Tests that a warning is thrown that indicates that the `inplace` kwarg
         is ignored when a function is called with `inplace=True`
         """
@@ -356,7 +356,7 @@ class TestGradients:
                 getattr(encrypted, func)(inplace=True)
             self.assertTrue(f"WARNING:root:{warning_str}" in cm.output)
 
-    def test_dot_ger(self):
+    def test_dot_ger(self) -> None:
         """Test inner and outer products of encrypted tensors."""
         for length in range(1, 10):
             tensor1 = get_random_test_tensor(size=(length,), is_float=True)
@@ -365,7 +365,7 @@ class TestGradients:
             self._check_forward_backward("dot", tensor1, tensor2)
             self._check_forward_backward("ger", tensor1, tensor2)
 
-    def test_squeeze_unsqueeze(self):
+    def test_squeeze_unsqueeze(self) -> None:
         """Test addition and removal of tensor dimensions"""
         for size in SIZES:
             tensor = get_random_test_tensor(size=size, is_float=True)
@@ -378,7 +378,7 @@ class TestGradients:
             # Check unsqueeze on last dimension
             self._check_forward_backward("unsqueeze", tensor, tensor.dim())
 
-    def test_softmax(self):
+    def test_softmax(self) -> None:
         """Test softmax"""
         for size in SIZES:
             tensor = get_random_test_tensor(size=size, is_float=True)
@@ -388,7 +388,7 @@ class TestGradients:
             for dim in range(dims):
                 self._check_forward_backward("softmax", tensor, dim)
 
-    def test_log_softmax(self):
+    def test_log_softmax(self) -> None:
         """Test log_softmax"""
         for size in SIZES:
             tensor = get_random_test_tensor(size=size, is_float=True)
@@ -398,7 +398,7 @@ class TestGradients:
             for dim in range(dims):
                 self._check_forward_backward("log_softmax", tensor, dim)
 
-    def test_transpose(self):
+    def test_transpose(self) -> None:
         for size in SIZES:
             tensor = get_random_test_tensor(size=size, is_float=True)
 
@@ -409,7 +409,7 @@ class TestGradients:
                 for dim1 in range(tensor.dim()):
                     self._check_forward_backward("transpose", tensor, dim0, dim1)
 
-    def test_permute(self):
+    def test_permute(self) -> None:
         for ndims in range(5):
             size = tuple([3] * ndims)
             tensor = get_random_test_tensor(size=size, is_float=True)
@@ -417,19 +417,19 @@ class TestGradients:
             for perm in itertools.permutations(list(range(ndims))):
                 self._check_forward_backward("permute", tensor, perm)
 
-    def test_conv1d_smaller_signal_one_channel(self):
+    def test_conv1d_smaller_signal_one_channel(self) -> None:
         self._conv1d(5, 1)
 
-    def test_conv1d_smaller_signal_many_channels(self):
+    def test_conv1d_smaller_signal_many_channels(self) -> None:
         self._conv1d(5, 5)
 
-    def test_conv1d_larger_signal_one_channel(self):
+    def test_conv1d_larger_signal_one_channel(self) -> None:
         self._conv1d(16, 1)
 
-    def test_conv1d_larger_signal_many_channels(self):
+    def test_conv1d_larger_signal_many_channels(self) -> None:
         self._conv1d(16, 5)
 
-    def _conv1d(self, signal_size, in_channels):
+    def _conv1d(self, signal_size, in_channels) -> None:
         """Test convolution of encrypted tensor with public/private tensors."""
         nbatches = [1, 3]
         nout_channels = [1, 5]
@@ -476,19 +476,19 @@ class TestGradients:
                 groups=groups,
             )
 
-    def test_conv2d_square_image_one_channel(self):
+    def test_conv2d_square_image_one_channel(self) -> None:
         self._conv2d((5, 5), 1)
 
-    def test_conv2d_square_image_many_channels(self):
+    def test_conv2d_square_image_many_channels(self) -> None:
         self._conv2d((5, 5), 5)
 
-    def test_conv2d_rectangular_image_one_channel(self):
+    def test_conv2d_rectangular_image_one_channel(self) -> None:
         self._conv2d((16, 7), 1)
 
-    def test_conv2d_rectangular_image_many_channels(self):
+    def test_conv2d_rectangular_image_many_channels(self) -> None:
         self._conv2d((16, 7), 5)
 
-    def _conv2d(self, image_size, in_channels):
+    def _conv2d(self, image_size, in_channels) -> None:
         """Test convolution of encrypted tensor with public/private tensors."""
         nbatches = [1, 3]
         kernel_sizes = [(1, 1), (2, 2), (2, 3)]
@@ -529,15 +529,15 @@ class TestGradients:
                 groups=groups,
             )
 
-    def test_max_pool2d(self):
+    def test_max_pool2d(self) -> None:
         """Tests max pooling gradient"""
         self._check_pooling("max_pool2d")
 
-    def test_avg_pool2d(self):
+    def test_avg_pool2d(self) -> None:
         """Tests average pooling gradient"""
         self._check_pooling("avg_pool2d")
 
-    def _check_pooling(self, func):
+    def _check_pooling(self, func) -> None:
         """Helper for testing pooling gradients to avoid test timeouts"""
         image_sizes = [(5, 5), (6, 7)]
         nchannels = [1, 3]
@@ -571,8 +571,8 @@ class TestGradients:
                     )
 
     def _check_max_pool2d_forward_backward(
-        self, image, kernel_size, padding, stride, dilation, ceil_mode, tol=0.1
-    ):
+        self, image, kernel_size, padding, stride, dilation, ceil_mode, tol: float = 0.1
+    ) -> None:
         """Checks forward and backward are for max pool 2d.
         Verifies gradients by checking sum of non-matching elements to account for
         differences in tie resolution in max between PyTorch and Shardwise:
@@ -663,7 +663,7 @@ class TestGradients:
     def test_magic_pow(self) -> None:
         self._pow_helper("__pow__")
 
-    def _pow_helper(self, pow_fn):
+    def _pow_helper(self, pow_fn) -> None:
         for size in SIZES:
             tensor = get_random_test_tensor(size=size, min_value=0.5, is_float=True)
             for power in [-3, -2, -1, 0, 1, 2, 3]:

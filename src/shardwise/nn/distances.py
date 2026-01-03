@@ -25,7 +25,7 @@ class CosineSimilarity(Module):
         >>> output = cos(input1, input2)
     """
 
-    def __init__(self, dim=1, eps=1e-8):
+    def __init__(self, dim: int = 1, eps: float = 1e-8) -> None:
         super().__init__()
         self.dim = dim
 

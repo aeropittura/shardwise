@@ -26,7 +26,7 @@ class DistributedCommunicator(Communicator):
     BYTES_PER_ELEMENT = 8
     instance = None
 
-    def __init__(self, init_ttp=False):
+    def __init__(self, init_ttp: bool = False) -> None:
         # no need to do anything if we already initialized the communicator:
         if not dist.is_initialized():
             # get configuration variables from environmens:
@@ -68,7 +68,7 @@ class DistributedCommunicator(Communicator):
         return dist.is_initialized()
 
     @classmethod
-    def initialize(cls, rank, world_size, init_ttp=False):
+    def initialize(cls, rank, world_size, init_ttp: bool = False):
         import os
 
         if os.name == "nt":
@@ -96,7 +96,7 @@ class DistributedCommunicator(Communicator):
         return cls.instance
 
     @classmethod
-    def shutdown(cls):
+    def shutdown(cls) -> None:
         if dist.get_rank() == 0 and cls.instance.ttp_initialized:
             cls.instance.send_obj("terminate", cls.instance.get_ttp_rank(), cls.instance.ttp_group)
         dist.destroy_process_group(cls.instance.main_group)
@@ -105,7 +105,7 @@ class DistributedCommunicator(Communicator):
         cls.instance = None
 
     @_logging
-    def send(self, tensor, dst):
+    def send(self, tensor, dst) -> None:
         """Sends the specified tensor to the destination dst."""
         assert dist.is_initialized(), "initialize the communicator first"
         dist.send(tensor.data, dst, group=self.main_group)
@@ -151,7 +151,7 @@ class DistributedCommunicator(Communicator):
         return tensor
 
     @_logging
-    def reduce(self, input, dst, op=ReduceOp.SUM, batched=False):
+    def reduce(self, input, dst, op=ReduceOp.SUM, batched: bool = False):
         """Reduces the input data across all parties."""
         assert dist.is_initialized(), "initialize the communicator first"
 
@@ -173,7 +173,7 @@ class DistributedCommunicator(Communicator):
         return result if dst == self.get_rank() else None
 
     @_logging
-    def all_reduce(self, input, op=ReduceOp.SUM, batched=False):
+    def all_reduce(self, input, op=ReduceOp.SUM, batched: bool = False):
         """Reduces the input data across all parties; all get the final result."""
         assert dist.is_initialized(), "initialize the communicator first"
 
@@ -219,7 +219,7 @@ class DistributedCommunicator(Communicator):
         return result
 
     @_logging
-    def broadcast(self, input, src, group=None, batched=False):
+    def broadcast(self, input, src, group=None, batched: bool = False):
         """Broadcasts the tensor to all parties."""
         assert dist.is_initialized(), "initialize the communicator first"
         group = self.main_group if group is None else group
@@ -236,7 +236,7 @@ class DistributedCommunicator(Communicator):
         return input
 
     @_logging
-    def barrier(self):
+    def barrier(self) -> None:
         """Synchronizes all processes.
 
         This collective blocks processes until the whole group enters this
@@ -246,7 +246,7 @@ class DistributedCommunicator(Communicator):
         dist.barrier(group=self.main_group)
 
     @_logging
-    def send_obj(self, obj, dst, group=None):
+    def send_obj(self, obj, dst, group=None) -> None:
         """Sends the specified object to the destination `dst`."""
         if group is None:
             group = self.main_group
@@ -313,7 +313,7 @@ class DistributedCommunicator(Communicator):
         """Returns the rank of the Trusted Third Party"""
         return self.get_world_size()
 
-    def set_name(self, name):
+    def set_name(self, name) -> None:
         """Sets the party name of the current process."""
         assert isinstance(name, str), f"Improper name provided to process on rank {self.get_rank()}"
         self._name = name

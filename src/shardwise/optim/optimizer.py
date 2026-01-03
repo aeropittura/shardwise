@@ -62,7 +62,7 @@ class Optimizer(torch.optim.Optimizer):
 
         self.param_groups.append(param_group)
 
-    def zero_grad(self, set_to_none=True):
+    def zero_grad(self, set_to_none: bool = True) -> None:
         r"""Sets the gradients of all optimized parameters to zero or None.
         Args:
             set_to_none (bool): instead of setting to zero, set the grads to None.

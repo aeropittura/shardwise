@@ -131,7 +131,7 @@ class _Reduce(Module):
     and ONNX ReduceSum (defined here as Sum).
     """
 
-    def __init__(self, dim, keepdim=False, reduction_fn="mean"):
+    def __init__(self, dim, keepdim: bool = False, reduction_fn: str = "mean") -> None:
         super().__init__()
         self.dim = dim
         self.keepdim = keepdim
@@ -150,7 +150,7 @@ class Mean(_Reduce):
     (or `len(dim)`) fewer dimension(s).
     """
 
-    def __init__(self, dim, keepdim=False):
+    def __init__(self, dim, keepdim: bool = False) -> None:
         super().__init__(dim, keepdim, "mean")
 
     @staticmethod
@@ -170,7 +170,7 @@ class Sum(_Reduce):
     (or `len(dim)`) fewer dimension(s).
     """
 
-    def __init__(self, dim, keepdim=False):
+    def __init__(self, dim, keepdim: bool = False) -> None:
         super().__init__(dim, keepdim, "sum")
 
     @staticmethod
@@ -186,7 +186,7 @@ class Cast(Module):
     Module that casts the input tensor to the specified type.
     """
 
-    def __init__(self, dtype):
+    def __init__(self, dtype) -> None:
         super().__init__()
         self.dtype = dtype
 

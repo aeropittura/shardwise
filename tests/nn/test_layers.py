@@ -40,7 +40,7 @@ class TestNN:
     This class tests the shardwise.nn package.
     """
 
-    def _check(self, encrypted_tensor, reference, msg, tolerance=None):
+    def _check(self, encrypted_tensor, reference, msg, tolerance=None) -> None:
         if tolerance is None:
             tolerance = getattr(self, "default_tolerance", 0.05)
         tensor = encrypted_tensor.get_plain_text()
@@ -74,7 +74,7 @@ class TestNN:
             )
         return reference
 
-    def _check_reference_parameters(self, init_name, reference, model):
+    def _check_reference_parameters(self, init_name, reference, model) -> None:
         for name, param in model.named_parameters(recurse=False):
             local_name = init_name + "_" + name
             self._check(param, reference[local_name], "parameter update failed")
@@ -82,13 +82,13 @@ class TestNN:
             local_name = init_name + "_" + name
             self._check_reference_parameters(local_name, reference, module)
 
-    def setUp(self):
+    def setUp(self) -> None:
         super().setUp()
         # We don't want the main process (rank -1) to initialize the communicator
         if self.rank >= 0:
             shardwise.init()
 
-    def test_from_shares(self):
+    def test_from_shares(self) -> None:
         """Tests shardwise.nn.Module.set_parameter_from_shares() functionality."""
 
         # create simple model:
@@ -132,7 +132,7 @@ class TestNN:
             reference = encoder.decode(all_references[name])
             self.assertTrue(torch.allclose(param, reference))
 
-    def test_global_avg_pool_module(self):
+    def test_global_avg_pool_module(self) -> None:
         """
         Tests the global average pool module with fixed 4-d test tensors
         """
@@ -224,7 +224,7 @@ class TestNN:
                 result_plaintext = result.get_plain_text().bool()
                 self.assertTrue(result_plaintext.all(), "dropout failed in test mode")
 
-    def test_non_pytorch_modules(self):
+    def test_non_pytorch_modules(self) -> None:
         """
         Tests all non-container Modules in shardwise.nn that do not have
         equivalent modules in PyTorch.
@@ -456,7 +456,7 @@ class TestNN:
                 encr_output = shardwise.tensor(encr_output)
             self._check(encr_output, reference, f"{module_name} failed")
 
-    def test_pytorch_modules(self):
+    def test_pytorch_modules(self) -> None:
         """
         Tests all non-container Modules in shardwise.nn that have equivalent
         modules in PyTorch.
@@ -613,7 +613,7 @@ class TestNN:
                     f"{module_name} backward on parameter {name} failed {msg}",
                 )
 
-    def test_conv(self):
+    def test_conv(self) -> None:
         """
         Tests shardwise.nn.Conv module.
         """
@@ -672,7 +672,7 @@ class TestNN:
                     self.assertIsNone(encr_input.grad)
                     self.assertIsNone(encr_kernel.grad)
 
-    def test_linear(self):
+    def test_linear(self) -> None:
         """
         Tests shardwise.nn.Linear module.
         """
@@ -718,7 +718,7 @@ class TestNN:
                         f"Linear backward on {name} failed",
                     )
 
-    def test_parameter_module(self):
+    def test_parameter_module(self) -> None:
         """
         Tests the shardwise.nn.Parameter module.
         """
@@ -780,7 +780,7 @@ class TestNN:
         with self.assertRaises(AssertionError):
             param = shardwise.nn.Parameter(list(range(5)))
 
-    def test_inplace_warning(self):
+    def test_inplace_warning(self) -> None:
         """Tests that a warning is thrown that indicates that the `inplace` kwarg
         is ignored when a function is called with `inplace=True`
         """
@@ -800,7 +800,7 @@ class TestNN:
                 getattr(shardwise.nn, module)(inplace=True)
             self.assertTrue(f"WARNING:root:{warning_str}" in cm.output)
 
-    def test_sequential(self):
+    def test_sequential(self) -> None:
         """
         Tests shardwise.nn.Sequential module.
         """
@@ -907,7 +907,7 @@ class TestNN:
                     raise ValueError(f"Unsupported value of inputs: {num_inputs}")
                 self._check(encr_output, reference, "nn.Graph forward failed")
 
-    def test_losses(self):
+    def test_losses(self) -> None:
         """
         Tests all Losses implemented in shardwise.nn.
         """
@@ -968,7 +968,7 @@ class TestNN:
         encrypted_loss = shardwise.nn.CrossEntropyLoss()(encrypted_input, encrypted_target)
         self._check(encrypted_loss, loss, "cross-entropy loss failed")
 
-    def test_distances(self):
+    def test_distances(self) -> None:
         distances = ["CosineSimilarity"]
 
         for distance in distances:
@@ -999,14 +999,14 @@ class TestNN:
             self._check(x1_enc.grad, x1.grad, f"{distance} 1st arg grad failed")
             self._check(x2_enc.grad, x2.grad, f"{distance} 2nd arg grad failed")
 
-    def test_getattr_setattr(self):
+    def test_getattr_setattr(self) -> None:
         """Tests the __getattr__ and __setattr__ functions"""
 
         tensor1 = get_random_test_tensor(size=(3, 3), is_float=True)
         tensor2 = get_random_test_tensor(size=(3, 3), is_float=True)
 
         class ExampleNet(shardwise.nn.Module):
-            def __init__(self):
+            def __init__(self) -> None:
                 super(ExampleNet, self).__init__()
                 self.fc1 = shardwise.nn.Linear(20, 1)
                 sample_buffer = tensor1
@@ -1061,7 +1061,7 @@ class TestNN:
             torch.nn.Parameter(torch.zeros((2, 3))).tolist(),
         )
 
-    def test_training(self):
+    def test_training(self) -> None:
         """
         Tests training of simple model in shardwise.nn.
         """
@@ -1110,13 +1110,13 @@ class TestNN:
                 model.update_parameters(learning_rate)
                 self._check_reference_parameters("", reference, model)
 
-    def test_custom_module_training(self):
+    def test_custom_module_training(self) -> None:
         """Tests training Shardwise models created directly using the shardwise.nn.Module"""
         BATCH_SIZE = 32
         NUM_FEATURES = 3
 
         class ExampleNet(shardwise.nn.Module):
-            def __init__(self):
+            def __init__(self) -> None:
                 super(ExampleNet, self).__init__()
                 self.fc1 = shardwise.nn.Linear(NUM_FEATURES, BATCH_SIZE)
                 self.fc2 = shardwise.nn.Linear(BATCH_SIZE, 2)
@@ -1306,7 +1306,7 @@ class TestNN:
         criterion = shardwise.nn.MSELoss()
 
         # function running the actual test:
-        def _run_test(_sample, _target):
+        def _run_test(_sample, _target) -> None:
             # forward pass fails when feeding encrypted input into unencrypted model:
             linear.zero_grad()
             if not linear.encrypted and not torch.is_tensor(_sample):
@@ -1351,7 +1351,7 @@ class TestNN:
         """
         import io
 
-        def _check_equal(t1, t2):
+        def _check_equal(t1, t2) -> None:
             """
             Checks whether to tensors are identical.
             """
@@ -1365,7 +1365,7 @@ class TestNN:
                 t2 = t2.get_plain_text()
             self.assertTrue(t1.eq(t2).all())
 
-        def _check_state_dict(model, state_dict):
+        def _check_state_dict(model, state_dict) -> None:
             """
             Checks if state_dict matches parameters in model.
             """
@@ -1709,7 +1709,7 @@ class TestNN:
 
 
 class AliceNet(torch.nn.Module):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.fc1 = torch.nn.Linear(50, 20)
         self.fc2 = torch.nn.Linear(20, 2)
@@ -1722,7 +1722,7 @@ class AliceNet(torch.nn.Module):
 
 
 class AliceNet2(torch.nn.Module):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.conv1 = torch.nn.Conv2d(1, 16, kernel_size=5, padding=0)
         self.conv2 = torch.nn.Conv2d(16, 16, kernel_size=5, padding=0)

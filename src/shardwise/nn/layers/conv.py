@@ -11,7 +11,7 @@ class Conv(Module):
     operation. Unlike other Conv modules, this module is stateless.
     """
 
-    def __init__(self, stride, padding, dilation, groups=1):
+    def __init__(self, stride, padding, dilation, groups: int = 1) -> None:
         super().__init__()
         self.stride = stride
         self.padding = padding
@@ -167,12 +167,12 @@ class Conv1d(Module):
         in_channels,
         out_channels,
         kernel_size,
-        stride=1,
-        padding=0,
-        dilation=1,
-        groups=1,
-        bias=True,
-    ):
+        stride: int = 1,
+        padding: int = 0,
+        dilation: int = 1,
+        groups: int = 1,
+        bias: bool = True,
+    ) -> None:
         # check inputs:
         super().__init__()
         assert isinstance(stride, int), "stride must be an integer"
@@ -305,12 +305,12 @@ class Conv2d(Module):
         in_channels,
         out_channels,
         kernel_size,
-        stride=1,
-        padding=0,
-        dilation=1,
-        groups=1,
-        bias=True,
-    ):
+        stride: int = 1,
+        padding: int = 0,
+        dilation: int = 1,
+        groups: int = 1,
+        bias: bool = True,
+    ) -> None:
         # check inputs:
         super().__init__()
 

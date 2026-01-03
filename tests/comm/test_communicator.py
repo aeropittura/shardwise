@@ -372,7 +372,7 @@ class TestCommunicatorMultiProcess(TestCommunicator, MultiProcessTestCase):
 
 
 class CNN(nn.Module):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.conv1 = nn.Conv2d(1, 16, kernel_size=5, padding=1)
         self.fc1 = nn.Linear(16 * 13 * 13, 100)

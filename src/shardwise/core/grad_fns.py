@@ -75,19 +75,19 @@ class BaseAutogradContext:
     for AutogradFunctions. Base implementation contains no-ops for all functions.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         pass
 
-    def reset(self):
+    def reset(self) -> None:
         pass
 
-    def save_for_backward(self, value):
+    def save_for_backward(self, value) -> None:
         pass
 
-    def save_multiple_for_backward(self, values):
+    def save_multiple_for_backward(self, values) -> None:
         pass
 
-    def mark_non_differentiable(self, non_differentiable):
+    def mark_non_differentiable(self, non_differentiable) -> None:
         pass
 
     def is_differentiable(self, tensor):
@@ -103,26 +103,26 @@ class AutogradContext(BaseAutogradContext):
     Object that can be used by AutogradFunction for saving context information.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.reset()
 
-    def reset(self):
+    def reset(self) -> None:
         self.context = []
         self.non_differentiable = []
 
-    def save_for_backward(self, value):
+    def save_for_backward(self, value) -> None:
         self.context.append(value)
 
-    def save_multiple_for_backward(self, values):
+    def save_multiple_for_backward(self, values) -> None:
         for value in values:
             self.save_for_backward(value)
 
-    def mark_non_differentiable(self, non_differentiable):
+    def mark_non_differentiable(self, non_differentiable) -> None:
         if not isinstance(non_differentiable, list):
             non_differentiable = [non_differentiable]
         self.non_differentiable.extend(id(x) for x in non_differentiable)
 
-    def is_differentiable(self, tensor):
+    def is_differentiable(self, tensor) -> bool:
         return id(tensor) not in self.non_differentiable
 
     @property
@@ -143,7 +143,7 @@ class AutogradFunction:
     def backward(ctx, grad_output):
         raise NotImplementedError("Backward function not implemented.")
 
-    def __str__(self):
+    def __str__(self) -> str:
         if hasattr(self, "name"):
             return self.name
 
@@ -213,7 +213,7 @@ class AutogradClone(AutogradFunction):
 @register_function("cat")
 class AutogradCat(AutogradFunction):
     @staticmethod
-    def forward(ctx, input, dim=0):
+    def forward(ctx, input, dim: int = 0):
         split_sections = [t.size(dim) for t in input]
         ctx.save_multiple_for_backward((dim, split_sections))
         return shardwise.cat(input, dim=dim)
@@ -227,7 +227,7 @@ class AutogradCat(AutogradFunction):
 @register_function("stack")
 class AutogradStack(AutogradFunction):
     @staticmethod
-    def forward(ctx, input, dim=0):
+    def forward(ctx, input, dim: int = 0):
         ctx.save_for_backward(dim)
         return shardwise.stack(input, dim=dim)
 
@@ -266,7 +266,7 @@ class AutogradReshape(AutogradFunction):
 @register_function("flatten")
 class AutogradFlatten(AutogradFunction):
     @staticmethod
-    def forward(ctx, input, start_dim=0, end_dim=-1):
+    def forward(ctx, input, start_dim: int = 0, end_dim=-1):
         ctx.save_for_backward(input.size())
         return input.flatten(start_dim=start_dim, end_dim=end_dim)
 
@@ -486,7 +486,7 @@ class AutogradReLU(AutogradFunction):
 @register_function("dropout")
 class AutogradDropout(AutogradFunction):
     @staticmethod
-    def forward(ctx, input, p=0.5, training=True, inplace=False):
+    def forward(ctx, input, p: float = 0.5, training: bool = True, inplace: bool = False):
         if training and inplace:
             logging.warning(
                 "Shardwise dropout does not support inplace computation during training."
@@ -520,7 +520,7 @@ class AutogradDropout(AutogradFunction):
 @register_function("_feature_dropout")
 class AutogradFeatureDropout(AutogradFunction):
     @staticmethod
-    def forward(ctx, input, p=0.5, training=True, inplace=False):
+    def forward(ctx, input, p: float = 0.5, training: bool = True, inplace: bool = False):
         if training and inplace:
             logging.warning(
                 "Shardwise _feature_dropout does not support inplace computation during training."
@@ -573,7 +573,7 @@ class AutogradTanh(AutogradFunction):
 @register_function("hardtanh")
 class AutogradHardtanh(AutogradFunction):
     @staticmethod
-    def forward(ctx, input, min_val=-1, max_val=1):
+    def forward(ctx, input, min_val=-1, max_val: int = 1):
         assert isinstance(min_val, (int, float)), "hardtanh min_val must be an int or float"
         assert isinstance(max_val, (int, float)), "hardtanh max_val must be an int or float"
         if min_val == max_val:
@@ -817,7 +817,7 @@ class AutogradRDiv(AutogradFunction):
 @register_function("polynomial")
 class AutogradPolynomial(AutogradFunction):
     @staticmethod
-    def forward(ctx, input, coeffs, func="mul"):
+    def forward(ctx, input, coeffs, func: str = "mul"):
         ctx.mark_non_differentiable(coeffs)
         if isinstance(coeffs, (list, tuple)):
             coeffs = torch.tensor(coeffs)
@@ -992,7 +992,7 @@ class AutogradCos(AutogradFunction):
 @register_function("cosine_similarity")
 class AutogradCosineSimilarity(AutogradFunction):
     @staticmethod
-    def forward(ctx, x1, x2, dim=1, eps=None):
+    def forward(ctx, x1, x2, dim: int = 1, eps=None):
         assert x1.size() == x2.size(), "cosine_similarity sizes must match"
 
         # Handle 0-d case
@@ -1074,7 +1074,7 @@ class AutogradSign(AutogradFunction):
 @register_function("norm")
 class AutogradNorm(AutogradFunction):
     @staticmethod
-    def forward(ctx, input, p="fro", dim=None, keepdim=False):
+    def forward(ctx, input, p: str = "fro", dim=None, keepdim: bool = False):
         if p == float("inf"):
             sign = input.sign()
             if dim is None:
@@ -1404,7 +1404,7 @@ class AutogradLogSoftmax(AutogradFunction):
 @register_function("pad")
 class AutogradPad(AutogradFunction):
     @staticmethod
-    def forward(ctx, input, padding, value=0.0, mode="constant"):
+    def forward(ctx, input, padding, value: float = 0.0, mode: str = "constant"):
         ctx.save_for_backward(padding)
         output = input.pad(padding, value=value, mode=mode)
         return output
@@ -1423,7 +1423,7 @@ class AutogradPad(AutogradFunction):
 @register_function("avg_pool2d")
 class AutogradAvgPool2D(AutogradFunction):
     @staticmethod
-    def forward(ctx, input, kernel_size, stride=None, padding=0, ceil_mode=False):
+    def forward(ctx, input, kernel_size, stride=None, padding: int = 0, ceil_mode: bool = False):
         # preprocess inputs:
         if stride is None:
             stride = kernel_size
@@ -1490,11 +1490,11 @@ class AutogradMaxPool2D(AutogradFunction):
         ctx,
         input,
         kernel_size,
-        padding=0,
+        padding: int = 0,
         stride=None,
-        dilation=1,
-        ceil_mode=False,
-        return_indices=False,
+        dilation: int = 1,
+        ceil_mode: bool = False,
+        return_indices: bool = False,
     ):
         # preprocess inputs:
         if stride is None:
@@ -1553,7 +1553,9 @@ class AutogradMaxPool2D(AutogradFunction):
 @register_function("conv1d")
 class AutogradConv1D(AutogradFunction):
     @staticmethod
-    def forward(ctx, input, kernel, padding=0, stride=1, dilation=1, groups=1):
+    def forward(
+        ctx, input, kernel, padding: int = 0, stride: int = 1, dilation: int = 1, groups: int = 1
+    ):
         if isinstance(stride, (int, float)):
             stride = (stride,)
         if isinstance(padding, (int, float)):
@@ -1628,7 +1630,9 @@ class AutogradConv1D(AutogradFunction):
 @register_function("conv2d")
 class AutogradConv2D(AutogradFunction):
     @staticmethod
-    def forward(ctx, input, kernel, stride=1, padding=0, dilation=1, groups=1):
+    def forward(
+        ctx, input, kernel, stride: int = 1, padding: int = 0, dilation: int = 1, groups: int = 1
+    ):
         if isinstance(stride, (int, float)):
             stride = (stride, stride)
         if isinstance(padding, (int, float)):
@@ -1726,9 +1730,9 @@ class AutogradBatchNorm(AutogradFunction):
         bias,
         running_mean=None,
         running_var=None,
-        training=False,
-        eps=1e-05,
-        momentum=0.1,
+        training: bool = False,
+        eps: float = 1e-05,
+        momentum: float = 0.1,
         inv_var=None,
     ):
         """
@@ -1867,7 +1871,7 @@ class AutogradBatchNorm(AutogradFunction):
 @register_function("binary_cross_entropy")
 class AutogradBinaryCrossEntropy(AutogradFunction):
     @staticmethod
-    def forward(ctx, pred, target, skip_forward=False):
+    def forward(ctx, pred, target, skip_forward: bool = False):
         ctx.mark_non_differentiable(target)
         ctx.save_multiple_for_backward([pred, target])
         if skip_forward:
@@ -1891,7 +1895,7 @@ class AutogradBinaryCrossEntropy(AutogradFunction):
 @register_function("binary_cross_entropy_with_logits")
 class AutogradBinaryCrossEntropyWithLogits(AutogradFunction):
     @staticmethod
-    def forward(ctx, logit, target, skip_forward=False):
+    def forward(ctx, logit, target, skip_forward: bool = False):
         sigmoid_out = logit.sigmoid()
         assert sigmoid_out.size() == target.size(), (
             "Incorrect input sizes for binary_cross_entropy_with_logits"
@@ -1917,7 +1921,7 @@ class AutogradBinaryCrossEntropyWithLogits(AutogradFunction):
 @register_function("rappor_loss")
 class AutogradRAPPORLoss(AutogradFunction):
     @staticmethod
-    def forward(ctx, logit, target, alpha, skip_forward=False):
+    def forward(ctx, logit, target, alpha, skip_forward: bool = False):
         assert logit.size() == target.size(), "Logit and target sizes must match for rappor loss"
         pred = logit.sigmoid()
         ctx.mark_non_differentiable(target)
@@ -1960,7 +1964,7 @@ class AutogradRAPPORLoss(AutogradFunction):
 @register_function("cross_entropy")
 class AutogradCrossEntropy(AutogradFunction):
     @staticmethod
-    def forward(ctx, pred, target, skip_forward=False):
+    def forward(ctx, pred, target, skip_forward: bool = False):
         # NOTE: target is assumed to be one-hot vector.
         assert pred.size() == target.size()
 

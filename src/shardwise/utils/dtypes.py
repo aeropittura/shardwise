@@ -7,7 +7,7 @@ from shardwise.gpu import CUDALongTensor
 
 
 # helper functions that determine if input is float, int, or base tensor:
-def _is_type_tensor(tensor, types):
+def _is_type_tensor(tensor, types) -> bool:
     """Checks whether the elements of the input tensor are of a given type"""
     if is_tensor(tensor):
         if any(tensor.dtype == type_ for type_ in types):

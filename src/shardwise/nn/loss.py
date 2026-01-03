@@ -12,7 +12,7 @@ class _Loss(Module):
     Base criterion class that mimics Pytorch's Loss.
     """
 
-    def __init__(self, reduction="mean", skip_forward=False):
+    def __init__(self, reduction: str = "mean", skip_forward: bool = False) -> None:
         super().__init__()
         if reduction != "mean":
             raise NotImplementedError("reduction %s not supported")
@@ -185,7 +185,7 @@ class RAPPORLoss(_Loss):
     auto-encoder. Note that the targets t[i] should be numbers between 0 and 1.
     """
 
-    def __init__(self, alpha, reduction="mean", skip_forward=False):
+    def __init__(self, alpha, reduction: str = "mean", skip_forward: bool = False) -> None:
         super().__init__(reduction=reduction, skip_forward=skip_forward)
         self.alpha = alpha
 

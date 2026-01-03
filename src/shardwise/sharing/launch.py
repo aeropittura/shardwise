@@ -12,7 +12,7 @@ import shardwise
 from shardwise.comm import DistributedCommunicator
 
 
-def _launch(func, rank, world_size, rendezvous_file, queue, func_args, func_kwargs):
+def _launch(func, rank, world_size, rendezvous_file, queue, func_args, func_kwargs) -> None:
     communicator_args = {
         "WORLD_SIZE": world_size,
         "RANK": rank,

@@ -20,12 +20,12 @@ class TestAutograd:
     This class tests all autograd-related functionality.
     """
 
-    def setUp(self):
+    def setUp(self) -> None:
         # we do not want main process (rank -1) initializing the communicator:
         if self.rank >= 0:
             shardwise.init()
 
-    def _check(self, encrypted_tensor, reference, msg, tolerance=None):
+    def _check(self, encrypted_tensor, reference, msg, tolerance=None) -> None:
         if tolerance is None:
             tolerance = getattr(self, "default_tolerance", 0.05)
         tensor = encrypted_tensor.get_plain_text()
@@ -47,7 +47,7 @@ class TestAutograd:
             logging.info("Result - Reference = %s" % (tensor - reference))
         self.assertTrue(test_passed, msg=msg)
 
-    def test_non_differentiable_marking(self):
+    def test_non_differentiable_marking(self) -> None:
         """Tests whether marking of non-differentiability works correctly."""
 
         # generate random inputs:
@@ -101,7 +101,7 @@ class TestAutograd:
                 "value of requires_grad is incorrect",
             )
 
-    def test_inplace(self):
+    def test_inplace(self) -> None:
         """
         Tests that in-place functions cannot be used in autograd but return
         correct results outside of autograd.
@@ -117,7 +117,7 @@ class TestAutograd:
                 result.add_(value)
                 self._check(result, reference.add(value), "in-place addition failed")
 
-    def test_autograd_registation(self):
+    def test_autograd_registation(self) -> None:
         """Tests registration of new autograd function."""
 
         # check that get_grad_fn() returns correct functions:
@@ -145,7 +145,7 @@ class TestAutograd:
             with self.assertRaises(ValueError):
                 gradients.register_function(func_name)(cls)
 
-    def test_autograd_func_take(self):
+    def test_autograd_func_take(self) -> None:
         """Tests the part of autograd take that does not have a torch equivalent"""
         tensor_size = [5, 5, 5, 5]
         index = torch.tensor([[[1, 2], [3, 4]], [[4, 2], [1, 3]]], dtype=torch.long)
@@ -180,7 +180,7 @@ class TestAutograd:
             # finally, compare values
             self._check(encr_grad, tensor2.grad, "take backward failed: dimension set")
 
-    def test_detach(self):
+    def test_detach(self) -> None:
         """Tests that detach() works as expected."""
 
         for func_name in ["detach", "detach_"]:
@@ -204,7 +204,7 @@ class TestAutograd:
             self.assertIsNone(input1.grad, msg)
             self.assertIsNotNone(input2.grad, msg)
 
-    def test_forward_tracking(self):
+    def test_forward_tracking(self) -> None:
         """Tests that requires_grad influences tracking of forward computations."""
 
         for requires_grad in [True, False]:
@@ -229,7 +229,7 @@ class TestAutograd:
                 self.assertIsNone(input.grad, msg)
                 self.assertIsNotNone(output.grad, msg)
 
-    def test_autograd_accumulation(self):
+    def test_autograd_accumulation(self) -> None:
         """Tests accumulation in autograd."""
 
         # graphs that have nodes with multiple parents, dead leafs, etc.:

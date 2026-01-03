@@ -12,7 +12,7 @@ class ReLU(Module):
     :math:`\text{ReLU}(x)= \max(0, x)`
     """
 
-    def __init__(self, inplace=False):
+    def __init__(self, inplace: bool = False) -> None:
         super().__init__()
         if inplace:
             logging.warning("Shardwise ReLU module does not support inplace computation.")
@@ -62,7 +62,7 @@ class Hardtanh(Module):
         >>> output = m(input)
     """
 
-    def __init__(self, min_val=-1.0, max_val=1.0, inplace=False):
+    def __init__(self, min_val=-1.0, max_val: float = 1.0, inplace: bool = False) -> None:
         super().__init__()
         self.min_val = min_val
         self.max_val = max_val
@@ -108,7 +108,7 @@ class ReLU6(Hardtanh):
         >>> output = m(input)
     """
 
-    def __init__(self, inplace=False):
+    def __init__(self, inplace: bool = False) -> None:
         if inplace:
             logging.warning("Shardwise ReLU6 module does not support inplace computation.")
         super().__init__(min_val=0, max_val=6, inplace=False)
@@ -153,7 +153,7 @@ class Softmax(Module):
             along dim will sum to 1).
     """
 
-    def __init__(self, dim):
+    def __init__(self, dim) -> None:
         super().__init__()
         self.dim = dim
 
@@ -189,7 +189,7 @@ class LogSoftmax(Module):
         values in the range \[-inf, 0\)
     """
 
-    def __init__(self, dim):
+    def __init__(self, dim) -> None:
         super().__init__()
         self.dim = dim
 

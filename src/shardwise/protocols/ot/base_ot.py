@@ -31,7 +31,7 @@ class BaseOT:
         """
         return "".join(chr(ord(a) ^ ord(b)) for a, b in zip(s1, s2))
 
-    def __init__(self, partner_rank):
+    def __init__(self, partner_rank) -> None:
         self.partner_rank = partner_rank
         return
 

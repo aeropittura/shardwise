@@ -15,7 +15,7 @@ from tests.support.multiprocess import MultiProcessTestCase, get_random_test_ten
 
 
 class TestMLP(torch.nn.Module):
-    def __init__(self, in_features, out_features):
+    def __init__(self, in_features, out_features) -> None:
         super().__init__()
         self.linear1 = torch.nn.Linear(in_features, 100)
         self.linear2 = torch.nn.Linear(100, 50)
@@ -29,7 +29,7 @@ class TestMLP(torch.nn.Module):
 
 
 class TestMLPBN(torch.nn.Module):
-    def __init__(self, in_features, out_features):
+    def __init__(self, in_features, out_features) -> None:
         super().__init__()
         self.linear1 = torch.nn.Linear(in_features, 100)
         self.linear2 = torch.nn.Linear(100, 50)
@@ -73,7 +73,7 @@ def RAPPOR_loss(alpha):
 
 
 class TestPrivacyModels(MultiProcessTestCase):
-    def _check(self, encrypted_tensor, reference, msg, tolerance=None):
+    def _check(self, encrypted_tensor, reference, msg, tolerance=None) -> None:
         if tolerance is None:
             tolerance = getattr(self, "default_tolerance", 0.05)
         tensor = encrypted_tensor.get_plain_text()
@@ -92,7 +92,7 @@ class TestPrivacyModels(MultiProcessTestCase):
             logging.info("Result - Reference = %s" % (tensor - reference))
         self.assertTrue(test_passed, msg=msg)
 
-    def _check_gradients_with_dp(self, model, dp_model, std, tolerance=None):
+    def _check_gradients_with_dp(self, model, dp_model, std, tolerance=None) -> None:
         if tolerance is None:
             tolerance = getattr(self, "default_tolerance", 0.07)
 

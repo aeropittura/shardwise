@@ -18,7 +18,7 @@ from tests.support.multiprocess import MultiProcessTestCase, get_random_test_ten
 
 
 class MLP(nn.Module):
-    def __init__(self, in_dim=128):
+    def __init__(self, in_dim: int = 128) -> None:
         super().__init__()
         self.linear1 = nn.Linear(in_dim, 128)
         self.relu1 = nn.ReLU()
@@ -42,7 +42,7 @@ class TestCUDA(TestMPC):
     This class tests all functions of CUDALongTensor as well as its integration with SecureTensor.
     """
 
-    def _check_int(self, result, reference, msg):
+    def _check_int(self, result, reference, msg) -> None:
         # Check sizes match
         self.assertTrue(result.size() == reference.size(), msg)
 
@@ -133,7 +133,7 @@ class TestCUDA(TestMPC):
     def test_conv1d_large_filter(self) -> None:
         self._patched_conv1d(1024, 1, kernel_sizes=[256, 512])
 
-    def _patched_conv1d(self, signal_size, in_channels, kernel_sizes=None):
+    def _patched_conv1d(self, signal_size, in_channels, kernel_sizes=None) -> None:
         """Test convolution of torch.cuda.LongTensor with cuda_patches technique."""
         nbatches = [1, 3]
         ochannels = [1, 3, 6]
@@ -196,7 +196,7 @@ class TestCUDA(TestMPC):
         self.kernel_sizes = [(64, 64)]
         self._patched_conv2d((64, 64), 1)
 
-    def _patched_conv2d(self, image_size, in_channels):
+    def _patched_conv2d(self, image_size, in_channels) -> None:
         """Test convolution of torch.cuda.LongTensor with cuda_patches technique."""
         kwargs = collections.OrderedDict()
         kwargs["nbatches"] = [1, 3]
@@ -532,7 +532,7 @@ class TestCUDA(TestMPC):
 
 # Run all unit tests with both TFP and TTP providers
 class TestTFP(MultiProcessTestCase, TestCUDA):
-    def __init__(self, methodName):
+    def __init__(self, methodName) -> None:
         super().__init__(methodName)
         self.device = torch.device("cuda")
 
@@ -549,7 +549,7 @@ class TestTFP(MultiProcessTestCase, TestCUDA):
 
 
 class TestTTP(MultiProcessTestCase, TestCUDA):
-    def __init__(self, methodName):
+    def __init__(self, methodName) -> None:
         super().__init__(methodName)
         self.device = torch.device("cuda")
 

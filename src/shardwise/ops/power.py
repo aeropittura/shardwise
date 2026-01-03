@@ -56,7 +56,7 @@ def pos_pow(self, p):
     return self.log().mul_(p).exp()
 
 
-def polynomial(self, coeffs, func="mul"):
+def polynomial(self, coeffs, func: str = "mul"):
     """Computes a polynomial function on a tensor with given coefficients,
     `coeffs`, that can be a list of values or a 1-D tensor.
 
@@ -91,7 +91,7 @@ def polynomial(self, coeffs, func="mul"):
     return terms.mul(coeffs).sum(0)
 
 
-def norm(self, p="fro", dim=None, keepdim=False):
+def norm(self, p: str = "fro", dim=None, keepdim: bool = False):
     """Computes the p-norm of the input tensor (or along a dimension)."""
     if p == "fro":
         p = 2

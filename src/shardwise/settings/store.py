@@ -31,10 +31,10 @@ class ShardwiseConfig:
 
     __DEFAULT_CONFIG_PATH = os.path.join(os.path.dirname(__file__), "default.yaml")
 
-    def __init__(self, config_file=None):
+    def __init__(self, config_file=None) -> None:
         self.load_config(config_file)
 
-    def load_config(self, config_file):
+    def load_config(self, config_file) -> None:
         """Loads config from a yaml file"""
         if config_file is None:
             config_file = ShardwiseConfig.__DEFAULT_CONFIG_PATH
@@ -44,7 +44,7 @@ class ShardwiseConfig:
             config_dict = yaml.safe_load(stream)
         self.config = OmegaConf.create(config_dict)
 
-    def set_config(self, config):
+    def set_config(self, config) -> None:
         if isinstance(config, ShardwiseConfig):
             self.config = config.config
         else:
@@ -63,7 +63,7 @@ class ShardwiseConfig:
     def __getitem__(self, name):
         return self.__getattribute__(name)
 
-    def __setattr__(self, name, value):
+    def __setattr__(self, name, value) -> None:
         if name == "config":
             object.__setattr__(self, name, value)
         try:
@@ -75,7 +75,7 @@ class ShardwiseConfig:
             update = OmegaConf.from_dotlist(dotlist)
             self.config = OmegaConf.merge(self.config, update)
 
-    def __setitem__(self, name, value):
+    def __setitem__(self, name, value) -> None:
         self.__setattr__(name, value)
 
     @contextmanager

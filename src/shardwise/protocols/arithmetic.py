@@ -33,11 +33,11 @@ class ArithmeticSharedTensor:
         self,
         tensor=None,
         size=None,
-        broadcast_size=False,
+        broadcast_size: bool = False,
         precision=None,
-        src=0,
+        src: int = 0,
         device=None,
-    ):
+    ) -> None:
         """
         Creates the shared tensor from the input `tensor` provided by party `src`.
 
@@ -133,7 +133,7 @@ class ArithmeticSharedTensor:
         return self._tensor
 
     @share.setter
-    def share(self, value):
+    def share(self, value) -> None:
         """Sets _tensor to value"""
         self._tensor = value
 
@@ -195,15 +195,15 @@ class ArithmeticSharedTensor:
         result._tensor = self._tensor.clone()
         return result
 
-    def copy_(self, other):
+    def copy_(self, other) -> None:
         """Copies other tensor into this tensor."""
         self.share.copy_(other.share)
         self.encoder = other.encoder
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"ArithmeticSharedTensor({self.share})"
 
-    def __bool__(self):
+    def __bool__(self) -> bool:
         """Override bool operator since encrypted tensors cannot evaluate"""
         raise RuntimeError("Cannot evaluate ArithmeticSharedTensors to boolean values")
 
@@ -211,7 +211,7 @@ class ArithmeticSharedTensor:
         """__bool__ for backwards compatibility with Python 2"""
         raise RuntimeError("Cannot evaluate ArithmeticSharedTensors to boolean values")
 
-    def __setitem__(self, index, value):
+    def __setitem__(self, index, value) -> None:
         """Set tensor values by index"""
         if isinstance(value, (int, float)) or is_tensor(value):
             value = ArithmeticSharedTensor(value)
@@ -220,7 +220,7 @@ class ArithmeticSharedTensor:
         )
         self.share.__setitem__(index, value.share)
 
-    def pad(self, pad, mode="constant", value=0):
+    def pad(self, pad, mode: str = "constant", value: int = 0):
         """
         Pads the input tensor with values provided in `value`.
         """
@@ -313,7 +313,7 @@ class ArithmeticSharedTensor:
     def _arithmetic_function_(self, y, op, *args, **kwargs):
         return self._arithmetic_function(y, op, inplace=True, *args, **kwargs)
 
-    def _arithmetic_function(self, y, op, inplace=False, *args, **kwargs):  # noqa:C901
+    def _arithmetic_function(self, y, op, inplace: bool = False, *args, **kwargs):  # noqa:C901
         assert op in [
             "add",
             "sub",
@@ -523,7 +523,7 @@ class ArithmeticSharedTensor:
             raise TypeError("scatter_add second tensor of unsupported type")
         return self
 
-    def avg_pool2d(self, kernel_size, stride=None, padding=0, ceil_mode=False):
+    def avg_pool2d(self, kernel_size, stride=None, padding: int = 0, ceil_mode: bool = False):
         """Perform an average pooling on each 2D matrix of the given tensor
 
         Args:
@@ -540,7 +540,7 @@ class ArithmeticSharedTensor:
             pool_size = kernel_size[0] * kernel_size[1]
         return z / pool_size
 
-    def _sum_pool2d(self, kernel_size, stride=None, padding=0, ceil_mode=False):
+    def _sum_pool2d(self, kernel_size, stride=None, padding: int = 0, ceil_mode: bool = False):
         """Perform a sum pooling on each 2D matrix of the given tensor"""
         result = self.shallow_copy()
 
@@ -638,7 +638,7 @@ class ArithmeticSharedTensor:
         return self._tensor.data
 
     @data.setter
-    def data(self, value):
+    def data(self, value) -> None:
         self._tensor.set_(value)
 
 

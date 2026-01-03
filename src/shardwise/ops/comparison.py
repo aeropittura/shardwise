@@ -80,7 +80,7 @@ def relu(self):
     return self * self.ge(0)
 
 
-def hardtanh(self, min_value=-1, max_value=1):
+def hardtanh(self, min_value=-1, max_value: int = 1):
     r"""Applies the HardTanh function element-wise
 
     HardTanh is defined as:

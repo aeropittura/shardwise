@@ -16,11 +16,11 @@ __all__ = [
 def max_pool2d(
     self,
     kernel_size,
-    padding=0,
+    padding: int = 0,
     stride=None,
-    dilation=1,
-    ceil_mode=False,
-    return_indices=False,
+    dilation: int = 1,
+    ceil_mode: bool = False,
+    return_indices: bool = False,
 ):
     """Applies a 2D max pooling over an input signal composed of several
     input planes.
@@ -55,8 +55,8 @@ def _max_pool2d_backward(
     kernel_size,
     padding=None,
     stride=None,
-    dilation=1,
-    ceil_mode=False,
+    dilation: int = 1,
+    ceil_mode: bool = False,
     output_size=None,
 ):
     """Implements the backwards for a `max_pool2d` call."""
@@ -160,7 +160,7 @@ def adaptive_avg_pool2d(self, output_size):
     return resized_input.avg_pool2d(*args, **kwargs)
 
 
-def adaptive_max_pool2d(self, output_size, return_indices=False):
+def adaptive_max_pool2d(self, output_size, return_indices: bool = False):
     r"""Applies a 2D adaptive max pooling over an input signal composed of
     several input planes.
 
@@ -184,7 +184,7 @@ def adaptive_max_pool2d(self, output_size, return_indices=False):
 
 
 # Helper functions
-def _adaptive_pool2d_helper(input, output_size, reduction="mean"):
+def _adaptive_pool2d_helper(input, output_size, reduction: str = "mean"):
     r"""
     Provides a helper that adapts the input size and provides input
     args / kwargs to allow pool2d functions to emulate adaptive pool2d
@@ -324,9 +324,9 @@ def _pool2d_reshape(
     kernel_size,
     padding=None,
     stride=None,
-    dilation=1,
-    ceil_mode=False,
-    pad_value=0,
+    dilation: int = 1,
+    ceil_mode: bool = False,
+    pad_value: int = 0,
 ):
     """Rearrange a 4-d tensor so that each kernel is represented by each row"""
 

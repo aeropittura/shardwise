@@ -22,7 +22,7 @@ from tests.support.multiprocess import (
 class TestOnnxConverter:
     """Tests PyTorch and Tensorflow model imports"""
 
-    def _check(self, encrypted_tensor, reference, msg, tolerance=None):
+    def _check(self, encrypted_tensor, reference, msg, tolerance=None) -> None:
         if tolerance is None:
             tolerance = getattr(self, "default_tolerance", 0.05)
         tensor = encrypted_tensor.get_plain_text()
@@ -43,7 +43,7 @@ class TestOnnxConverter:
             logging.info("Result - Reference = %s" % (tensor - reference))
         self.assertTrue(test_passed, msg=msg)
 
-    def _check_reference_parameters(self, init_name, reference, model):
+    def _check_reference_parameters(self, init_name, reference, model) -> None:
         for name, param in model.named_parameters(recurse=False):
             local_name = init_name + "_" + name
             self._check(param, reference[local_name], "parameter update failed")
@@ -64,7 +64,7 @@ class TestOnnxConverter:
             )
         return reference
 
-    def setUp(self):
+    def setUp(self) -> None:
         super().setUp()
         # We don't want the main process (rank -1) to initialize the communicator
         if self.rank >= 0:
@@ -171,13 +171,13 @@ class TestOnnxConverter:
             self._check(result_enc, result, "nn.from_tensorflow failed")
     """
 
-    def test_from_pytorch_training_classification(self):
+    def test_from_pytorch_training_classification(self) -> None:
         """Tests from_pytorch Shardwise training for classification models"""
         import torch.nn as nn
         import torch.nn.functional as F
 
         class CNN(nn.Module):
-            def __init__(self):
+            def __init__(self) -> None:
                 super(CNN, self).__init__()
                 self.conv1 = nn.Conv2d(1, 16, kernel_size=5, padding=1)
                 self.fc1 = nn.Linear(16 * 13 * 13, 100)
@@ -215,13 +215,13 @@ class TestOnnxConverter:
 
         self._check_model_export(model, x_train)
 
-    def test_from_pytorch_training_regression(self):
+    def test_from_pytorch_training_regression(self) -> None:
         """Tests from_pytorch Shardwise training for regression models"""
         import torch.nn as nn
         import torch.nn.functional as F
 
         class FeedForward(nn.Module):
-            def __init__(self):
+            def __init__(self) -> None:
                 super(FeedForward, self).__init__()
                 self.fc1 = nn.Linear(3, 10)
                 self.fc2 = nn.Linear(10, 1)
@@ -252,8 +252,8 @@ class TestOnnxConverter:
         self._check_model_export(model, x_train)
 
     def _check_training(
-        self, model, x_train, y_train, loss_name, num_epochs=2, learning_rate=0.001
-    ):
+        self, model, x_train, y_train, loss_name, num_epochs: int = 2, learning_rate: float = 0.001
+    ) -> None:
         """Verifies gradient updates and loss decreases during training"""
         # create loss function
         loss = getattr(shardwise.nn, loss_name)()
@@ -301,7 +301,7 @@ class TestOnnxConverter:
             f"{loss_name} has not decreased after training",
         )
 
-    def _check_model_export(self, shardwise_model, x_enc):
+    def _check_model_export(self, shardwise_model, x_enc) -> None:
         """Checks that exported model returns the same results as shardwise model"""
         pytorch_model = shardwise_model.decrypt().to_pytorch()
         x_plain = x_enc.get_plain_text()
@@ -312,7 +312,7 @@ class TestOnnxConverter:
 
         self._check(y_enc, y_plain, msg="Model export failed.")
 
-    def test_get_operator_class(self):
+    def test_get_operator_class(self) -> None:
         """Checks operator is a valid shardwise module"""
         Node = collections.namedtuple("Node", "op_type")
 
@@ -338,7 +338,7 @@ class TestOnnxConverter:
                 node = Node(invalid_type)
                 operator = onnx_io._get_operator_class(node.op_type, attr)
 
-    def test_export_pytorch_model(self):
+    def test_export_pytorch_model(self) -> None:
         """Tests loading of onnx model from a file"""
         pytorch_model = PyTorchLinear()
         dummy_input = torch.empty(10, 10)
@@ -346,7 +346,7 @@ class TestOnnxConverter:
         with io.BytesIO() as f:
             onnx_io._export_pytorch_model(f, pytorch_model, dummy_input)
 
-    def test_from_onnx(self):
+    def test_from_onnx(self) -> None:
         """Tests construction of shardwise model from onnx graph"""
         pytorch_model = PyTorchLinear()
         dummy_input = torch.empty(10, 10)
@@ -359,11 +359,11 @@ class TestOnnxConverter:
 
         self.assertTrue(hasattr(shardwise_model, "encrypt"))
 
-    def test_reshape_plain_text_conversion(self):
+    def test_reshape_plain_text_conversion(self) -> None:
         """Verifies shape inputs in reshape are properly imported"""
 
         class Net(torch.nn.Module):
-            def __init__(self):
+            def __init__(self) -> None:
                 super().__init__()
                 self.fc1 = torch.nn.Linear(4, 4)
 
@@ -385,7 +385,7 @@ class TestOnnxConverter:
 
 
 class PyTorchLinear(torch.nn.Module):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.fc1 = torch.nn.Linear(10, 1)
 
