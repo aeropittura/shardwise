@@ -46,14 +46,10 @@ index_page = html.Div(
             [
                 html.Div(
                     [
-                        html.Img(
-                            src=app.get_asset_url("shardwise-icon.png"),
+                        html.H3(
+                            "Shardwise",
                             id="plotly-image",
-                            style={
-                                "height": "60px",
-                                "width": "auto",
-                                "margin-bottom": "25px",
-                            },
+                            style={"margin-bottom": "25px"},
                         )
                     ],
                     className="one-third column",
@@ -106,7 +102,7 @@ index_page = html.Div(
                         dcc.Markdown(
                             """To reproduce or view assumptions see
                             [benchmarks](
-                            https://github.com/facebookresearch/Shardwise/blob/master/benchmarks/benchmark.py#L68)
+                            https://github.com/aeropittura/shardwise/blob/main/benchmarks/benchmark.py)
                             """
                         ),
                         html.H5("Runtimes"),
@@ -157,10 +153,10 @@ index_page = html.Div(
                         dcc.Markdown(
                             """
                             For model details or to reproduce see
-                            [models](https://github.com/facebookresearch/Shardwise/blob/master/benchmarks/models.py)
+                            [models](https://github.com/aeropittura/shardwise/blob/main/benchmarks/models.py)
                             and
                             [training details](
-                            https://github.com/facebookresearch/Shardwise/blob/master/benchmarks/benchmark.py#L293).
+                            https://github.com/aeropittura/shardwise/blob/main/benchmarks/benchmark.py).
                             * trained on Gaussian clusters for binary classification
                                 * uses SGD with 5k samples, 20 features, over 20 epochs, and 0.1 learning rate
                             * feedforward has three hidden layers with intermediary RELU and
@@ -215,14 +211,10 @@ comparison_layout = html.Div(
             [
                 html.Div(
                     [
-                        html.Img(
-                            src=app.get_asset_url("shardwise-icon.png"),
+                        html.H3(
+                            "Shardwise",
                             id="plotly-image",
-                            style={
-                                "height": "60px",
-                                "width": "auto",
-                                "margin-bottom": "25px",
-                            },
+                            style={"margin-bottom": "25px"},
                         )
                     ],
                     className="one-third column",

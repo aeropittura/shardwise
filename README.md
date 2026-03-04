@@ -19,72 +19,78 @@ neural network components with examples for training and inference.
 
 ## Getting started
 
-Clone the repository and create an isolated Python environment:
+Shardwise needs Python 3.9 or later on Linux or macOS.
 
 ```bash
 git clone https://github.com/aeropittura/shardwise.git
 cd shardwise
 python3 -m venv .venv
 source .venv/bin/activate
-python -m pip install --upgrade pip setuptools wheel
+pip install -e .
 ```
 
-Install the runtime dependencies and the local package:
+Optional extras: `.[examples]`, `.[benchmarks]`, `.[aws]`, `.[docs]` and `.[dev]`.
 
-```bash
-python -m pip install torch torchvision omegaconf onnx pandas pyyaml tensorboard future scipy scikit-learn
-python -m pip install --no-deps -e .
+## A first encrypted computation
+
+```python
+import shardwise
+import torch
+
+shardwise.init()
+
+x = shardwise.tensor(torch.tensor([1.0, 2.0, 3.0]))  # secret-shared ShardTensor
+y = (x * 2 + 1).get_plain_text()  # tensor([3., 5., 7.])
 ```
 
-The dependency list above uses `scikit-learn` in place of the legacy `sklearn`
-package entry in `requirements.txt`. The package metadata specifies Python 3.7
-or later; compatibility with every recent Python or dependency release is not
-established. Consult [requirements.txt](requirements.txt) and [env.yml](env.yml)
-when preparing a reproducible environment. Linux and macOS are the documented
-platforms; Windows is not supported by the existing setup.
+To run code as several parties on one machine, decorate a function with
+`shardwise.sharing.run_multiprocess(world_size=2)`.
 
 ## Run an example
 
-Install the additional example dependencies:
-
 ```bash
-python -m pip install -r requirements.examples.txt
-```
-
-Inspect the options for the encrypted linear classifier example:
-
-```bash
+pip install -e ".[examples]"
 python examples/mpc_linear_svm/launcher.py --help
 ```
 
 The [examples](examples) directory includes encrypted linear classification,
 image classification, contextual bandits, and pretrained-model inference.
-Each example has its own launcher and configuration options. Some examples
-train in plaintext before evaluating an encrypted model; others demonstrate
-training with encrypted data.
 
-## Explore the repository
+## Project layout
 
-- [tutorials](tutorials): notebook walkthroughs of encrypted tensors, access
-  control, model evaluation, and training.
-- [examples](examples): end-to-end model demonstrations and launchers.
-- [benchmarks](benchmarks): performance experiments and profiling tools.
-- [configs](configs): runtime configuration defaults.
-- [scripts](scripts): distributed execution and deployment helpers.
-- [test](test): tests for tensors, protocols, communication, and model components.
-- [docs](docs): documentation sources.
+```
+src/shardwise/
+  core/        ShardTensor base class, autograd tensor, gradient functions, fixed-point encoding
+  sharing/     SecureTensor (the default secret-shared tensor), ptype, multiprocess launcher
+  protocols/   arithmetic and binary secret sharing, Beaver triples, circuits, conversions, OT
+  providers/   sources of correlated randomness (trusted first/third party, homomorphic)
+  ops/         functions shared by all tensor types (approximations, comparisons, pooling, ...)
+  comm/        communicators (torch.distributed and in-process threads)
+  nn/          layers/, losses, ONNX import (onnx_io), privacy-preserving training
+  optim/       optimizers
+  settings/    configuration object and default.yaml
+  gpu/  utils/  debug/  zoo/
+tests/         mirrors src/shardwise/
+examples/  benchmarks/  notebooks/  docs/  scripts/
+```
 
 ## Development
 
-Install the test runner and run the tests relevant to a change:
-
 ```bash
-python -m pip install pytest
-python -m pytest test/test_common.py
+pip install -e ".[dev]"
+pre-commit install
+ruff check . && ruff format --check .
+python -m unittest discover -s tests -t .
 ```
 
-Distributed and GPU tests may require additional processes, hardware, or runtime
-configuration. Start with a small local example before running a larger workload.
+Most tests start several processes to simulate the parties, so the full suite
+takes a while. Run a single module while iterating, e.g.
+`python -m unittest tests.protocols.test_arithmetic`. GPU tests are skipped when
+CUDA is unavailable. See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## License
+
+Shardwise is released under the [MIT License](LICENSE).
 
 ## Research scope
 

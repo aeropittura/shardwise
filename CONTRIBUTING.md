@@ -1,25 +1,43 @@
-# Contributing to Shardwise
-We want to make contributing to this project as easy and transparent as
-possible.
+# Contributing
 
-## Development Installation
+Thanks for helping improve Shardwise.
 
-1. Activate virtualenv with Python >= 3.7
-2. Install Numpy and PyTorch Nightly
+## Set up a development environment
+
+Shardwise needs Python 3.9 or later.
+
 ```bash
-pip install numpy
-pip install --pre torch torchvision -f https://download.pytorch.org/whl/nightly/cpu/torch_nightly.html
+python -m venv .venv
+source .venv/bin/activate
+pip install -e ".[dev]"
+pre-commit install
 ```
-3. From your fork of the repo: `pip install -e .`
 
-## Pull Requests
-We actively welcome your pull requests.
+## Before opening a pull request
 
-1. Fork the repo and create your branch from `master`.
-2. If you've added code that should be tested, add tests.
-3. If you've changed APIs, update the documentation.
-4. Ensure the test suite passes.
+1. Branch from `main`.
+2. Add or update tests for any behavior you change; tests live in `tests/`,
+   mirroring the layout of `src/shardwise/`.
+3. Run the checks:
 
-## Issues
-We use GitHub issues to track public bugs. Please ensure your description is
-clear and has sufficient instructions to be able to reproduce the issue.
+   ```bash
+   ruff check .
+   ruff format --check .
+   python -m unittest discover -s tests -t .
+   ```
+
+4. Update the documentation in `docs/` if you change a public API.
+
+Most tests start several processes to simulate the parties of a computation, so
+the full suite takes a while. While iterating, run a single module, e.g.
+`python -m unittest tests.protocols.test_arithmetic`.
+
+## Reporting issues
+
+Use GitHub issues. Include the Shardwise, PyTorch and Python versions, your
+operating system, and the smallest snippet that reproduces the problem.
+
+## License
+
+By contributing, you agree that your contributions are licensed under the
+[MIT License](LICENSE).

@@ -3,7 +3,7 @@
 
 """
 Based on
-https://github.com/facebookresearch/Shardwise/blob/master/examples/multiprocess_launcher.py
+https://github.com/aeropittura/shardwise/blob/main/examples/multiprocess_launcher.py
 """
 
 import logging

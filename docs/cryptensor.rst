@@ -44,7 +44,7 @@ backpropagation.
 
 For an example of backpropagation using ``ShardTensor``, please
 see `Tutorial 7
-<https://github.com/facebookresearch/Shardwise/blob/master/tutorials/Tutorial_7_Training_an_Encrypted_Neural_Network.ipynb>`_.
+<https://github.com/aeropittura/shardwise/blob/main/notebooks/tutorials/07_encrypted_training.ipynb>`_.
 
 
 File I/O Utilities

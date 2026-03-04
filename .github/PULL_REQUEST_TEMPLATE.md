@@ -23,5 +23,5 @@
 <!--- If you're unsure about any of these, don't hesitate to ask. We're here to help! -->
 
 - [ ] The documentation is up-to-date with the changes I made.
-- [ ] I have read the **CONTRIBUTING** document and completed the CLA (see **CONTRIBUTING**).
-- [ ] All tests passed, and additional code has been covered with new tests.
+- [ ] I have read the **CONTRIBUTING** document.
+- [ ] `ruff check`, `ruff format --check` and the test suite pass, and new code is covered by tests.

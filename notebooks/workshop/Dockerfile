@@ -1,10 +1,9 @@
-# This pulls pytorch image with Python 3.7
 FROM pytorch/pytorch
 
-RUN  pip install shardwise
+RUN  pip install "shardwise @ git+https://github.com/aeropittura/shardwise.git"
 RUN  pip install jupyter
 
-COPY Intro.ipynb Intro.ipynb
+COPY *.ipynb *.py ./
 
 # start jupyter notebook
 # Tini operates as a process subreaper for jupyter to prevent kernel crashes.

@@ -23,7 +23,7 @@ PyTorch networks that need to be encrypted before use.
     The dummy input simply needs to be a `torch` tensor of the same
     shape; the values inside the tensor do not matter. For a complete
     example of how to use ``from_pytorch`` function, please see
-    `Tutorial 4 <https://github.com/facebookresearch/Shardwise/blob/master/tutorials/Tutorial_4_Classification_with_Encrypted_Neural_Networks.ipynb>`_.
+    `Tutorial 4 <https://github.com/aeropittura/shardwise/blob/main/notebooks/tutorials/04_encrypted_classification.ipynb>`_.
 
 Custom Shardwise Modules
 ----------------------
