@@ -50,7 +50,9 @@ class SecureTensor(ShardTensor):
 
         # create the SecureTensor:
         tensor_type = ptype.to_tensor()
-        if tensor == []:
+        # Kept as an identity check to preserve upstream behavior: it is always False,
+        # so an empty list still reaches the protocol constructor (needed for src/broadcast_size).
+        if tensor is []:  # noqa: F632
             self._tensor = torch.tensor([], device=device)
         else:
             self._tensor = tensor_type(tensor=tensor, device=device, *args, **kwargs)
