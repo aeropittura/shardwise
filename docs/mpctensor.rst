@@ -38,7 +38,7 @@ used in our implementation.
 For examples illustrating arithmetic and binary secret-sharing in
 Shardwise, the ``ptype`` attribute, and the execution of secure
 multi-party computations, please see `Tutorial 2
-<https://github.com/facebookresearch/Shardwise/blob/master/tutorials/Tutorial_2_Inside_ShardTensors.ipynb>`_.
+<https://github.com/aeropittura/shardwise/blob/main/notebooks/tutorials/02_inside_shard_tensors.ipynb>`_.
 
 Tensor Operations
 -----------------

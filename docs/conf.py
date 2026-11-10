@@ -21,7 +21,7 @@
 # -- Project information -----------------------------------------------------
 
 project = "Shardwise"
-author = "Facebook AI Research"
+author = "Shardwise contributors"
 
 # The full version, including alpha/beta/rc tags
 release = "0.1"

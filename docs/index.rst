@@ -38,7 +38,7 @@ you can run the unit tests by cloning the repo then
 We do not support Windows yet.
 For contributing to the latest development version, please see Contributing_.
 
-.. _Contributing: https://github.com/facebookresearch/Shardwise/blob/master/CONTRIBUTING.md
+.. _Contributing: https://github.com/aeropittura/shardwise/blob/main/CONTRIBUTING.md
 
 Examples
 ========

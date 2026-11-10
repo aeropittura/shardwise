@@ -21,11 +21,11 @@ To launch the `mpc_linear_svm` example,
 
 .. code-block:: bash
 
-    python3 [PATH_TO_SHARDWISE]/Shardwise/aws_launcher.py \
+    python3 [PATH_TO_SHARDWISE]/scripts/aws_launcher.py \
     --ssh_key_file [SSH_KEY_FILE] --instances=[AWS_INSTANCE1, AWS_INSTANCE2...] \
     --region [AWS_REGION] \
     --ssh_user [AWS_USERNAME] \
-    --aux_files=[PATH_TO_SHARDWISE]/Shardwise/examples/mpc_linear_svm/mpc_linear_svm.py [PATH_TO_SHARDWISE]/Shardwise/examples/mpc_linear_svm/launcher.py \
+    --aux_files=[PATH_TO_SHARDWISE]/examples/mpc_linear_svm/mpc_linear_svm.py [PATH_TO_SHARDWISE]/examples/mpc_linear_svm/launcher.py \
     --features 50 \
     --examples 100 \
     --epochs 50 \

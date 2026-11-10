@@ -1,12 +1,12 @@
-# Shardwise PyCon Workshop 2020
+# Shardwise workshop notebooks
 
 
 ## Installation
 
-Install Shardwise using the instructions in the [README](https://github.com/facebookresearch/Shardwise#installing-shardwise).
+Install Shardwise using the instructions in the [README](https://github.com/aeropittura/shardwise#getting-started).
 Then from this directory, `pip install -r requirements.txt`.
 
-* Note Shardwise requires Python 3.7.
+* Shardwise requires Python 3.9 or later.
 
 Alternatively, we provide a Dockerfile to make running these notebooks easy.
 After cloning the repo,
