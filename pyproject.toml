@@ -1,0 +1,75 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "shardwise"
+dynamic = ["version"]
+description = "Privacy-preserving machine learning with secure multiparty computation on PyTorch."
+readme = "README.md"
+license = { file = "LICENSE" }
+authors = [{ name = "Shardwise contributors" }]
+requires-python = ">=3.9"
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Security :: Cryptography",
+]
+dependencies = [
+    "torch>=1.7.0",
+    "torchvision>=0.9.1",
+    "numpy",
+    "omegaconf>=2.0.6",
+    "onnx>=1.7.0",
+    "pyyaml>=5.3.1",
+    "tensorboard",
+    "scipy>=1.6.0",
+]
+
+[project.optional-dependencies]
+examples = ["visdom>=0.1.8.8", "pandas>=1.2.2", "scikit-learn"]
+benchmarks = ["pandas>=1.2.2", "scikit-learn", "pillow", "dash", "plotly"]
+aws = ["boto3", "paramiko"]
+docs = ["sphinx", "sphinx-rtd-theme"]
+dev = ["ruff>=0.6", "pre-commit", "pandas>=1.2.2", "scikit-learn"]
+
+[project.urls]
+Repository = "https://github.com/aeropittura/shardwise"
+
+[tool.setuptools.dynamic]
+version = { attr = "shardwise.__version__" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"shardwise.settings" = ["default.yaml"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+src = ["src", "tests", "examples", "benchmarks", "scripts"]
+extend-include = ["*.ipynb"]
+extend-exclude = ["notebooks"]
+
+[tool.ruff.format]
+docstring-code-format = true
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "UP", "C4"]
+ignore = [
+    "E501",  # long lines are left to the formatter (docstrings/URLs may exceed it)
+    "E731",  # lambda assignments are used deliberately in tests
+    "E741",  # short math-style variable names (l, I) are intentional
+    "F403", "F405",  # nn.init is re-exported with a star import
+]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["shardwise", "tests", "examples", "benchmarks"]
+force-sort-within-sections = true
