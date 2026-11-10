@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-# pyre-unsafe
 
 """
 To run mpc_autograd_cnn example:
@@ -87,8 +86,7 @@ def _run_experiment(args):
         level=level,
         format="%(asctime)s - %(process)d - %(name)s - %(levelname)s - %(message)s",
     )
-    # pyre-fixme[21]: Could not find module `mpc_autograd_cnn`.
-    from mpc_autograd_cnn import run_mpc_autograd_cnn  # @manual
+    from mpc_autograd_cnn import run_mpc_autograd_cnn
 
     run_mpc_autograd_cnn(
         num_epochs=args.epochs,

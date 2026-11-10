@@ -5,7 +5,6 @@ import random
 import time
 
 import torch
-from asset_minimisation_infra.dead_code_cleanup.dynamic_dispatch import dynamic_dispatch
 
 
 def online_learner(
@@ -101,7 +100,6 @@ def online_learner(
         monitor_func(idx, None, None, None, finished=True)
 
 
-@dynamic_dispatch
 def epsilon_greedy(
     sampler,
     epsilon=0.0,
@@ -142,7 +140,6 @@ def epsilon_greedy(
     )
 
 
-@dynamic_dispatch
 def linucb(
     sampler,
     epsilon=0.1,

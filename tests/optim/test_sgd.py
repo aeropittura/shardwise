@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-# pyre-unsafe
 
 
 import itertools
@@ -71,13 +70,10 @@ class TestOptim:
             }
 
             if nesterov and (momentum <= 0 or dampening != 0):
-                # pyre-fixme[16]: `TestOptim` has no attribute `assertRaises`.
                 with self.assertRaises(ValueError):
                     shardwise.optim.SGD(shardwise_model.parameters(), **kwargs)
                 continue
 
-            # pyre-fixme[6]: For 2nd argument expected `Optional[bool]` but got `float`.
-            # pyre-fixme[6]: For 2nd argument expected `bool` but got `float`.
             torch_optimizer = torch.optim.SGD(torch_model.parameters(), **kwargs)
             shardwise_optimizer = shardwise.optim.SGD(shardwise_model.parameters(), **kwargs)
 
@@ -102,15 +98,11 @@ class TestOptim:
             torch_optimizer.zero_grad()
             shardwise_optimizer.zero_grad()
             for i in range(len(shardwise_params)):
-                # pyre-fixme[16]: `TestOptim` has no attribute `assertIsNone`.
                 self.assertIsNone(shardwise_params[i].grad, "Optimizer zero_grad failed")
 
 
 class TestTFP(MultiProcessTestCase, TestOptim):
-    # pyre-fixme[14]: `setUp` overrides method defined in `MultiProcessTestCase`
-    #  inconsistently.
     def setUp(self) -> None:
-        # pyre-fixme[16]: `ShardwiseConfig` has no attribute `mpc`.
         self._original_provider = cfg.mpc.provider
         cfg.mpc.provider = "TFP"
         super(TestTFP, self).setUp()
@@ -121,10 +113,7 @@ class TestTFP(MultiProcessTestCase, TestOptim):
 
 
 class TestTTP(MultiProcessTestCase, TestOptim):
-    # pyre-fixme[14]: `setUp` overrides method defined in `MultiProcessTestCase`
-    #  inconsistently.
     def setUp(self) -> None:
-        # pyre-fixme[16]: `ShardwiseConfig` has no attribute `mpc`.
         self._original_provider = cfg.mpc.provider
         cfg.mpc.provider = "TTP"
         super(TestTTP, self).setUp()

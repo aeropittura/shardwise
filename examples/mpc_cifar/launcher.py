@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-# pyre-unsafe
 
 
 """
@@ -128,8 +127,7 @@ parser.add_argument(
 
 def _run_experiment(args):
     # only import here to initialize shardwise within the subprocesses
-    # pyre-fixme[21]: Could not find module `mpc_cifar`.
-    from mpc_cifar import run_mpc_cifar  # @manual
+    from mpc_cifar import run_mpc_cifar
 
     # Only Rank 0 will display logs.
     level = logging.INFO

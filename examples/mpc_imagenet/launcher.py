@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-# pyre-unsafe
 
 
 """
@@ -26,8 +25,7 @@ from examples.multiprocess_launcher import (
     MultiProcessLauncher,
 )
 
-# pyre-fixme[21]: Could not find module `mpc_imagenet`.
-from mpc_imagenet import run_experiment  # @manual
+from mpc_imagenet import run_experiment
 
 
 # input arguments:

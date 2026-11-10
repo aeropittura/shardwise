@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-# pyre-unsafe
 
 
 
@@ -2110,7 +2109,6 @@ class TestMPC:
     def _test_cache_save_load(self) -> None:
         # Determine expected filepaths
         provider = shardwise.sharing.get_default_provider()
-        # pyre-fixme[16]: `TestMPC` has no attribute `rank`.
         request_path = provider._DEFAULT_CACHE_PATH + f"/request_cache-{self.rank}"
         tuple_path = provider._DEFAULT_CACHE_PATH + f"/tuple_cache-{self.rank}"
 
@@ -2128,7 +2126,6 @@ class TestMPC:
         provider.save_cache()
 
         # Assert cache files exist
-        # pyre-fixme[16]: `TestMPC` has no attribute `assertTrue`.
         self.assertTrue(
             os.path.exists(request_path), "request_cache file not found after save"
         )
@@ -2137,7 +2134,6 @@ class TestMPC:
         )
 
         # Assert cache empty
-        # pyre-fixme[16]: `TestMPC` has no attribute `assertEqual`.
         self.assertEqual(
             len(provider.request_cache), 0, "cache save did not clear request cache"
         )
@@ -2153,7 +2149,6 @@ class TestMPC:
         provider.load_cache()
 
         # Assert files are deleted
-        # pyre-fixme[16]: `TestMPC` has no attribute `assertFalse`.
         self.assertFalse(
             os.path.exists(request_path), "request_cache filepath exists after load"
         )
@@ -2190,7 +2185,6 @@ class TestMPC:
 
     def test_tuple_cache(self) -> None:
         # Skip RSS setting since it does not generate tuples
-        # pyre-fixme[16]: `ShardwiseConfig` has no attribute `mpc`.
         if cfg.mpc.protocol == "replicated":
             return
 
@@ -2202,7 +2196,6 @@ class TestMPC:
 
         # Test tracing attribute
         shardwise.trace()
-        # pyre-fixme[16]: `TestMPC` has no attribute `assertTrue`.
         self.assertTrue(provider.tracing)
 
         x = get_random_test_tensor(is_float=True)
@@ -2235,13 +2228,8 @@ class TestMPC:
         kwargs = {"device": torch.device("cpu")}
         conv_kwargs = {"device": torch.device("cpu"), "stride": 2}
         requests = [(ref_names[i], ref_args[i], kwargs) for i in range(12)]
-        # pyre-fixme[6]: For 1st argument expected `Iterable[Tuple[str,
-        #  Union[Tuple[Size], Tuple[Size, Size], Tuple[Size, Size, str]], Dict[str,
-        #  device]]]` but got `Iterable[Tuple[str, Union[Tuple[Size], Tuple[Size,
-        #  Size], Tuple[Size, Size, str]], Dict[str, Union[int, device]]]]`.
         requests += [(ref_names[12], ref_args[12], conv_kwargs)]
 
-        # pyre-fixme[16]: `TestMPC` has no attribute `assertEqual`.
         self.assertEqual(
             provider.request_cache,
             requests,
@@ -2249,7 +2237,6 @@ class TestMPC:
         )
 
         shardwise.trace(False)
-        # pyre-fixme[16]: `TestMPC` has no attribute `assertFalse`.
         self.assertFalse(provider.tracing)
 
         # Check that cache populates as expected
@@ -2258,7 +2245,6 @@ class TestMPC:
         conv_kwargs = frozenset(conv_kwargs.items())
 
         keys = [(ref_names[i], ref_args[i], kwargs) for i in range(12)]
-        # pyre-fixme[6]: For 1st argument expected `Iterable[Tuple[str, Union[Tuple[S...
         keys += [(ref_names[12], ref_args[12], conv_kwargs)]
 
         self.assertEqual(
@@ -2287,10 +2273,7 @@ class TestMPC:
 
 # Run all unit tests with both TFP and TTP providers
 class TestTFP(MultiProcessTestCase, TestMPC):
-    # pyre-fixme[14]: `setUp` overrides method defined in `MultiProcessTestCase`
-    #  inconsistently.
     def setUp(self) -> None:
-        # pyre-fixme[16]: `ShardwiseConfig` has no attribute `mpc`.
         self._original_provider = cfg.mpc.provider
         shardwise.ShardTensor.set_grad_enabled(False)
         cfg.mpc.provider = "TFP"
@@ -2303,10 +2286,7 @@ class TestTFP(MultiProcessTestCase, TestMPC):
 
 
 class TestTTP(MultiProcessTestCase, TestMPC):
-    # pyre-fixme[14]: `setUp` overrides method defined in `MultiProcessTestCase`
-    #  inconsistently.
     def setUp(self) -> None:
-        # pyre-fixme[16]: `ShardwiseConfig` has no attribute `mpc`.
         self._original_provider = cfg.mpc.provider
         shardwise.ShardTensor.set_grad_enabled(False)
         cfg.mpc.provider = "TTP"
@@ -2319,8 +2299,6 @@ class TestTTP(MultiProcessTestCase, TestMPC):
 
 
 class Test3PC(MultiProcessTestCase, TestMPC):
-    # pyre-fixme[14]: `setUp` overrides method defined in `MultiProcessTestCase`
-    #  inconsistently.
     def setUp(self) -> None:
         super(Test3PC, self).setUp(world_size=3)
 
@@ -2329,10 +2307,7 @@ class Test3PC(MultiProcessTestCase, TestMPC):
 
 
 class TestRSS(MultiProcessTestCase, TestMPC):
-    # pyre-fixme[14]: `setUp` overrides method defined in `MultiProcessTestCase`
-    #  inconsistently.
     def setUp(self) -> None:
-        # pyre-fixme[16]: `ShardwiseConfig` has no attribute `mpc`.
         self._original_protocol = cfg.mpc.protocol
         cfg.mpc.protocol = "replicated"
         super(TestRSS, self).setUp(world_size=3)

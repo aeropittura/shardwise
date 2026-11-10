@@ -47,8 +47,8 @@ def get_random_test_tensor(
         tensor[tensor == 0] = 1
 
     # Broadcast this tensor to the world so that the generated random tensor
-    # is in sync in all distributed processes. See T45688819 for more
-    # information.
+    # is in sync in all distributed processes.
+    
     tensor = comm.get().broadcast(tensor, 0)
 
     return tensor
@@ -71,8 +71,8 @@ def get_random_linear(in_channels, out_channels):
     linear = torch.nn.Linear(in_channels, out_channels)
     if dist.is_initialized():
         # Broadcast this tensor to the world so that the generated random tensor
-        # is in sync in all distributed processes. See T45688819 for more
-        # information.
+        # is in sync in all distributed processes.
+        
         comm.get().broadcast(linear.weight, 0)
         comm.get().broadcast(linear.bias, 0)
 

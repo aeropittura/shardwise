@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-# pyre-unsafe
 
 
 import collections
@@ -405,10 +404,7 @@ class PyTorchLinear(torch.nn.Module):
 
 # Run all unit tests with both TFP and TTP providers
 class TestTFP(MultiProcessTestCase, TestOnnxConverter):
-    # pyre-fixme[14]: `setUp` overrides method defined in `MultiProcessTestCase`
-    #  inconsistently.
     def setUp(self) -> None:
-        # pyre-fixme[16]: `ShardwiseConfig` has no attribute `mpc`.
         self._original_provider = cfg.mpc.provider
         cfg.mpc.provider = "TFP"
         super(TestTFP, self).setUp()
@@ -419,10 +415,7 @@ class TestTFP(MultiProcessTestCase, TestOnnxConverter):
 
 
 class TestTTP(MultiProcessTestCase, TestOnnxConverter):
-    # pyre-fixme[14]: `setUp` overrides method defined in `MultiProcessTestCase`
-    #  inconsistently.
     def setUp(self) -> None:
-        # pyre-fixme[16]: `ShardwiseConfig` has no attribute `mpc`.
         self._original_provider = cfg.mpc.provider
         cfg.mpc.provider = "TTP"
         super(TestTTP, self).setUp()

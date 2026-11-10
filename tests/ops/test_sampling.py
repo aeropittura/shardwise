@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-# pyre-unsafe
 
 
 
@@ -85,10 +84,7 @@ class TestDistributions:
 
 # Run all unit tests with both TFP and TTP providers
 class TestTFP(MultiProcessTestCase, TestDistributions):
-    # pyre-fixme[14]: `setUp` overrides method defined in `MultiProcessTestCase`
-    #  inconsistently.
     def setUp(self) -> None:
-        # pyre-fixme[16]: `ShardwiseConfig` has no attribute `mpc`.
         self._original_provider = cfg.mpc.provider
         shardwise.ShardTensor.set_grad_enabled(False)
         cfg.mpc.provider = "TFP"
@@ -101,10 +97,7 @@ class TestTFP(MultiProcessTestCase, TestDistributions):
 
 
 class TestTTP(MultiProcessTestCase, TestDistributions):
-    # pyre-fixme[14]: `setUp` overrides method defined in `MultiProcessTestCase`
-    #  inconsistently.
     def setUp(self) -> None:
-        # pyre-fixme[16]: `ShardwiseConfig` has no attribute `mpc`.
         self._original_provider = cfg.mpc.provider
         shardwise.ShardTensor.set_grad_enabled(False)
         cfg.mpc.provider = "TTP"
