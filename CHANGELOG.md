@@ -2,8 +2,7 @@
 
 ## Unreleased
 
-Shardwise is derived from [CrypTen](https://github.com/facebookresearch/CrypTen)
-0.4.0 (MIT License). This release reorganizes the code without changing behavior:
+This release reorganizes the code without changing behavior:
 
 - The package is now `shardwise`, in a `src/` layout, with modules grouped into
   `core`, `ops`, `protocols`, `providers`, `sharing`, `comm`, `nn`, `optim`,
