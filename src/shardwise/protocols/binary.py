@@ -26,7 +26,9 @@ class BinarySharedTensor:
     where n is the number of parties present in the protocol (world_size).
     """
 
-    def __init__(self, tensor=None, size=None, broadcast_size=False, src=0, device=None):
+    def __init__(
+        self, tensor=None, size=None, broadcast_size: bool = False, src: int = 0, device=None
+    ) -> None:
         """
         Creates the shared tensor from the input `tensor` provided by party `src`.
 
@@ -90,7 +92,7 @@ class BinarySharedTensor:
         return BinarySharedTensor(*args, **kwargs)
 
     @staticmethod
-    def from_shares(share, precision=None, src=0, device=None):
+    def from_shares(share, precision=None, src: int = 0, device=None):
         """Generate a BinarySharedTensor from a share from each party"""
         result = BinarySharedTensor(src=SENTINEL)
         share = share.to(device) if device is not None else share
@@ -123,7 +125,7 @@ class BinarySharedTensor:
         return tensor
 
     @staticmethod
-    def rand(*size, bits=64, device=None):
+    def rand(*size, bits: int = 64, device=None):
         """
         Generate a uniform random samples with a given size.
         """
@@ -168,7 +170,7 @@ class BinarySharedTensor:
         return self._tensor
 
     @share.setter
-    def share(self, value):
+    def share(self, value) -> None:
         """Sets _tensor to value"""
         self._tensor = value
 
@@ -185,15 +187,15 @@ class BinarySharedTensor:
         result._tensor = self._tensor.clone()
         return result
 
-    def copy_(self, other):
+    def copy_(self, other) -> None:
         """Copies other tensor into this tensor."""
         self.share.copy_(other.share)
         self.encoder = other.encoder
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"BinarySharedTensor({self.share})"
 
-    def __bool__(self):
+    def __bool__(self) -> bool:
         """Override bool operator since encrypted tensors cannot evaluate"""
         raise RuntimeError("Cannot evaluate BinarySharedTensors to boolean values")
 
@@ -304,7 +306,7 @@ class BinarySharedTensor:
     def ge(self, y):
         return circuit.ge(self, y)
 
-    def __setitem__(self, index, value):
+    def __setitem__(self, index, value) -> None:
         """Set tensor values by index"""
         if is_tensor(value) or isinstance(value, list):
             value = BinarySharedTensor(value)

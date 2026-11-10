@@ -8,7 +8,7 @@ import shardwise
 __all__ = ["dropout"]
 
 
-def dropout(self, p=0.5, training=True, inplace=False):
+def dropout(self, p: float = 0.5, training: bool = True, inplace: bool = False):
     r"""
     Randomly zeroes some of the elements of the input tensor with
     probability :attr:`p`.

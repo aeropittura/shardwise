@@ -7,6 +7,7 @@ import builtins
 import copy
 import logging
 import os
+from typing import Any, Callable, Optional, Union
 import warnings
 
 import torch
@@ -36,7 +37,11 @@ generators = {
 }
 
 
-def init(config_file=None, party_name=None, device=None):
+def init(
+    config_file: Optional[str] = None,
+    party_name: Optional[str] = None,
+    device: Optional[Union[int, str, torch.device]] = None,
+) -> None:
     """
     Initialize Shardwise. It will initialize communicator, setup party
     name for file save / load, and setup seeds for Random Number Generatiion.
@@ -74,29 +79,29 @@ def init(config_file=None, party_name=None, device=None):
             shardwise.providers.trusted_third.TTPClient._init()
 
 
-def init_thread(rank, world_size):
+def init_thread(rank: int, world_size: int) -> None:
     comm._init(use_threads=True, rank=rank, world_size=world_size)
     _setup_prng()
 
 
-def uninit():
+def uninit() -> None:
     return comm.uninit()
 
 
-def is_initialized():
+def is_initialized() -> bool:
     return comm.is_initialized()
 
 
-def print_communication_stats():
+def print_communication_stats() -> None:
     comm.get().print_communication_stats()
 
 
-def reset_communication_stats():
+def reset_communication_stats() -> None:
     comm.get().reset_communication_stats()
 
 
 # set tensor type to be used for ShardTensors:
-def register_tensor_type(name):
+def register_tensor_type(name: str) -> Callable[[type], type]:
     """Registers a custom :class:`ShardTensor` subclass.
 
     This decorator allows the user to instantiate a subclass of `ShardTensor`
@@ -111,19 +116,19 @@ def register_tensor_type(name):
     return ShardTensor.register_tensor_type(name)
 
 
-def set_default_tensor_type(tensor_type):
+def set_default_tensor_type(tensor_type: str) -> None:
     """Sets the default type used to create `ShardTensor`s."""
     if tensor_type not in ShardTensor.__TENSOR_TYPES__.keys():
         raise ValueError(f"ShardTensor type {tensor_type} does not exist.")
     ShardTensor.__DEFAULT_TENSOR_TYPE__ = tensor_type
 
 
-def get_default_tensor_type():
+def get_default_tensor_type() -> str:
     """Gets the default type used to create `ShardTensor`s."""
     return ShardTensor.__DEFAULT_TENSOR_TYPE__
 
 
-def get_tensor_type(tensor):
+def get_tensor_type(tensor: ShardTensor) -> str:
     """Gets the type name of the specified `tensor` `ShardTensor`."""
     if not isinstance(tensor, ShardTensor):
         raise ValueError(f"Specified tensor is not a ShardTensor: {type(tensor)}")
@@ -133,7 +138,7 @@ def get_tensor_type(tensor):
     raise ValueError(f"Unregistered ShardTensor type: {type(tensor)}")
 
 
-def tensor(*args, tensor_type=None, **kwargs):
+def tensor(*args, tensor_type: Optional[str] = None, **kwargs) -> ShardTensor:
     """
     Factory function to return encrypted tensor of given `tensor_type`. If no
     `tensor_type` is specified, the default type is used.
@@ -149,14 +154,14 @@ def tensor(*args, tensor_type=None, **kwargs):
     return ShardTensor.__TENSOR_TYPES__[tensor_type](*args, **kwargs)
 
 
-def is_encrypted_tensor(obj):
+def is_encrypted_tensor(obj: Any) -> bool:
     """
     Returns True if obj is an encrypted tensor.
     """
     return isinstance(obj, ShardTensor)
 
 
-def _setup_prng():
+def _setup_prng() -> None:
     """
     Generate shared random seeds to generate pseudo-random sharings of
     zero. For each device, we generator four random seeds:
@@ -210,7 +215,7 @@ def _setup_prng():
     _sync_seeds(next_seed, local_seed, global_seed)
 
 
-def _sync_seeds(next_seed, local_seed, global_seed):
+def _sync_seeds(next_seed, local_seed, global_seed) -> None:
     """
     Sends random seed to next party, recieve seed from prev. party, and broadcast global seed
 
@@ -255,7 +260,7 @@ def _sync_seeds(next_seed, local_seed, global_seed):
         generators["global"][device].manual_seed(global_seed)
 
 
-def manual_seed(next_seed, local_seed, global_seed):
+def manual_seed(next_seed: int, local_seed: int, global_seed: int) -> None:
     """
     Allow users to set their random seed for testing purposes. For each device, we set three random seeds.
     Note that prev_seed is populated using next_seed
@@ -276,9 +281,9 @@ def manual_seed(next_seed, local_seed, global_seed):
 def load_from_party(
     f=None,
     preloaded=None,
-    encrypted=False,
+    encrypted: bool = False,
     model_class=None,
-    src=0,
+    src: int = 0,
     load_closure=torch.load,
     **kwargs,
 ):
@@ -379,7 +384,7 @@ def load(f, load_closure=torch.load, **kwargs):
     return obj
 
 
-def save_from_party(obj, f, src=0, save_closure=torch.save, **kwargs):
+def save_from_party(obj, f, src: int = 0, save_closure=torch.save, **kwargs):
     """
     Saves a ShardTensor or PyTorch tensor to a file.
 
@@ -407,7 +412,7 @@ def save_from_party(obj, f, src=0, save_closure=torch.save, **kwargs):
     comm.get().barrier()
 
 
-def save(obj, f, save_closure=torch.save, **kwargs):
+def save(obj, f, save_closure=torch.save, **kwargs) -> None:
     """
     Saves the shares of ShardTensor or an encrypted model to a file.
 
@@ -436,7 +441,7 @@ def where(condition, input, other):
     return input * condition + other * (1 - condition)
 
 
-def cat(tensors, dim=0):
+def cat(tensors: list, dim: int = 0) -> Union[torch.Tensor, ShardTensor]:
     """
     Concatenates the specified Shardwise `tensors` along dimension `dim`.
     """
@@ -454,7 +459,7 @@ def cat(tensors, dim=0):
     return type(tensors[0]).cat(tensors, dim=dim)
 
 
-def stack(tensors, dim=0):
+def stack(tensors: list, dim: int = 0) -> ShardTensor:
     """
     Stacks the specified Shardwise `tensors` along dimension `dim`. In contrast to
     `shardwise.cat`, this adds a dimension to the result tensor.
@@ -470,7 +475,11 @@ def stack(tensors, dim=0):
     return type(tensors[0]).stack(tensors, dim=dim)
 
 
-def rand(*sizes, device=None, tensor_type=None):
+def rand(
+    *sizes: int,
+    device: Optional[Union[str, torch.device]] = None,
+    tensor_type: Optional[str] = None,
+) -> ShardTensor:
     """
     Returns a tensor with elements uniformly sampled in [0, 1).
     """
@@ -480,7 +489,7 @@ def rand(*sizes, device=None, tensor_type=None):
         return ShardTensor.__TENSOR_TYPES__[tensor_type].rand(*sizes, device=device)
 
 
-def randn(*sizes, tensor_type=None):
+def randn(*sizes: int, tensor_type: Optional[str] = None) -> ShardTensor:
     """
     Returns a tensor with normally distributed elements.
     """
@@ -490,7 +499,7 @@ def randn(*sizes, tensor_type=None):
         return ShardTensor.__TENSOR_TYPES__[tensor_type].randn(*sizes)
 
 
-def bernoulli(tensor, tensor_type=None):
+def bernoulli(tensor: Any, tensor_type: Optional[str] = None) -> ShardTensor:
     """
     Returns a tensor with elements in {0, 1}. The i-th element of the
     output will be 1 with probability according to the i-th value of the
@@ -499,7 +508,9 @@ def bernoulli(tensor, tensor_type=None):
     return rand(tensor.size(), tensor_type=tensor_type) < tensor
 
 
-def __multiprocess_print_helper(print_func, *args, in_order=False, dst=0, **kwargs):
+def __multiprocess_print_helper(
+    print_func, *args, in_order: bool = False, dst: int = 0, **kwargs
+) -> None:
     """
     Helper for print / log functions to reduce copy-pasted code
     """
@@ -522,7 +533,7 @@ def __multiprocess_print_helper(print_func, *args, in_order=False, dst=0, **kwar
         print_func(*args, **kwargs)
 
 
-def print(*args, in_order=False, dst=0, **kwargs):
+def print(*args, in_order: bool = False, dst: int = 0, **kwargs) -> None:
     """
     Prints with formatting options that account for multiprocessing. This
     function prints with the output of:
@@ -541,7 +552,7 @@ def print(*args, in_order=False, dst=0, **kwargs):
     __multiprocess_print_helper(builtins.print, *args, in_order=in_order, dst=dst, **kwargs)
 
 
-def log(*args, in_order=False, dst=0, **kwargs):
+def log(*args, in_order: bool = False, dst: int = 0, **kwargs) -> None:
     """
     Logs with formatting options that account for multiprocessing. This
     function logs with the output of:
@@ -561,15 +572,15 @@ def log(*args, in_order=False, dst=0, **kwargs):
 
 
 # TupleProvider tracing functions
-def trace(tracing=True):
+def trace(tracing: bool = True) -> None:
     shardwise.sharing.get_default_provider().trace(tracing=tracing)
 
 
-def trace_once():
+def trace_once() -> None:
     shardwise.sharing.get_default_provider().trace_once()
 
 
-def fill_cache():
+def fill_cache() -> None:
     shardwise.sharing.get_default_provider().fill_cache()
 
 

@@ -67,5 +67,5 @@ class SummaryWriter(_SummaryWriter):
     Adapts the PyTorch SummaryWriter to output shardwise graphs.
     """
 
-    def add_graph(self, model, input_to_model=None, verbose=False):
+    def add_graph(self, model, input_to_model=None, verbose: bool = False) -> None:
         self._get_file_writer().add_onnx_graph(graph(model))

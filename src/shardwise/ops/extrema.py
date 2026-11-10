@@ -16,7 +16,7 @@ __all__ = [
 ]
 
 
-def argmax(self, dim=None, keepdim=False, one_hot=True):
+def argmax(self, dim=None, keepdim: bool = False, one_hot: bool = True):
     """Returns the indices of the maximum value of all elements in the
     `input` tensor.
     """
@@ -37,14 +37,14 @@ def argmax(self, dim=None, keepdim=False, one_hot=True):
     return result
 
 
-def argmin(self, dim=None, keepdim=False, one_hot=True):
+def argmin(self, dim=None, keepdim: bool = False, one_hot: bool = True):
     """Returns the indices of the minimum value of all elements in the
     `input` tensor.
     """
     return (-self).argmax(dim=dim, keepdim=keepdim, one_hot=one_hot)
 
 
-def max(self, dim=None, keepdim=False, one_hot=True):
+def max(self, dim=None, keepdim: bool = False, one_hot: bool = True):
     """Returns the maximum value of all elements in the input tensor."""
     method = cfg.functions.max_method
     if dim is None:
@@ -74,7 +74,7 @@ def max(self, dim=None, keepdim=False, one_hot=True):
             )
 
 
-def min(self, dim=None, keepdim=False, one_hot=True):
+def min(self, dim=None, keepdim: bool = False, one_hot: bool = True):
     """Returns the minimum value of all elements in the input tensor."""
     result = (-self).max(dim=dim, keepdim=keepdim, one_hot=one_hot)
     if dim is None:
@@ -223,7 +223,7 @@ def _max_helper_accelerated_cascade(enc_tensor, dim=None):
     return enc_max
 
 
-def _max_helper_all_tree_reductions(enc_tensor, dim=None, method="log_reduction"):
+def _max_helper_all_tree_reductions(enc_tensor, dim=None, method: str = "log_reduction"):
     """
     Finds the max along `dim` using the specified reduction method. `method`
     can be one of [`log_reduction`, `double_log_reduction`, 'accelerated_cascade`]
@@ -243,7 +243,7 @@ def _max_helper_all_tree_reductions(enc_tensor, dim=None, method="log_reduction"
         raise RuntimeError("Unknown max method")
 
 
-def _argmax_helper_all_tree_reductions(enc_tensor, dim=None, method="log_reduction"):
+def _argmax_helper_all_tree_reductions(enc_tensor, dim=None, method: str = "log_reduction"):
     """
     Returns 1 for all elements that have the highest value in the appropriate
     dimension of the tensor. `method` can be one of [`log_reduction`,
@@ -264,7 +264,9 @@ def _argmax_helper_all_tree_reductions(enc_tensor, dim=None, method="log_reducti
     return enc_one_hot_vec, enc_max_vec
 
 
-def _argmax_helper(enc_tensor, dim=None, one_hot=True, method="pairwise", _return_max=False):
+def _argmax_helper(
+    enc_tensor, dim=None, one_hot: bool = True, method: str = "pairwise", _return_max: bool = False
+):
     """
     Returns 1 for one randomly chosen element among all the elements that have
     the highest value in the appropriate dimension of the tensor. Sets up the ShardTensor

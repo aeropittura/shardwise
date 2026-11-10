@@ -20,10 +20,10 @@ class InProcessCommunicator(Communicator):
     lock = threading.Lock()
 
     @classmethod
-    def initialize(cls, rank, world_size, init_ttp=False):
+    def initialize(cls, rank, world_size, init_ttp: bool = False) -> None:
         cls.tls.instance = cls(rank, world_size)
 
-    def __init__(self, rank, world_size, init_ttp=False):
+    def __init__(self, rank, world_size, init_ttp: bool = False) -> None:
         self.world_size = world_size
         self.rank = rank
         self.reset_communication_stats()
@@ -58,7 +58,7 @@ class InProcessCommunicator(Communicator):
     def is_initialized(cls):
         return hasattr(cls.tls, "instance")
 
-    def send(self, tensor, dst):
+    def send(self, tensor, dst) -> None:
         """Sends the specified tensor to the destination dst."""
         self.mailbox[dst].put((self.rank, tensor.clone()))
 
@@ -74,10 +74,10 @@ class InProcessCommunicator(Communicator):
         self.send(tensor, dst)
 
         class Result:
-            def is_completed(self):
+            def is_completed(self) -> bool:
                 return True
 
-            def wait(self):
+            def wait(self) -> None:
                 pass
 
         return Result()
@@ -86,7 +86,7 @@ class InProcessCommunicator(Communicator):
         """Receives a tensor from an (optional) source src."""
 
         class Result:
-            def __init__(self, mailbox, rank):
+            def __init__(self, mailbox, rank) -> None:
                 self.completed = False
                 self.mailbox = mailbox
                 self.rank = rank
@@ -102,7 +102,7 @@ class InProcessCommunicator(Communicator):
 
         return Result(self.mailbox, self.rank)
 
-    def scatter(self, scatter_list, src, size=None, async_op=False):
+    def scatter(self, scatter_list, src, size=None, async_op: bool = False):
         """Scatters a list of tensors to all parties."""
         if async_op:
             raise NotImplementedError()
@@ -115,7 +115,7 @@ class InProcessCommunicator(Communicator):
 
         return self.mailbox[self.rank].get()
 
-    def reduce(self, tensor, dst, op=ReduceOp.SUM, async_op=False):
+    def reduce(self, tensor, dst, op=ReduceOp.SUM, async_op: bool = False):
         """Reduces the tensor data across all parties."""
         tensors = self.gather(tensor, dst)
         if self.rank == dst:
@@ -123,7 +123,7 @@ class InProcessCommunicator(Communicator):
             return reduce_fn(torch.stack(tensors), dim=0)
 
     @classmethod
-    def shutdown(cls):
+    def shutdown(cls) -> None:
         # Destroy all thread-local instances
         cls.tls = threading.local()
         cls.mailbox = None
@@ -135,7 +135,7 @@ class InProcessCommunicator(Communicator):
 
         raise NotImplementedError()
 
-    def all_reduce(self, tensor, op=ReduceOp.SUM, async_op=False):
+    def all_reduce(self, tensor, op=ReduceOp.SUM, async_op: bool = False):
         """Reduces the tensor data across all parties; all get the final result."""
         if async_op:
             raise NotImplementedError()
@@ -144,7 +144,7 @@ class InProcessCommunicator(Communicator):
         reduce_fn = self._reduce_op_to_function(op)
         return reduce_fn(torch.stack(ag), dim=0)
 
-    def gather(self, tensor, dst, async_op=False):
+    def gather(self, tensor, dst, async_op: bool = False):
         """Gathers a list of tensors in a single party."""
         if async_op:
             raise NotImplementedError()
@@ -157,7 +157,7 @@ class InProcessCommunicator(Communicator):
             result = [self.mailbox[dst].get() for _ in range(self.world_size)]
             return [tensor for rank, tensor in sorted(result, key=itemgetter(0))]
 
-    def all_gather(self, tensor, async_op=False):
+    def all_gather(self, tensor, async_op: bool = False):
         """Gathers tensors from all parties in a list."""
         if async_op:
             raise NotImplementedError()
@@ -174,7 +174,7 @@ class InProcessCommunicator(Communicator):
 
         return [tensor for (rank, tensor) in result]
 
-    def broadcast(self, tensor, src, async_op=False):
+    def broadcast(self, tensor, src, async_op: bool = False):
         """Broadcasts the tensor to all parties."""
         if async_op:
             raise NotImplementedError()
@@ -195,7 +195,7 @@ class InProcessCommunicator(Communicator):
         """Returns the rank of the current process."""
         return self.rank
 
-    def set_name(self, name):
+    def set_name(self, name) -> None:
         """Sets the party name of the current rank."""
         assert isinstance(name, str), f"Improper name provided to process on rank {self.get_rank()}"
         self._name = name

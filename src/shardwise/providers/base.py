@@ -20,7 +20,7 @@ class TupleProvider:
 
     _DEFAULT_CACHE_PATH = os.path.normpath(os.path.join(__file__, "../tuple_cache/"))
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.tracing = False
         self.request_cache = []
         self.tuple_cache = {}
@@ -39,7 +39,7 @@ class TupleProvider:
             prefix = self._DEFAULT_CACHE_PATH
         return prefix + f"/tuple_cache-{self.rank}"
 
-    def trace(self, tracing=True):
+    def trace(self, tracing: bool = True) -> None:
         """Sets tracing attribute.
 
         When tracing is True, provider caches all tuple requests.
@@ -47,14 +47,14 @@ class TupleProvider:
         """
         self.tracing = tracing
 
-    def trace_once(self):
+    def trace_once(self) -> None:
         """Sets tracing attribute True only if the request cache is empty.
         If `trace_once()` is called again, it sets tracing attribute to False
         """
         untraced = self.request_cache.empty()
         self.trace(tracing=untraced)
 
-    def _save_requests(self, filepath=None):
+    def _save_requests(self, filepath=None) -> None:
         # TODO: Deal with any overwrite issues
         if len(self.request_cache) == 0:
             shardwise.log("Request cache not saved - cache is empty")
@@ -63,7 +63,7 @@ class TupleProvider:
         torch.save(self.request_cache, filepath)
         self.request_cache = []
 
-    def _load_requests(self, filepath=None):
+    def _load_requests(self, filepath=None) -> None:
         filepath = self._get_request_path(prefix=filepath)
         if os.path.exists(filepath):
             self.request_cache = torch.load(filepath)
@@ -71,7 +71,7 @@ class TupleProvider:
         else:
             shardwise.log(f"Cache requests not loaded - File `{filepath}` not found")
 
-    def _save_tuples(self, filepath=None):
+    def _save_tuples(self, filepath=None) -> None:
         # TODO: Deal with any overwrite issues
         if len(self.tuple_cache) == 0:
             shardwise.log("Tuple cache not saved - cache is empty")
@@ -80,7 +80,7 @@ class TupleProvider:
         torch.save(self.tuple_cache, filepath)
         self.tuple_cache = {}
 
-    def _load_tuples(self, filepath=None):
+    def _load_tuples(self, filepath=None) -> None:
         filepath = self._get_tuple_path(prefix=filepath)
         if os.path.exists(filepath):
             self.tuple_cache = torch.load(filepath)
@@ -88,7 +88,7 @@ class TupleProvider:
         else:
             shardwise.log(f"Tuple cache not loaded - File `{filepath}` not found")
 
-    def save_cache(self, filepath=None):
+    def save_cache(self, filepath=None) -> None:
         """Saves request and tuple cache to a file.
 
         args:
@@ -97,7 +97,7 @@ class TupleProvider:
         self._save_requests(filepath=filepath)
         self._save_tuples(filepath=filepath)
 
-    def load_cache(self, filepath=None):
+    def load_cache(self, filepath=None) -> None:
         """Loads request and tuple cache from a file.
 
         args:
@@ -137,7 +137,7 @@ class TupleProvider:
 
         return func_from_cache
 
-    def fill_cache(self):
+    def fill_cache(self) -> None:
         """Fills tuple_cache with tuples requested in the request_cache"""
         # TODO: parallelize / async this
         for request in self.request_cache:

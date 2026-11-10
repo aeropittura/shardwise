@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 
 
+from types import TracebackType
+from typing import Optional
+
 import torch
 
 import shardwise
@@ -12,15 +15,20 @@ from shardwise.utils.helpers import count_wraps
 class IgnoreEncodings:
     """Context Manager to ignore tensor encodings"""
 
-    def __init__(self, list_of_tensors):
+    def __init__(self, list_of_tensors) -> None:
         self.list_of_tensors = list_of_tensors
         self.encodings_cache = [tensor.encoder.scale for tensor in list_of_tensors]
 
-    def __enter__(self):
+    def __enter__(self) -> None:
         for tensor in self.list_of_tensors:
             tensor.encoder._scale = 1
 
-    def __exit__(self, exc_type, exc_value, exc_traceback):
+    def __exit__(
+        self,
+        exc_type: Optional[type[BaseException]],
+        exc_value: Optional[BaseException],
+        exc_traceback: Optional[TracebackType],
+    ) -> None:
         for i, tensor in enumerate(self.list_of_tensors):
             tensor.encoder._scale = self.encodings_cache[i]
 

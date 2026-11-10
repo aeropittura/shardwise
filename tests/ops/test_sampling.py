@@ -15,7 +15,7 @@ class TestDistributions:
     This class tests accuracy of distributions provided by random sampling in shardwise.
     """
 
-    def _check_distribution(self, func, expected_mean, expected_variance, lb=None, ub=None):
+    def _check_distribution(self, func, expected_mean, expected_variance, lb=None, ub=None) -> None:
         """
         Checks that the function `func` returns a distribution with the expected
         size, mean, and variance.
@@ -55,13 +55,13 @@ class TestDistributions:
                     f"Sample detected below lower bound for {name} distribution",
                 )
 
-    def test_uniform(self):
+    def test_uniform(self) -> None:
         self._check_distribution(shardwise.rand, 0.5, 0.083333, lb=0, ub=1)
 
-    def test_normal(self):
+    def test_normal(self) -> None:
         self._check_distribution(shardwise.randn, 0, 1)
 
-    def test_bernoulli(self):
+    def test_bernoulli(self) -> None:
         for p in [0.25 * i for i in range(5)]:
 
             def bernoulli(*size):

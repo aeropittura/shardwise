@@ -18,7 +18,7 @@ class Transpose(Module):
         `perm`: list of ints
     """
 
-    def __init__(self, perm):
+    def __init__(self, perm) -> None:
         super().__init__()
         self.perm = perm
 
@@ -62,7 +62,7 @@ class Squeeze(Module):
             this dimension
     """
 
-    def __init__(self, dimension):
+    def __init__(self, dimension) -> None:
         super().__init__()
         if isinstance(dimension, (list, tuple)):
             assert len(dimension) == 1, "can only squeeze one dimension at a time"
@@ -98,7 +98,7 @@ class Unsqueeze(Module):
 
     SUPPORTS_PLAINTEXT_INPUTS = True
 
-    def __init__(self, dimension):
+    def __init__(self, dimension) -> None:
         super().__init__()
         if isinstance(dimension, (list, tuple)):
             assert len(dimension) == 1, "can only squeeze one dimension at a time"
@@ -132,7 +132,7 @@ class Slice(Module):
     This module definition matches ONNX opset version 11.
     """
 
-    def __init__(self, starts, ends, axes=None):
+    def __init__(self, starts, ends, axes=None) -> None:
         super().__init__()
         self.starts = starts
         self.ends = ends
@@ -210,7 +210,7 @@ class Flatten(Module):
         axis (int, optional): must not be larger than dimension
     """
 
-    def __init__(self, axis=1):
+    def __init__(self, axis: int = 1) -> None:
         super().__init__()
         self.axis = axis
 
@@ -244,7 +244,7 @@ class Shape(Module):
 
     SUPPORTS_PLAINTEXT_INPUTS = True
 
-    def __init__(self, dim=None):
+    def __init__(self, dim=None) -> None:
         super().__init__()
         self.dim = dim
 
@@ -269,7 +269,7 @@ class Concat(Module):
         dim (int, optional): the dimension over which to concatenate
     """
 
-    def __init__(self, dimension):
+    def __init__(self, dimension) -> None:
         super().__init__()
         self.dimension = dimension
 
@@ -305,7 +305,7 @@ class Reshape(Module):
         input (tuple): contains input tensor and shape (torch.Size)
     """
 
-    def __init__(self, shape=None):
+    def __init__(self, shape=None) -> None:
         super().__init__()
         self.shape = shape
 
@@ -345,7 +345,7 @@ class Gather(Module):
 
     SUPPORTS_PLAINTEXT_INPUTS = True
 
-    def __init__(self, dimension, indices=None):
+    def __init__(self, dimension, indices=None) -> None:
         super().__init__()
         self.dimension = dimension
         self.indices = indices
@@ -396,7 +396,7 @@ class _ConstantPad(Module):
     Module that pads a tensor.
     """
 
-    def __init__(self, padding, value, ndims, mode="constant"):
+    def __init__(self, padding, value, ndims, mode: str = "constant") -> None:
         super().__init__()
         if isinstance(padding, (int)):
             padding = [padding, padding] * ndims
@@ -426,7 +426,7 @@ class ConstantPad1d(_ConstantPad):
     Module that pads a 1D tensor.
     """
 
-    def __init__(self, padding, value, mode="constant"):
+    def __init__(self, padding, value, mode: str = "constant") -> None:
         super().__init__(padding, value, 1, mode=mode)
 
 
@@ -435,7 +435,7 @@ class ConstantPad2d(_ConstantPad):
     Module that pads a 2D tensor.
     """
 
-    def __init__(self, padding, value, mode="constant"):
+    def __init__(self, padding, value, mode: str = "constant") -> None:
         super().__init__(padding, value, 2, mode=mode)
 
 
@@ -444,5 +444,5 @@ class ConstantPad3d(_ConstantPad):
     Module that pads a 3D tensor.
     """
 
-    def __init__(self, padding, value, mode="constant"):
+    def __init__(self, padding, value, mode: str = "constant") -> None:
         super().__init__(padding, value, 3, mode=mode)

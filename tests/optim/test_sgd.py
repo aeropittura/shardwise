@@ -17,7 +17,7 @@ class TestOptim:
     This class tests the shardwise.optim package.
     """
 
-    def _check(self, encrypted_tensor, reference, msg, tolerance=None):
+    def _check(self, encrypted_tensor, reference, msg, tolerance=None) -> None:
         if tolerance is None:
             tolerance = getattr(self, "default_tolerance", 0.05)
         tensor = encrypted_tensor.get_plain_text()

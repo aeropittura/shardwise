@@ -12,7 +12,9 @@ class Gemm(Module):
     Unlike the `Linear` module, this module is stateless.
     """
 
-    def __init__(self, alpha=1.0, beta=1.0, trans_a=False, trans_b=False):
+    def __init__(
+        self, alpha: float = 1.0, beta: float = 1.0, trans_a: bool = False, trans_b: bool = False
+    ) -> None:
         super().__init__()
         self.alpha = alpha
         self.beta = beta
@@ -61,7 +63,7 @@ class Linear(Module):
           are the same shape as the input and :math:`H_{out} = \text{out\_features}`.
     """  # noqa: W605
 
-    def __init__(self, in_features, out_features, bias=True):
+    def __init__(self, in_features, out_features, bias: bool = True) -> None:
         super().__init__()
 
         # initialize model parameters:
@@ -109,7 +111,7 @@ class MatMul(Module):
             is already initialized with the second (i.e. multiplier) matrix.
     """
 
-    def __init__(self, weight=None):
+    def __init__(self, weight=None) -> None:
         super().__init__()
         if weight is not None:
             self.register_parameter("weight", weight)

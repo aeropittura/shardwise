@@ -50,12 +50,12 @@ class SGD(Optimizer):
         self,
         params,
         lr,
-        momentum=0,
-        dampening=0,
-        weight_decay=0,
-        nesterov=False,
+        momentum: int = 0,
+        dampening: int = 0,
+        weight_decay: int = 0,
+        nesterov: bool = False,
         grad_threshold=None,
-    ):
+    ) -> None:
         if not isinstance(lr, (int, float)) or lr < 0.0:
             raise ValueError(f"Invalid learning rate: {lr}")
         if not isinstance(momentum, (int, float)) or momentum < 0.0:
@@ -82,7 +82,7 @@ class SGD(Optimizer):
 
         super().__init__(params, defaults)
 
-    def __setstate__(self, state):
+    def __setstate__(self, state) -> None:
         super().__setstate__(state)
         for group in self.param_groups:
             group.setdefault("nesterov", False)

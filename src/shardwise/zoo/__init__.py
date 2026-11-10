@@ -69,7 +69,7 @@ def __import_model_package_copy(import_name):
     return model_type
 
 
-def __update_model_class_inheritance(cls):
+def __update_model_class_inheritance(cls) -> None:
     """
     Updates the class inheritance of a torch.nn.Module to instead use
     shardwise.nn.Module
@@ -112,7 +112,7 @@ class FunctionalReplacement:
         return x.max_pool2d(*args, **kwargs)
 
 
-def __update_torch_functions(module):
+def __update_torch_functions(module) -> None:
     if hasattr(module, "nn"):
         module.nn = cnn
 

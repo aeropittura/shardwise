@@ -25,13 +25,13 @@ class TestShardwise(MultiProcessTestCase):
     This class tests all member functions of shardwise package
     """
 
-    def setUp(self):
+    def setUp(self) -> None:
         super().setUp()
         if self.rank >= 0:
             shardwise.init()
             shardwise.set_default_tensor_type("mpc")
 
-    def _check(self, encrypted_tensor, reference, msg, tolerance=None):
+    def _check(self, encrypted_tensor, reference, msg, tolerance=None) -> None:
         if tolerance is None:
             tolerance = getattr(self, "default_tolerance", 0.05)
         tensor = encrypted_tensor.get_plain_text()
@@ -50,7 +50,7 @@ class TestShardwise(MultiProcessTestCase):
             logging.info(f"Result = {tensor};\nreference = {reference}")
         self.assertTrue(test_passed, msg=msg)
 
-    def test_przs_generators(self):
+    def test_przs_generators(self) -> None:
         """Tests that przs generators are initialized independently"""
         # Check that each party has two unique generators for next and prev seeds
         for device in shardwise.generators["prev"].keys():
@@ -82,7 +82,7 @@ class TestShardwise(MultiProcessTestCase):
                     sender_value = shardwise.generators["prev"][device].initial_seed()
                     comm.get().send_obj(sender_value, receiver)
 
-    def test_global_generator(self):
+    def test_global_generator(self) -> None:
         """Tests that global generator is generated properly"""
         # Check that all seeds are the same
         for device in shardwise.generators["global"].keys():
@@ -90,7 +90,7 @@ class TestShardwise(MultiProcessTestCase):
             generator0 = comm.get().broadcast_obj(this_generator, 0)
             self.assertEqual(this_generator, generator0)
 
-    def test_manual_seeds(self):
+    def test_manual_seeds(self) -> None:
         """
         Tests that user-supplied seeds replaces auto-generated seeds
         and tests that the seed values match the expected values
@@ -138,7 +138,7 @@ class TestShardwise(MultiProcessTestCase):
         self.test_przs_generators()
         self.test_global_generator()
 
-    def test_cat_stack(self):
+    def test_cat_stack(self) -> None:
         """Tests concatenation and stacking of tensors"""
         tensor1 = get_random_test_tensor(size=(5, 5, 5, 5), is_float=True)
         tensor2 = get_random_test_tensor(size=(5, 5, 5, 5), is_float=True)
@@ -156,12 +156,12 @@ class TestShardwise(MultiProcessTestCase):
                     encrypted_out = getattr(module, op)([encrypted1, encrypted2], dim=dim)
                     self._check(encrypted_out, reference, f"{op} failed")
 
-    def test_print_log(self):
+    def test_print_log(self) -> None:
         """Tests shardwise.print and shardwise.log logging functions."""
         shardwise.print("test")
         shardwise.log("test")
 
-    def test_rand(self):
+    def test_rand(self) -> None:
         """Tests uniform random variable generation on [0, 1)"""
         for size in [(10,), (10, 10), (10, 10, 10)]:
             randvec = shardwise.rand(*size)
@@ -175,7 +175,7 @@ class TestShardwise(MultiProcessTestCase):
         self.assertTrue(torch.isclose(mean, torch.tensor([0.5]), rtol=1e-3, atol=1e-3))
         self.assertTrue(torch.isclose(var, torch.tensor([1.0 / 12]), rtol=1e-3, atol=1e-3))
 
-    def test_bernoulli(self):
+    def test_bernoulli(self) -> None:
         for size in [(10,), (10, 10), (10, 10, 10)]:
             probs = torch.rand(size)
             randvec = shardwise.bernoulli(probs)
@@ -188,7 +188,7 @@ class TestShardwise(MultiProcessTestCase):
         frac_zero = float((randvec == 0).sum()) / randvec.nelement()
         self.assertTrue(math.isclose(frac_zero, 0.8, rel_tol=1e-1, abs_tol=1e-1))
 
-    def test_shard_tensor_registration(self):
+    def test_shard_tensor_registration(self) -> None:
         """Tests the registration mechanism for custom `ShardTensor` types."""
 
         # perform tests:
@@ -204,7 +204,7 @@ class TestShardwise(MultiProcessTestCase):
         class MyShardTensor(shardwise.ShardTensor):
             """Dummy `ShardTensor` type."""
 
-            def __init__(self, *args, **kwargs):
+            def __init__(self, *args, **kwargs) -> None:
                 self.is_custom_type = True
 
         # test that registration was successful:
@@ -215,7 +215,7 @@ class TestShardwise(MultiProcessTestCase):
         self.assertTrue(getattr(tensor, "is_custom_type", False))
         self.assertEqual(shardwise.get_tensor_type(tensor), shard_tensor_name)
 
-    def test_shard_tensor_instantiation(self):
+    def test_shard_tensor_instantiation(self) -> None:
         """Tests that ShardTensors cannot be instantiated."""
         tensor = get_random_test_tensor()
         with self.assertRaises(TypeError):
@@ -223,7 +223,7 @@ class TestShardwise(MultiProcessTestCase):
         encrypted_tensor = shardwise.sharing.SecureTensor(tensor)
         self.assertIsInstance(encrypted_tensor, shardwise.ShardTensor)
 
-    def test_save_load(self):
+    def test_save_load(self) -> None:
         """Test that shardwise.save and shardwise.load properly save and load
         shares of shard_tensors"""
         import io
@@ -233,7 +233,7 @@ class TestShardwise(MultiProcessTestCase):
             obj = pickle.load(f)
             return obj
 
-        def custom_save_function(obj, f):
+        def custom_save_function(obj, f) -> None:
             pickle.dump(obj, f)
 
         all_save_fns = [torch.save, custom_save_function]
@@ -269,7 +269,7 @@ class TestShardwise(MultiProcessTestCase):
                 else:
                     self.assertTrue(attr1 == attr2)
 
-    def test_plaintext_save_load_from_party(self):
+    def test_plaintext_save_load_from_party(self) -> None:
         """Test that shardwise.save_from_party and shardwise.load_from_party
         properly save and load plaintext tensors"""
         import tempfile
@@ -281,7 +281,7 @@ class TestShardwise(MultiProcessTestCase):
             tensor = torch.from_numpy(np_arr)
             return tensor
 
-        def custom_save_function(obj, f):
+        def custom_save_function(obj, f) -> None:
             np_arr = obj.numpy()
             np.save(f, np_arr)
 
@@ -417,7 +417,7 @@ class TestShardwise(MultiProcessTestCase):
 
 # Modules used for testing saveing / loading of modules
 class TestModule(nn.Module):
-    def __init__(self, input_features, output_features):
+    def __init__(self, input_features, output_features) -> None:
         super().__init__()
         self.fc1 = nn.Linear(input_features, 100)
         self.fc2 = nn.Linear(100, 50)
@@ -429,7 +429,7 @@ class TestModule(nn.Module):
         out = self.fc3(out)
         return out
 
-    def set_all_parameters(self, value):
+    def set_all_parameters(self, value) -> None:
         self.fc1.weight.data.fill_(value)
         self.fc1.bias.data.fill_(value)
         self.fc2.weight.data.fill_(value)
@@ -439,16 +439,16 @@ class TestModule(nn.Module):
 
 
 class NestedTestModule(nn.Module):
-    def __init__(self, input_features, output_features):
+    def __init__(self, input_features, output_features) -> None:
         super().__init__()
         self.fc1 = nn.Linear(input_features, input_features)
         self.nested = TestModule(input_features, output_features)
 
-    def forward(self, input):
+    def forward(self, input) -> None:
         out = F.relu(self.fc1(input))
         out = self.nested(out)
 
-    def set_all_parameters(self, value):
+    def set_all_parameters(self, value) -> None:
         self.fc1.weight.data.fill_(value)
         self.fc1.bias.data.fill_(value)
         self.nested.set_all_parameters(value)

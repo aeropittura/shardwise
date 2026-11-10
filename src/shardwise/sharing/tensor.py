@@ -17,7 +17,7 @@ from shardwise.utils.helpers import torch_stack
 
 @ShardTensor.register_tensor_type("mpc")
 class SecureTensor(ShardTensor):
-    def __init__(self, tensor, ptype=Ptype.arithmetic, device=None, *args, **kwargs):
+    def __init__(self, tensor, ptype=Ptype.arithmetic, device=None, *args, **kwargs) -> None:
         """
         Creates the shared tensor from the input `tensor` provided by party `src`.
         The `ptype` defines the type of sharing used (default: arithmetic).
@@ -87,7 +87,7 @@ class SecureTensor(ShardTensor):
         result.ptype = self.ptype
         return result
 
-    def copy_(self, other):
+    def copy_(self, other) -> None:
         """Copies value of other SecureTensor into this SecureTensor."""
         assert isinstance(other, SecureTensor), "other must be SecureTensor"
         self._tensor.copy_(other._tensor)
@@ -174,7 +174,7 @@ class SecureTensor(ShardTensor):
         """Decrypts the tensor without any downscaling."""
         return self._tensor.reveal(dst=dst)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """Returns a representation of the tensor useful for debugging."""
         debug_mode = cfg.debug.debug_mode
 
@@ -192,7 +192,7 @@ class SecureTensor(ShardTensor):
         return self._tensor.share
 
     @share.setter
-    def share(self, value):
+    def share(self, value) -> None:
         """Sets share to value"""
         self._tensor.share = value
 
@@ -202,7 +202,7 @@ class SecureTensor(ShardTensor):
         return self._tensor.encoder
 
     @encoder.setter
-    def encoder(self, value):
+    def encoder(self, value) -> None:
         """Sets encoder to value"""
         self._tensor.encoder = value
 
@@ -314,7 +314,7 @@ BINARY_FUNCTIONS = [
 ]
 
 
-def _add_unary_passthrough_function(name):
+def _add_unary_passthrough_function(name) -> None:
     def unary_wrapper_function(self, *args, **kwargs):
         result = self.shallow_copy()
         result._tensor = getattr(result._tensor, name)(*args, **kwargs)
@@ -323,7 +323,7 @@ def _add_unary_passthrough_function(name):
     setattr(SecureTensor, name, unary_wrapper_function)
 
 
-def _add_binary_passthrough_function(name):
+def _add_binary_passthrough_function(name) -> None:
     def binary_wrapper_function(self, value, *args, **kwargs):
         result = self.shallow_copy()
         if isinstance(value, SecureTensor):

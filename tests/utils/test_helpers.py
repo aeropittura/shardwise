@@ -12,7 +12,7 @@ from shardwise.settings import cfg
 from shardwise.utils.helpers import chebyshev_series
 
 
-def get_test_tensor(max_value=10, float=False):
+def get_test_tensor(max_value: int = 10, float: bool = False):
     """Create simple test tensor."""
     tensor = torch.tensor(list(range(max_value)), dtype=torch.long)
     if float:
@@ -25,7 +25,7 @@ class TestCommon(unittest.TestCase):
     Test cases for common functionality.
     """
 
-    def _check(self, tensor, reference, msg):
+    def _check(self, tensor, reference, msg) -> None:
         test_passed = (tensor == reference).all().item() == 1
         self.assertTrue(test_passed, msg=msg)
 

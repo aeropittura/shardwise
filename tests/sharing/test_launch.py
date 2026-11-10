@@ -22,7 +22,7 @@ def test_exception_func():
 
 
 @mpc.run_multiprocess(world_size=10)
-def test_worldsize_func():
+def test_worldsize_func() -> int:
     return 1
 
 

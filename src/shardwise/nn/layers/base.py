@@ -17,14 +17,14 @@ class Module:
     _version = 1
     SUPPORTS_PLAINTEXT_INPUTS = False
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._parameters = OrderedDict()
         self._buffers = OrderedDict()
         self._modules = OrderedDict()
         self.encrypted = False
         self.train()
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         encrypted_str = "encrypted" if self.encrypted else "unencrypted"
         return f"{type(self).__name__} {encrypted_str} module"
 
@@ -42,7 +42,7 @@ class Module:
     def __call__(self, *args, **kwargs):
         return self.forward(*args, **kwargs)
 
-    def train(self, mode=True):
+    def train(self, mode: bool = True):
         """Sets the module in the specified training mode."""
         for param in self.parameters():
             param.requires_grad = mode
@@ -81,7 +81,7 @@ class Module:
                 memo.add(module)
                 yield name, module
 
-    def register_module(self, name, module):
+    def register_module(self, name, module) -> None:
         """Registers child module in the module."""
         self._modules[name] = module
 
@@ -95,7 +95,7 @@ class Module:
         for _, module in self.named_modules():
             yield module
 
-    def named_modules(self, memo=None, prefix=""):
+    def named_modules(self, memo=None, prefix: str = ""):
         """Returns iterator over named modules (non-recursively)."""
         if memo is None:
             memo = set()
@@ -109,7 +109,7 @@ class Module:
                 for m in module.named_modules(memo, submodule_prefix):
                     yield m
 
-    def register_parameter(self, name, param, requires_grad=True):
+    def register_parameter(self, name, param, requires_grad: bool = True):
         """
         Register parameter in the module. This function cannot register
         parameters in child modules.
@@ -155,7 +155,7 @@ class Module:
         self._parameters[name] = cls.from_shares(share, **kwargs)
         setattr(self, name, self._parameters[name])
 
-    def parameters(self, recurse=True):
+    def parameters(self, recurse: bool = True):
         """Returns an iterator over module parameters.
         This is typically passed to an optimizer.
         Args:
@@ -168,7 +168,7 @@ class Module:
         for _, param in self.named_parameters(recurse=recurse):
             yield param
 
-    def named_parameters(self, recurse=True, prefix=None):
+    def named_parameters(self, recurse: bool = True, prefix=None):
         """
         Returns an iterator over module parameters, yielding both the
         name of the parameter as well as the parameter itself.
@@ -188,7 +188,7 @@ class Module:
                 pre = module_name if prefix is None else prefix + "." + module_name
                 yield from module.named_parameters(recurse=recurse, prefix=pre)
 
-    def _save_to_state_dict(self, destination, prefix, keep_vars):
+    def _save_to_state_dict(self, destination, prefix, keep_vars) -> None:
         """
         Saves module state to `destination` dictionary, containing a state
         of the module, but not its descendants. The specified `prefix` will be
@@ -202,7 +202,7 @@ class Module:
             if buffer is not None:
                 destination[prefix + name] = buffer if keep_vars else buffer.detach()
 
-    def state_dict(self, destination=None, prefix="", keep_vars=False):
+    def state_dict(self, destination=None, prefix: str = "", keep_vars: bool = False):
         """
         Returns a dictionary containing the state of the module. Both parameters
         and persistent buffers (e.g., running averages) are included. Keys are
@@ -263,7 +263,7 @@ class Module:
             with shardwise.no_grad(), torch.no_grad():
                 param.copy_(input_param)
 
-    def load_state_dict(self, state_dict, strict=True):
+    def load_state_dict(self, state_dict, strict: bool = True):
         """
         Copies parameters and buffers from `state_dict` into this module and its
         children. If `strict` is `True`, then the keys of `state_dict` must
@@ -281,7 +281,7 @@ class Module:
         # make copy state_dict so that load() can modify it:
         state_dict = state_dict.copy()
 
-        def load(module, prefix=""):
+        def load(module, prefix: str = "") -> None:
             """
             Closure that performs the loading of a module recursively.
             """
@@ -294,12 +294,12 @@ class Module:
         load(self)
         load = None  # break load->load reference cycle
 
-    def zero_grad(self):
+    def zero_grad(self) -> None:
         """Sets gradients of all parameters to zero."""
         for param in self.parameters():
             param.grad = None
 
-    def update_parameters(self, learning_rate, grad_threshold=100):
+    def update_parameters(self, learning_rate, grad_threshold: int = 100):
         """Performs gradient step on parameters.
 
         Parameters:
@@ -351,7 +351,7 @@ class Module:
         self._buffers[name] = buffer
         setattr(self, name, buffer)
 
-    def buffers(self, recurse=True):
+    def buffers(self, recurse: bool = True):
         """Returns an iterator over module buffers.
         Args:
             recurse (bool): if True, then yields buffers of this module
@@ -363,7 +363,7 @@ class Module:
         for _, buffer in self.named_buffers(recurse=recurse):
             yield buffer
 
-    def named_buffers(self, recurse=True, prefix=None):
+    def named_buffers(self, recurse: bool = True, prefix=None):
         """Returns an iterator over module buffers, yielding both the
         name of the buffer as well as the buffer itself.
         Args:
@@ -452,7 +452,7 @@ class Module:
         fn(self)
         return self
 
-    def encrypt(self, mode=True, src=0):
+    def encrypt(self, mode: bool = True, src: int = 0):
         """Encrypts the model."""
         if mode != self.encrypted:
             # encrypt / decrypt parameters:
@@ -533,13 +533,13 @@ class Module:
                 return buffers[name]
         raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")
 
-    def __setattr__(self, name, value):
+    def __setattr__(self, name, value) -> None:
         """Redefine __setattr__ so that any submodules created
         inside the Module object are registered with _modules
         OrderedDict.
         """
 
-        def remove_from(*dicts):
+        def remove_from(*dicts) -> None:
             for d in dicts:
                 if name in d:
                     del d[name]
@@ -565,7 +565,7 @@ class Module:
                     return
             object.__setattr__(self, name, value)
 
-    def add_module(self, name, module):
+    def add_module(self, name, module) -> None:
         """Adds and registers a submodule with a given name"""
         assert name not in self._modules.keys(), f"Module {name} already exists."
         self.register_module(name, module)
@@ -590,7 +590,7 @@ class Graph(Container):
     the module by the `add_module` function.
     """
 
-    def __init__(self, input_names, output_names, modules=None, graph=None):
+    def __init__(self, input_names, output_names, modules=None, graph=None) -> None:
         """
         Initializes a graph module with inputs named by `input_names`, that
         produces outputs named by `output_names`.
@@ -611,7 +611,7 @@ class Graph(Container):
         if graph is not None:
             self._graph = graph
 
-    def add_module(self, name, module, input_names=None, output_names=None):
+    def add_module(self, name, module, input_names=None, output_names=None) -> None:
         """
         Adds a `module` with the specified `name` to the graph. If the `module`
         expects inputs, their names should be specified via `input_names`.
@@ -641,7 +641,7 @@ class Graph(Container):
             key: [False for _ in range(len(value_list))] for key, value_list in self._graph.items()
         }
 
-        def _mark_as_computed(name):
+        def _mark_as_computed(name) -> None:
             """Marks a value as having been computed."""
             computed[name] = True
             for key, value_list in self._graph.items():
@@ -655,7 +655,7 @@ class Graph(Container):
                     return key
             return None
 
-        def _clear_unused_values():
+        def _clear_unused_values() -> None:
             """Clear values that are no longer needed (to save memory)."""
             remove_keys = []
             for remove_key in values.keys():
@@ -737,7 +737,7 @@ class Sequential(Graph):
     Sequence of modules.
     """
 
-    def __init__(self, *module_list, input_names=None):
+    def __init__(self, *module_list, input_names=None) -> None:
         if input_names is None:
             input_names = ["input"]
         super().__init__(input_names, "output")
@@ -786,7 +786,7 @@ class ModuleList(Module):
                 return x
     """
 
-    def __init__(self, modules=None):
+    def __init__(self, modules=None) -> None:
         super().__init__()
         if modules is not None:
             self += modules
@@ -796,7 +796,7 @@ class ModuleList(Module):
         keys = [key for key in keys if not key.isdigit()]
         return keys
 
-    def __delitem__(self, idx):
+    def __delitem__(self, idx) -> None:
         if isinstance(idx, slice):
             for k in range(len(self._modules))[idx]:
                 del self._modules[str(k)]
@@ -863,7 +863,7 @@ class ModuleDict(Module):
                 return x
     """
 
-    def __init__(self, modules=None):
+    def __init__(self, modules=None) -> None:
         super().__init__()
         if modules is not None:
             self.update(modules)
@@ -901,7 +901,7 @@ class Parameter(Module):
     Parameters are encrypted when the `encrypt()` function is called on a module.
     """
 
-    def __init__(self, param, trainable=True):
+    def __init__(self, param, trainable: bool = True) -> None:
         super().__init__()
 
         # ensure that input is a PyTorch or Shardwise tensor:
@@ -938,7 +938,7 @@ class Constant(Module):
 
     SUPPORTS_PLAINTEXT_INPUTS = True
 
-    def __init__(self, value):
+    def __init__(self, value) -> None:
         super().__init__()
         if not torch.is_tensor(value):
             value = torch.tensor(value)
@@ -955,7 +955,7 @@ class Constant(Module):
         assert "value" in attributes, "No value for Constant specified."
         return Constant(attributes["value"])
 
-    def encrypt(self, mode=True, src=0):
+    def encrypt(self, mode: bool = True, src: int = 0):
         self.encrypted = mode
         return self
 
@@ -967,7 +967,7 @@ class ConstantOfShape(Module):
 
     SUPPORTS_PLAINTEXT_INPUTS = True
 
-    def __init__(self, value):
+    def __init__(self, value) -> None:
         super().__init__()
         if not torch.is_tensor(value):
             value = torch.tensor(value)
@@ -987,6 +987,6 @@ class ConstantOfShape(Module):
         assert "value" in attributes, "No value for ConstantOfShape specified."
         return ConstantOfShape(attributes["value"])
 
-    def encrypt(self, mode=True, src=0):
+    def encrypt(self, mode: bool = True, src: int = 0):
         self.encrypted = mode
         return self

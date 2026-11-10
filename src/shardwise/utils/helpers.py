@@ -55,14 +55,14 @@ def chebyshev_series(func, width, terms):
 # torch.stack/torch.cat with CUDALongTensor as parameters. This is
 # a temporary solution before pytorch fix their issue.
 # See https://github.com/pytorch/pytorch/issues/34294 for details
-def torch_cat(tensors, dim=0, out=None):
+def torch_cat(tensors, dim: int = 0, out=None):
     is_cuda = any(t.is_cuda for t in tensors)
     if is_cuda:
         return CUDALongTensor.cat(tensors, dim=dim, out=out)
     return torch.cat(tensors, dim=dim, out=out)
 
 
-def torch_stack(tensors, dim=0, out=None):
+def torch_stack(tensors, dim: int = 0, out=None):
     is_cuda = any(t.is_cuda for t in tensors)
     if is_cuda:
         return CUDALongTensor.stack(tensors, dim=dim, out=out)

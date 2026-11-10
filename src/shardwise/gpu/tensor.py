@@ -46,7 +46,7 @@ class CUDALongTensor:
                 __INDICES[nblocks].append(idx)
                 __SHIFTS[nblocks].append((i + j) * __BLOCK_SIZE[nblocks])
 
-    def __init__(self, data=None, device=None):
+    def __init__(self, data=None, device=None) -> None:
         r"""
         Construct a CUDALongTensor with `data` on the specified `device`.
         `data` can either be a torch tensor, a CUDALongTensor, or an array-like
@@ -90,10 +90,10 @@ class CUDALongTensor:
             return result
         return HANDLED_FUNCTIONS[func](*args, **kwargs)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"CUDALongTensor({self._tensor})"
 
-    def __setitem__(self, index, value):
+    def __setitem__(self, index, value) -> None:
         self._tensor[index] = value.data
 
     @property
@@ -146,7 +146,7 @@ class CUDALongTensor:
         return result
 
     @staticmethod
-    def __encode_as_fp64(x, num_blocks=3):
+    def __encode_as_fp64(x, num_blocks: int = 3):
         """Converts a CUDALongTensor to an encoding of
         torch.cuda.DoubleTensor that represent the same data.
         """
@@ -158,7 +158,7 @@ class CUDALongTensor:
         return x_block.double()
 
     @staticmethod
-    def __decode_as_int64(x, num_blocks=3):
+    def __decode_as_int64(x, num_blocks: int = 3):
         """Converts a CUDALongTensor encoded as torch.cuda.DoubleTensor
         back to the CUDALongTensor it encodes
         """
@@ -328,7 +328,7 @@ class CUDALongTensor:
         splits = [CUDALongTensor(split) for split in splits]
         return splits
 
-    def unbind(self, dim=0):
+    def unbind(self, dim: int = 0):
         results = torch.unbind(self._tensor, dim)
         results = tuple(CUDALongTensor(t) for t in results)
         return results
@@ -573,7 +573,7 @@ INPLACE_FUNCTIONS = [
 ]
 
 
-def _add_regular_function(func_name):
+def _add_regular_function(func_name) -> None:
     """
     Adds function to `CUDALongTensor` that is applied directly on the underlying
     `_tensor` attribute, and stores the result in the same attribute.
@@ -591,7 +591,7 @@ def _add_regular_function(func_name):
     setattr(CUDALongTensor, func_name, regular_func)
 
 
-def _add_property_function(func_name):
+def _add_property_function(func_name) -> None:
     """
     Adds function to `CUDALongTensor` that is applied directly on the underlying
     `_tensor` attribute, and returns the result of that function.
@@ -604,7 +604,7 @@ def _add_property_function(func_name):
     setattr(CUDALongTensor, func_name, property_func)
 
 
-def _add_inplace_function(func_name):
+def _add_inplace_function(func_name) -> None:
     """
     Adds function to `CUDALongTensor` that is applied in place on the underlying
     `_tensor` attribute, and returns the result of that function.

@@ -25,7 +25,7 @@ class TestArithmetic(MultiProcessTestCase):
         if self.rank >= 0:
             shardwise.init()
 
-    def _check(self, encrypted_tensor, reference, msg, dst=None, tolerance=None):
+    def _check(self, encrypted_tensor, reference, msg, dst=None, tolerance=None) -> None:
         if tolerance is None:
             tolerance = getattr(self, "default_tolerance", 0.05)
         tensor = encrypted_tensor.get_plain_text(dst=dst)
@@ -450,7 +450,7 @@ class TestArithmetic(MultiProcessTestCase):
     def test_conv1d_larger_signal_many_channels(self) -> None:
         self._conv1d(16, 5)
 
-    def _conv1d(self, signal_size, in_channels):
+    def _conv1d(self, signal_size, in_channels) -> None:
         """Test convolution of encrypted tensor with public/private tensors."""
         nbatches = [1, 3]
         kernel_sizes = [1, 2, 3]
@@ -520,7 +520,7 @@ class TestArithmetic(MultiProcessTestCase):
     def test_conv2d_rectangular_image_many_channels(self) -> None:
         self._conv2d((16, 7), 5)
 
-    def _conv2d(self, image_size, in_channels):
+    def _conv2d(self, image_size, in_channels) -> None:
         """Test convolution of encrypted tensor with public/private tensors."""
         nbatches = [1, 3]
         kernel_sizes = [(1, 1), (2, 2), (2, 3)]

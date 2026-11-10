@@ -39,27 +39,27 @@ class Communicator:
         """Receives a tensor from an (optional) source src."""
         raise NotImplementedError("recv is not implemented")
 
-    def scatter(self, scatter_list, src, size=None, async_op=False):
+    def scatter(self, scatter_list, src, size=None, async_op: bool = False):
         """Scatters a list of tensors to all parties."""
         raise NotImplementedError("scatter is not implemented")
 
-    def reduce(self, tensor, op=None, async_op=False):
+    def reduce(self, tensor, op=None, async_op: bool = False):
         """Reduces the tensor data across all parties."""
         raise NotImplementedError("tensor is not implemented")
 
-    def all_reduce(self, tensor, op=None, async_op=False):
+    def all_reduce(self, tensor, op=None, async_op: bool = False):
         """Reduces the tensor data across all parties; all get the final result."""
         raise NotImplementedError("tensor is not implemented")
 
-    def gather(self, tensor, dst, async_op=False):
+    def gather(self, tensor, dst, async_op: bool = False):
         """Gathers a list of tensors in a single party."""
         raise NotImplementedError("gather is not implemented")
 
-    def all_gather(self, tensor, async_op=False):
+    def all_gather(self, tensor, async_op: bool = False):
         """Gathers tensors from all parties in a list."""
         raise NotImplementedError("all_gather is not implemented")
 
-    def broadcast(self, tensor, src, async_op=False):
+    def broadcast(self, tensor, src, async_op: bool = False):
         """Broadcasts the tensor to all parties."""
         raise NotImplementedError("broadcast is not implemented")
 
@@ -99,13 +99,13 @@ class Communicator:
         """Returns the party name of the current process."""
         raise NotImplementedError("get_name is not implemented")
 
-    def reset_communication_stats(self):
+    def reset_communication_stats(self) -> None:
         """Resets communication statistics."""
         self.comm_rounds = 0
         self.comm_bytes = 0
         self.comm_time = 0
 
-    def print_communication_stats(self):
+    def print_communication_stats(self) -> None:
         """
         Prints communication statistics.
 
@@ -136,12 +136,12 @@ class Communicator:
             "time": self.comm_time,
         }
 
-    def _log_communication(self, nelement):
+    def _log_communication(self, nelement) -> None:
         """Updates log of communication statistics."""
         self.comm_rounds += 1
         self.comm_bytes += nelement * self.BYTES_PER_ELEMENT
 
-    def _log_communication_time(self, comm_time):
+    def _log_communication_time(self, comm_time) -> None:
         self.comm_time += comm_time
 
 

@@ -15,7 +15,7 @@ class BatchNormalization(Module):
     `running_var` tensors as input into `forward()`.
     """
 
-    def __init__(self, eps=1e-05, momentum=0.1):
+    def __init__(self, eps: float = 1e-05, momentum: float = 0.1) -> None:
         super().__init__()
         self.eps = eps
         self.momentum = momentum
@@ -78,7 +78,7 @@ class _BatchNorm(Module):
     Unlike the `BatchNormalization` class, this module is stateful.
     """
 
-    def __init__(self, num_features, eps=1e-05, momentum=0.1):
+    def __init__(self, num_features, eps: float = 1e-05, momentum: float = 0.1) -> None:
         super().__init__()
 
         # initialize model parameters and buffers:
@@ -131,7 +131,7 @@ class _BatchNorm(Module):
                 module.set_parameter(key, value)
         return module
 
-    def train(self, mode=True):
+    def train(self, mode: bool = True):
         """Freezes the inverse variance during inference to save computation"""
         super().train(mode=mode)
         if self.training:
@@ -172,5 +172,5 @@ class GroupNorm(Module):
     Module that performs group normalization on tensors.
     """
 
-    def __init__(self, num_groups, num_channels, eps=1e-5, affine=True):
+    def __init__(self, num_groups, num_channels, eps: float = 1e-5, affine: bool = True) -> None:
         raise NotImplementedError("GroupNorm is not implemented.")

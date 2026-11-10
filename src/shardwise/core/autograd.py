@@ -12,7 +12,7 @@ class AutogradContext(_AutogradContext):
     DEPRECATED: Object used by AutogradFunctions for saving context information.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         raise DeprecationWarning(
             "shardwise.core.autograd.AutogradContext is deprecated. Please "
             "use shardwise.core.grad_fns.AutogradContext instead."
@@ -20,7 +20,7 @@ class AutogradContext(_AutogradContext):
         super().__init__(self)
 
 
-def AutogradShardTensor(tensor, requires_grad=True):
+def AutogradShardTensor(tensor, requires_grad: bool = True):
     """
     DEPRECATED: ShardTensor with support for autograd, akin to the `Variable`
     originally in PyTorch.

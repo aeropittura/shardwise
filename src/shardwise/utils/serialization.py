@@ -101,7 +101,7 @@ class RestrictedUnpickler(pickle.Unpickler):
             logging.info(f"Could not find {item} to register as a SAFE_CLASS")
 
     @classmethod
-    def register_safe_class(cls, input_class):
+    def register_safe_class(cls, input_class) -> None:
         assert isinstance(input_class, type), f"Cannot register {type(input_class)} type as safe"
         classname = str(input_class).split("'")[1]
         logging.info(f"Registering {classname} class as safe for deserialization.")
@@ -114,16 +114,16 @@ class RestrictedUnpickler(pickle.Unpickler):
         return self.__SAFE_CLASSES[classname]
 
 
-def register_safe_class(input_class):
+def register_safe_class(input_class) -> None:
     RestrictedUnpickler.register_safe_class(input_class)
 
 
-def _assert_empty_ordered_dict(x):
+def _assert_empty_ordered_dict(x) -> None:
     assert isinstance(x, collections.OrderedDict)
     assert len(x) == 0
 
 
-def _check_hooks_are_valid(result, hook_name):
+def _check_hooks_are_valid(result, hook_name) -> None:
     if hasattr(result, hook_name):
         _assert_empty_ordered_dict(getattr(result, hook_name))
     if hasattr(result, "parameters"):

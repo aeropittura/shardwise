@@ -48,7 +48,7 @@ def exp(self):
     return result
 
 
-def log(self, input_in_01=False):
+def log(self, input_in_01: bool = False):
     r"""
     Approximates the natural logarithm using 8th order modified
     Householder iterations. This approximation is accurate within 2% relative
@@ -100,7 +100,7 @@ def log(self, input_in_01=False):
     return y
 
 
-def reciprocal(self, input_in_01=False):
+def reciprocal(self, input_in_01: bool = False):
     r"""
     Args:
         input_in_01 (bool) : Allows a user to indicate that the input is in the range [0, 1],

@@ -14,10 +14,10 @@ from shardwise.settings import cfg
 class SkippedLoss:
     """Placeholder for output of a skipped loss function"""
 
-    def __init__(self, msg=""):
+    def __init__(self, msg: str = "") -> None:
         self.msg = msg
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"SkippedLoss({self.msg})"
 
 
@@ -116,7 +116,7 @@ class DPSplitModel(nn.Module):
         noise_src=None,
         randomized_response_prob=None,
         rappor_prob=None,
-    ):
+    ) -> None:
         super().__init__()
 
         # TODO: Compute noise magnitude based on jacobian.
@@ -153,7 +153,7 @@ class DPSplitModel(nn.Module):
         # Cache for tensor sizes
         self.cache = {}
 
-    def eval(self):
+    def eval(self) -> None:
         self.train(mode=False)
 
     @property
@@ -163,16 +163,16 @@ class DPSplitModel(nn.Module):
         return self._training
 
     @training.setter
-    def training(self, mode):
+    def training(self, mode) -> None:
         self.train(mode)
 
-    def train(self, mode=True):
+    def train(self, mode: bool = True) -> None:
         if hasattr(self, "model") and self.model is not None:
             self.model.train(mode=mode)
         else:
             self._training = mode
 
-    def zero_grad(self):
+    def zero_grad(self) -> None:
         if self.is_feature_src():
             self.model.zero_grad()
 
@@ -320,7 +320,7 @@ class DPSplitModel(nn.Module):
                 """
 
         # Overwrite loss backward to call model's backward function:
-        def backward_(self_, grad_output=None):
+        def backward_(self_, grad_output=None) -> None:
             self.backward(grad_output=grad_output)
 
         self.loss.backward = backward_
@@ -421,7 +421,7 @@ class DPSplitModel(nn.Module):
         grads = grad.flatten().get_plain_text(dst=self.feature_src)
         return grads
 
-    def _backward_full_jacobian(self, grad_output=None):
+    def _backward_full_jacobian(self, grad_output=None) -> None:
         """Computes backward for non-RR variant.
 
         To add DP noise at the aggregated gradient level,
@@ -511,7 +511,7 @@ class DPSplitModel(nn.Module):
         # return dLdW
         return dLdW_enc.get_plain_text(dst=self.feature_src)
 
-    def _backward_layer_estimation(self, grad_output=None):
+    def _backward_layer_estimation(self, grad_output=None) -> None:
         with shardwise.no_grad():
             # Find dLdW for last layer weights
             dLdW = self._compute_last_layer_grad(grad_output=grad_output)

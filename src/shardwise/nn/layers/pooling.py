@@ -34,7 +34,9 @@ class _Pool2d(Module):
         https://github.com/vdumoulin/conv_arithmetic/blob/master/README.md
     """
 
-    def __init__(self, pool_type, kernel_size, stride=None, padding=0, ceil_mode=False):
+    def __init__(
+        self, pool_type, kernel_size, stride=None, padding: int = 0, ceil_mode: bool = False
+    ) -> None:
         super().__init__()
         self.pool_type = pool_type
         self.kernel_size = kernel_size
@@ -126,7 +128,7 @@ class AvgPool2d(_Pool2d):
                 \text{kernel\_size}[1]}{\text{stride}[1]} + 1\right\rfloor
     """
 
-    def __init__(self, kernel_size, stride=None, padding=0, ceil_mode=False):
+    def __init__(self, kernel_size, stride=None, padding: int = 0, ceil_mode: bool = False) -> None:
         super().__init__(
             "average", kernel_size, stride=stride, padding=padding, ceil_mode=ceil_mode
         )
@@ -141,7 +143,7 @@ class MaxPool2d(_Pool2d):
     Module that performs 2D max pooling (see :meth:`AvgPool2d`)
     """
 
-    def __init__(self, kernel_size, stride=None, padding=0, ceil_mode=False):
+    def __init__(self, kernel_size, stride=None, padding: int = 0, ceil_mode: bool = False) -> None:
         super().__init__("max", kernel_size, stride=stride, padding=padding, ceil_mode=ceil_mode)
 
     @staticmethod
@@ -176,7 +178,7 @@ class AdaptiveAvgPool2d(Module):
         >>> output = m(input)
     """
 
-    def __init__(self, output_size=None):
+    def __init__(self, output_size=None) -> None:
         super().__init__()
         self.output_size = output_size
 
@@ -229,7 +231,7 @@ class AdaptiveMaxPool2d(Module):
 
     """
 
-    def __init__(self, output_size=None):
+    def __init__(self, output_size=None) -> None:
         super().__init__()
         self.output_size = output_size
 

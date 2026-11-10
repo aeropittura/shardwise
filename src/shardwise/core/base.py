@@ -167,13 +167,13 @@ class ShardTensor(metaclass=ShardTensorMetaclass):
             ShardTensor.set_grad_enabled(prior_value)
 
     @staticmethod
-    def set_grad_enabled(mode):
+    def set_grad_enabled(mode) -> None:
         """
         Enables (`mode = True`) or disables (`mode = False`) Shardwise's autograd.
         """
         ShardTensor.AUTOGRAD_ENABLED = mode
 
-    def __init__(self, requires_grad=False):
+    def __init__(self, requires_grad: bool = False) -> None:
         """
         Creates a new `ShardTensor` object. The `requires_grad` flag determines
         if computations on the created tensor are logged on the autograd tape.
@@ -189,7 +189,7 @@ class ShardTensor(metaclass=ShardTensorMetaclass):
             raise TypeError("ShardTensor class cannot be instantiated directly.")
         return object.__new__(cls)
 
-    def _reset_gradients(self):
+    def _reset_gradients(self) -> None:
         """Resets gradient information in tensor."""
         self.grad = None  # gradient itself
         self.grad_fn = None  # functions to call for gradient
@@ -198,14 +198,14 @@ class ShardTensor(metaclass=ShardTensorMetaclass):
         self.children = []  # children of node in graph
         self.ctx = AutogradContext()  # contexts for AutogradFunctions
 
-    def _identify_required_grads(self):
+    def _identify_required_grads(self) -> None:
         """Flag all nodes for which gradient needs to be evaluated."""
         self.grad_expected += 1
         if self.grad_expected == 1:  # only backpropagate once from each node
             for child in self.children:
                 child._identify_required_grads()
 
-    def backward(self, grad_input=None, top_node=True):
+    def backward(self, grad_input=None, top_node: bool = True):
         """
         Backpropagates gradient through the computation graph. The function
         only maintains the gradients in leaf nodes of the graph.
@@ -534,13 +534,13 @@ class ShardTensor(metaclass=ShardTensorMetaclass):
         return self._tensor.data
 
     @data.setter
-    def data(self, value):
+    def data(self, value) -> None:
         self._tensor.data = value
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"{self.__class__.__name__}({self._tensor})"
 
-    def __bool__(self):
+    def __bool__(self) -> bool:
         """Override bool operator since encrypted tensors cannot evaluate"""
         raise RuntimeError("Cannot evaluate ShardTensors to boolean values")
 
@@ -688,7 +688,7 @@ class ShardTensor(metaclass=ShardTensorMetaclass):
         """Perform a 2D transpose convolution (deconvolution) using the given kernel"""
         raise NotImplementedError("conv_transpose2d is not implemented")
 
-    def avg_pool2d(self, kernel_size, stride=None, padding=0):
+    def avg_pool2d(self, kernel_size, stride=None, padding: int = 0):
         """Perform an average pooling on each 2D matrix of the given tensor
 
         Args:

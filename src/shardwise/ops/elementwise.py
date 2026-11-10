@@ -53,7 +53,7 @@ __all__ = [  # noqa: F822
 PROPERTY_FUNCTIONS = ["__len__", "nelement", "dim", "size", "numel"]
 
 
-def __setitem__(self, index, value):
+def __setitem__(self, index, value) -> None:
     """Set tensor values by index"""
     if not isinstance(value, type(self)):
         kwargs = {"device": self.device}
@@ -63,7 +63,7 @@ def __setitem__(self, index, value):
     self._tensor.__setitem__(index, value._tensor)
 
 
-def pad(self, pad, mode="constant", value=0):
+def pad(self, pad, mode: str = "constant", value: int = 0):
     result = self.shallow_copy()
     if hasattr(value, "_tensor"):
         value = value._tensor
@@ -109,7 +109,7 @@ def scatter(self, dim, index, src):
     return result
 
 
-def unbind(self, dim=0):
+def unbind(self, dim: int = 0):
     tensors = self._tensor.unbind(dim=dim)
     results = tuple(self.shallow_copy() for _ in range(len(tensors)))
     for i in range(len(tensors)):
@@ -117,7 +117,7 @@ def unbind(self, dim=0):
     return results
 
 
-def split(self, split_size, dim=0):
+def split(self, split_size, dim: int = 0):
     tensors = self._tensor.split(split_size, dim=dim)
     results = tuple(self.shallow_copy() for _ in range(len(tensors)))
     for i in range(len(tensors)):
@@ -192,7 +192,7 @@ def var(self, *args, **kwargs):
     return result.div(divisor)
 
 
-def prod(self, dim=None, keepdim=False):
+def prod(self, dim=None, keepdim: bool = False):
     """
     Returns the product of each row of the `input` tensor in the given
     dimension `dim`.
@@ -275,7 +275,7 @@ stack = staticmethod(stack)
 
 
 # Add remaining regular functions
-def _add_regular_function(function_name):
+def _add_regular_function(function_name) -> None:
     """
     Adds regular function that is applied directly on the underlying
     `_tensor` attribute, and stores the result in the same attribute.
@@ -290,7 +290,7 @@ def _add_regular_function(function_name):
         globals()[function_name] = regular_func
 
 
-def _add_property_function(function_name):
+def _add_property_function(function_name) -> None:
     """
     Adds regular function that is applied directly on the underlying
     `_tensor` attribute, and returns the result of that function.

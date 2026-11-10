@@ -13,7 +13,7 @@ class PyTorchTensor(ShardTensor):
     This class should be used for testing purposes.
     """
 
-    def __init__(self, tensor, device=None, *args, **kwargs):
+    def __init__(self, tensor, device=None, *args, **kwargs) -> None:
         # take required_grad from kwargs, input tensor, or set to False:
         default = tensor.requires_grad if torch.is_tensor(tensor) else False
         requires_grad = kwargs.pop("requires_grad", default)
@@ -43,7 +43,7 @@ class PyTorchTensor(ShardTensor):
         result._tensor = self._tensor.clone()
         return result
 
-    def copy_(self, other):
+    def copy_(self, other) -> None:
         """Copies value of other PyTorchTensor into this PyTorchTensor."""
         assert isinstance(other, PyTorchTensor), "other must be PyTorchTensor"
         self._tensor = other._tensor
@@ -105,7 +105,7 @@ class PyTorchTensor(ShardTensor):
         )
         return result
 
-    def avg_pool2d(self, kernel_size, stride=None, padding=0):
+    def avg_pool2d(self, kernel_size, stride=None, padding: int = 0):
         result = self.clone()
         result._tensor = torch.nn.functional.avg_pool2d(
             result._tensor, kernel_size, stride=stride, padding=padding

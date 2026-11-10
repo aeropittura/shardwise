@@ -19,7 +19,12 @@ from shardwise.settings import cfg
 
 
 def get_random_test_tensor(
-    max_value=6, min_value=None, size=(1, 5), is_float=False, ex_zero=False, device=None
+    max_value: int = 6,
+    min_value=None,
+    size=(1, 5),
+    is_float: bool = False,
+    ex_zero: bool = False,
+    device=None,
 ):
     """Generates random tensor for testing
 
@@ -85,7 +90,7 @@ class MultiProcessTestCase(unittest.TestCase):
     @staticmethod
     def join_or_run(fn):
         @wraps(fn)
-        def wrapper(self):
+        def wrapper(self) -> None:
             if self.rank == self.MAIN_PROCESS_RANK:
                 self._join_processes(fn)
             else:
@@ -98,20 +103,20 @@ class MultiProcessTestCase(unittest.TestCase):
     # assume the role of the main process and join its subprocesses,
     # or run the underlying test function.
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls) -> None:
         for attr in dir(cls):
             if attr.startswith("test"):
                 fn = getattr(cls, attr)
                 setattr(cls, attr, cls.join_or_run(fn))
 
-    def __init__(self, methodName):
+    def __init__(self, methodName) -> None:
         super().__init__(methodName)
 
         self.device = torch.device(self.DEFAULT_DEVICE)
         self.rank = self.MAIN_PROCESS_RANK
         self.mp_context = multiprocessing.get_context("spawn")
 
-    def setUp(self, world_size=DEFAULT_WORLD_SIZE):
+    def setUp(self, world_size=DEFAULT_WORLD_SIZE) -> None:
         super().setUp()
 
         shardwise.debug.configure_logging()
@@ -128,7 +133,7 @@ class MultiProcessTestCase(unittest.TestCase):
             if shardwise.sharing.ttp_required():
                 self.processes += [self._spawn_ttp()]
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         super().tearDown()
         for p in self.processes:
             p.terminate()
@@ -138,7 +143,7 @@ class MultiProcessTestCase(unittest.TestCase):
         return self.id().split(".")[-1]
 
     @staticmethod
-    def _spawn_ttp_process_with_config(config):
+    def _spawn_ttp_process_with_config(config) -> None:
         """Runs TTPServer with config copied from parent"""
         cfg.set_config(config)
         shardwise.providers.TTPServer()
@@ -171,7 +176,7 @@ class MultiProcessTestCase(unittest.TestCase):
         return process
 
     @classmethod
-    def _run(cls, test_name, config, rank, world_size, file, exception_queue):
+    def _run(cls, test_name, config, rank, world_size, file, exception_queue) -> None:
         self = cls(test_name)
 
         self.file = file
@@ -210,7 +215,7 @@ class MultiProcessTestCase(unittest.TestCase):
         shardwise.uninit()
         sys.exit(0)
 
-    def _join_processes(self, fn):
+    def _join_processes(self, fn) -> None:
         exceptions = {}
         for p in self.processes:
             p.join()

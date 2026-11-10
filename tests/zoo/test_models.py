@@ -27,7 +27,7 @@ class TestModels(MultiProcessTestCase):
         super().setUp()
         shardwise.init()
 
-    def _check_modules(self, shardwise_model, torchvision_model, msg):
+    def _check_modules(self, shardwise_model, torchvision_model, msg) -> None:
         msg += " in modules."
 
         # Check modules()
@@ -45,7 +45,7 @@ class TestModels(MultiProcessTestCase):
         for k in shardwise_named_modules.keys():
             self.assertTrue(k in torchvision_named_modules, msg)
 
-    def _check_parameters(self, shardwise_model, torchvision_model, pretrained, msg):
+    def _check_parameters(self, shardwise_model, torchvision_model, pretrained, msg) -> None:
         msg += " in parameters."
         if pretrained:
             msg = f"Pretrained {msg}"
@@ -82,7 +82,7 @@ class TestModels(MultiProcessTestCase):
                     f"{msg}: {name}",
                 )
 
-    def _check_model(self, model_name, *args, **kwargs):
+    def _check_model(self, model_name, *args, **kwargs) -> None:
         shardwise_model = getattr(shardwise.zoo, model_name)(*args, **kwargs)
         torchvision_model = getattr(torchvision.models, model_name)(*args, **kwargs)
 
@@ -117,7 +117,7 @@ class TestModels(MultiProcessTestCase):
         # encr_output = shardwise_model(encr_input)
         # self._check(encr_output, output, f"{model_name} model forward failed")
 
-    def _check_all_models(self, list_of_model_names):
+    def _check_all_models(self, list_of_model_names) -> None:
         for model_name in list_of_model_names:
             for pretrained in [False, True]:
                 if pretrained and model_name in self.__PRETRAINED_UNAVAILABLE:
