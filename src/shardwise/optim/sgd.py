@@ -2,7 +2,6 @@
 
 
 import shardwise
-
 from shardwise.optim.optimizer import Optimizer
 
 
@@ -58,13 +57,13 @@ class SGD(Optimizer):
         grad_threshold=None,
     ):
         if not isinstance(lr, (int, float)) or lr < 0.0:
-            raise ValueError("Invalid learning rate: {}".format(lr))
+            raise ValueError(f"Invalid learning rate: {lr}")
         if not isinstance(momentum, (int, float)) or momentum < 0.0:
-            raise ValueError("Invalid momentum value: {}".format(momentum))
+            raise ValueError(f"Invalid momentum value: {momentum}")
         if not isinstance(dampening, (int, float)):
-            raise ValueError("Invalid dampening value {}".format(dampening))
+            raise ValueError(f"Invalid dampening value {dampening}")
         if not isinstance(weight_decay, (int, float)) or weight_decay < 0.0:
-            raise ValueError("Invalid weight_decay value: {}".format(weight_decay))
+            raise ValueError(f"Invalid weight_decay value: {weight_decay}")
 
         defaults = {
             "lr": lr,
@@ -81,10 +80,10 @@ class SGD(Optimizer):
         if self.square_threshold is not None:
             self.square_threshold *= self.square_threshold
 
-        super(SGD, self).__init__(params, defaults)
+        super().__init__(params, defaults)
 
     def __setstate__(self, state):
-        super(SGD, self).__setstate__(state)
+        super().__setstate__(state)
         for group in self.param_groups:
             group.setdefault("nesterov", False)
 

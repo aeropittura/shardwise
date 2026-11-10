@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 
 
-
+from functools import wraps
 import queue
 import sys
 import threading
-import unittest
-from functools import wraps
 from threading import Thread
+import unittest
 
 import shardwise
 
@@ -59,9 +58,7 @@ class MultiThreadTestCase(unittest.TestCase):
             pass
         else:
             sys.excepthook(*exception_info)
-            raise RuntimeError(
-                "Exception found in one of the parties. Look at past logs."
-            )
+            raise RuntimeError("Exception found in one of the parties. Look at past logs.")
 
     def _current_test_name(self):
         # self.id() == e.g. '__main__.TestDistributed.TestAdditive.test_get_rank'

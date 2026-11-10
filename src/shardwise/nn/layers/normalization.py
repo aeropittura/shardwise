@@ -1,7 +1,8 @@
 """Normalization layers."""
 
-import shardwise
 import torch
+
+import shardwise
 from shardwise.nn.layers.base import Module
 
 

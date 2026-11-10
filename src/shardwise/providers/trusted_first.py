@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 
 
-import shardwise.comm as comm
 import torch
-from shardwise.utils.random import generate_kbit_random_tensor, generate_random_ring_element
-from shardwise.utils.helpers import count_wraps, torch_stack
-from shardwise.protocols import ArithmeticSharedTensor, BinarySharedTensor
 
+import shardwise.comm as comm
+from shardwise.protocols import ArithmeticSharedTensor, BinarySharedTensor
 from shardwise.providers.base import TupleProvider
+from shardwise.utils.helpers import count_wraps, torch_stack
+from shardwise.utils.random import generate_kbit_random_tensor, generate_random_ring_element
 
 
 class TrustedFirstParty(TupleProvider):
@@ -51,10 +51,7 @@ class TrustedFirstParty(TupleProvider):
     def wrap_rng(self, size, device=None):
         """Generate random shared tensor of given size and sharing of its wraps"""
         num_parties = comm.get().get_world_size()
-        r = [
-            generate_random_ring_element(size, device=device)
-            for _ in range(num_parties)
-        ]
+        r = [generate_random_ring_element(size, device=device) for _ in range(num_parties)]
         theta_r = count_wraps(r)
 
         shares = comm.get().scatter(r, 0)

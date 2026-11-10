@@ -76,18 +76,14 @@ PATH = os.getcwd()
 
 
 # clone
-subprocess.call(
-    "cd /tmp && git clone https://github.com/facebookresearch/CrypTen.git", shell=True
-)
+subprocess.call("cd /tmp && git clone https://github.com/facebookresearch/CrypTen.git", shell=True)
 
 # create venv
 subprocess.call("cd /tmp && python3 -m venv .venv", shell=True)
 venv = "cd /tmp && . .venv/bin/activate && "
 
 # install PyTorch
-subprocess.call(
-    f"{venv} pip3 install onnx==1.6.0 tensorboard pandas sklearn", shell=True
-)
+subprocess.call(f"{venv} pip3 install onnx==1.6.0 tensorboard pandas sklearn", shell=True)
 stable_url = "https://download.pytorch.org/whl/torch_stable.html"
 pip_torch = f"pip install torch==1.5.1+cu{cuda_version} torchvision==0.6.1+cu{cuda_version} -f https://download.pytorch.org/whl/torch_stable.html"
 subprocess.call(f"{venv} {pip_torch} -f {stable_url}", shell=True)
@@ -101,7 +97,7 @@ for date in dates:
         continue
     # checkout closest version before date
     subprocess.call(
-        f"cd /tmp/Shardwise && "
+        "cd /tmp/Shardwise && "
         + f"git checkout `git rev-list -n 1 --before='{date} 01:01' master`",
         shell=True,
     )
@@ -110,9 +106,7 @@ for date in dates:
         subprocess.call(f"echo Generating {date} Benchmarks for {mode}", shell=True)
         path = os.path.join(PATH, f"dash_app/data/{date}", mode)
         subprocess.call(f"mkdir -p {path}", shell=True)
-        subprocess.call(
-            venv + f"cd {PATH} && python3 benchmark.py -p '{path}' {arg}", shell=True
-        )
+        subprocess.call(venv + f"cd {PATH} && python3 benchmark.py -p '{path}' {arg}", shell=True)
         subprocess.call(
             venv + f"cd {PATH} && python3 benchmark.py -p '{path}' -d 'cuda' {arg}",
             shell=True,

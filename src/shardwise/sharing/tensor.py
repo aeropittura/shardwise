@@ -2,17 +2,17 @@
 
 
 import torch
-import shardwise.comm as comm
-from shardwise.utils.dtypes import is_tensor
-from shardwise.utils.helpers import torch_stack
-from shardwise.settings import cfg
-from shardwise.gpu import CUDALongTensor
 
+import shardwise.comm as comm
 from shardwise.core.base import ShardTensor
 from shardwise.core.encoding import FixedPointEncoder
+from shardwise.gpu import CUDALongTensor
 from shardwise.protocols.binary import BinarySharedTensor
 from shardwise.protocols.conversion import convert
+from shardwise.settings import cfg
 from shardwise.sharing.ptype import ptype as Ptype
+from shardwise.utils.dtypes import is_tensor
+from shardwise.utils.helpers import torch_stack
 
 
 @ShardTensor.register_tensor_type("mpc")
@@ -50,7 +50,7 @@ class SecureTensor(ShardTensor):
 
         # create the SecureTensor:
         tensor_type = ptype.to_tensor()
-        if tensor is []:
+        if tensor == []:
             self._tensor = torch.tensor([], device=device)
         else:
             self._tensor = tensor_type(tensor=tensor, device=device, *args, **kwargs)
@@ -181,10 +181,7 @@ class SecureTensor(ShardTensor):
         share = self.share
         plain_text = self._tensor.get_plain_text() if debug_mode else "HIDDEN"
         ptype = self.ptype
-        return (
-            f"SecureTensor(\n\t_tensor={share}\n"
-            f"\tplain_text={plain_text}\n\tptype={ptype}\n)"
-        )
+        return f"SecureTensor(\n\t_tensor={share}\n\tplain_text={plain_text}\n\tptype={ptype}\n)"
 
     def __hash__(self):
         return hash(self.share)
@@ -218,9 +215,7 @@ class SecureTensor(ShardTensor):
         """
         rand = SecureTensor([])
         encoder = FixedPointEncoder()
-        rand._tensor = BinarySharedTensor.rand(
-            *sizes, bits=encoder._precision_bits, device=device
-        )
+        rand._tensor = BinarySharedTensor.rand(*sizes, bits=encoder._precision_bits, device=device)
         rand._tensor.encoder = encoder
         rand.ptype = Ptype.binary
         return rand.to(Ptype.arithmetic, bits=encoder._precision_bits)

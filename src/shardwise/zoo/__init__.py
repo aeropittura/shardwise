@@ -5,9 +5,9 @@ import importlib.util
 import logging
 import sys
 
-import shardwise.nn as cnn
 import torch
 
+import shardwise.nn as cnn
 
 # List of modules to import and additional classes to update from them
 __import_list = {
@@ -160,10 +160,8 @@ if models is not None:
                 if isinstance(module, type):
                     __update_model_class_inheritance(module)
 
-                module.load_state_dict = (
-                    lambda *args, **kwargs: cnn.Module.load_state_dict(
-                        *args, strict=False, **kwargs
-                    )
+                module.load_state_dict = lambda *args, **kwargs: cnn.Module.load_state_dict(
+                    *args, strict=False, **kwargs
                 )
 
                 if module_name in model_type.__all__:

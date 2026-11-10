@@ -26,9 +26,7 @@ def dropout(self, p=0.5, training=True, inplace=False):
 
     assert p > 0.0 and p < 1.0, "dropout probability has to be between 0 and 1"
     if training and inplace:
-        logging.warning(
-            "Shardwise dropout does not support inplace computation during training."
-        )
+        logging.warning("Shardwise dropout does not support inplace computation during training.")
 
     if not training:
         if inplace:

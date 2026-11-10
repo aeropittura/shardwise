@@ -4,8 +4,9 @@
 import random
 import time
 
-import shardwise
 import torch
+
+import shardwise
 from shardwise.settings import cfg
 
 
@@ -48,9 +49,7 @@ def online_learner(
         start_t = time.time()
 
         # unpack sample:
-        assert "context" in sample and "rewards" in sample, (
-            "invalid sample: %s" % sample
-        )
+        assert "context" in sample and "rewards" in sample, f"invalid sample: {sample}"
 
         context = shardwise.tensor(sample["context"])
         num_features = context.nelement()

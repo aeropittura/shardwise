@@ -1,6 +1,7 @@
 """Fully connected and matrix-multiplication layers."""
 
 import torch
+
 from shardwise.nn.layers.base import Module
 
 

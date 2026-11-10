@@ -20,12 +20,13 @@ import logging
 import os
 import pickle
 
-import examples.util
 import torch
 import visdom
+
 from examples.multiprocess_launcher import (
     MultiProcessLauncher,
 )
+import examples.util
 
 
 def compute_rewards(weights, dataset, epsilon=0.0):
@@ -97,21 +98,15 @@ def parse_args():
         type=str,
         help="folder from which to load checkpointed models",
     )
-    parser.add_argument(
-        "--permfile", default=None, type=str, help="file with sampling permutation"
-    )
+    parser.add_argument("--permfile", default=None, type=str, help="file with sampling permutation")
     parser.add_argument(
         "--epsilon",
         default=0.01,
         type=float,
         help="exploration parameter (default = 0.01)",
     )
-    parser.add_argument(
-        "--savefile", default=None, type=str, help="file to pickle advantages"
-    )
-    parser.add_argument(
-        "--visualize", action="store_true", help="visualize results with visdom"
-    )
+    parser.add_argument("--savefile", default=None, type=str, help="file to pickle advantages")
+    parser.add_argument("--visualize", action="store_true", help="visualize results with visdom")
     parser.add_argument(
         "--world_size",
         type=int,
@@ -137,9 +132,7 @@ def membership_inference(args, load_data_module, download_mnist):
         clusters = torch.load(clusters_file)
 
     # load dataset:
-    train_data, _ = load_data_module.load_data(
-        split="train", download_mnist_func=download_mnist
-    )
+    train_data, _ = load_data_module.load_data(split="train", download_mnist_func=download_mnist)
     components = examples.util.pca(train_data, args.pca)
     positive_set = load_data_module.load_data(
         split="train",

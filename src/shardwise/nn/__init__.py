@@ -1,10 +1,8 @@
 #!/usr/bin/env python3
 
 
-
-from shardwise.nn.init import *  # noqa: F403
 from shardwise.nn.distances import CosineSimilarity
-from shardwise.nn.loss import _Loss, BCELoss, BCEWithLogitsLoss, CrossEntropyLoss, L1Loss, MSELoss
+from shardwise.nn.init import *  # noqa: F403
 from shardwise.nn.layers import (
     AdaptiveAvgPool2d,
     AdaptiveMaxPool2d,
@@ -67,8 +65,8 @@ from shardwise.nn.layers import (
     Unsqueeze,
     Where,
 )
-from shardwise.nn.onnx_io import from_onnx, from_pytorch, from_tensorflow, TF_AND_TF2ONNX
-
+from shardwise.nn.loss import BCELoss, BCEWithLogitsLoss, CrossEntropyLoss, L1Loss, MSELoss, _Loss
+from shardwise.nn.onnx_io import TF_AND_TF2ONNX, from_onnx, from_pytorch, from_tensorflow
 
 # expose contents of package
 __all__ = [  # noqa: F405

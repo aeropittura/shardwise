@@ -6,15 +6,15 @@ import math
 import numpy as np
 import torch
 
-from shardwise.utils.dtypes import is_float_tensor, is_int_tensor
-from shardwise.settings import cfg
 from shardwise.core.base import ShardTensor
+from shardwise.settings import cfg
+from shardwise.utils.dtypes import is_float_tensor, is_int_tensor
 
 
 def nearest_integer_division(tensor, integer):
     """Performs division of integer tensor, rounding to nearest integer."""
     assert integer > 0, "only supports positive divisors"
-    assert is_int_tensor(tensor), "unsupported type: %s" % type(tensor)
+    assert is_int_tensor(tensor), f"unsupported type: {type(tensor)}"
 
     lez = (tensor < 0).long()
     pos_remainder = (1 - lez) * tensor % integer
@@ -40,15 +40,9 @@ class FixedPointEncoder:
             return x
         elif isinstance(x, int) or isinstance(x, float):
             # Squeeze in order to get a 0-dim tensor with value `x`
-            return torch.tensor(
-                [self._scale * x], dtype=torch.long, device=device
-            ).squeeze()
+            return torch.tensor([self._scale * x], dtype=torch.long, device=device).squeeze()
         elif isinstance(x, list):
-            return (
-                torch.tensor(x, dtype=torch.float, device=device)
-                .mul_(self._scale)
-                .long()
-            )
+            return torch.tensor(x, dtype=torch.float, device=device).mul_(self._scale).long()
         elif is_float_tensor(x):
             return (self._scale * x).long()
         # For integer types cast to long prior to scaling to avoid overflow.
@@ -57,9 +51,9 @@ class FixedPointEncoder:
         elif isinstance(x, np.ndarray):
             return self._scale * torch.from_numpy(x).long().to(device)
         elif torch.is_tensor(x):
-            raise TypeError("Cannot encode input with dtype %s" % x.dtype)
+            raise TypeError(f"Cannot encode input with dtype {x.dtype}")
         else:
-            raise TypeError("Unknown tensor type: %s." % type(x))
+            raise TypeError(f"Unknown tensor type: {type(x)}.")
 
     def decode(self, tensor):
         """Helper function that decodes from scaled tensor"""

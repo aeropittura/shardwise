@@ -23,7 +23,6 @@ from examples.multiprocess_launcher import (
     MultiProcessLauncher,
 )
 
-
 parser = argparse.ArgumentParser(description="Shardwise Autograd CNN Training")
 
 

@@ -5,9 +5,8 @@ from contextlib import contextmanager
 
 import torch
 
-from shardwise.debug import register_validation
 from shardwise.core.grad_fns import AutogradContext, BaseAutogradContext, get_grad_fn
-
+from shardwise.debug import register_validation
 
 # list of all static functions that ShardTensors support:
 STATIC_FUNCTIONS = ["cat", "stack"]
@@ -44,7 +43,7 @@ class ShardTensorMetaclass(type):
         return type.__getattribute__(cls, name)
 
 
-class ShardTensor(object, metaclass=ShardTensorMetaclass):
+class ShardTensor(metaclass=ShardTensorMetaclass):
     """
     Abstract implementation of encrypted tensor type. Every subclass of `ShardTensor`
     must implement the methods defined here. The actual tensor data should live in
@@ -65,21 +64,20 @@ class ShardTensor(object, metaclass=ShardTensorMetaclass):
 
         .. code-block:: python
 
-            @ShardTensor.register_tensor_type('my_shard_tensor')
-            class MyShardTensor(ShardTensor):
-                ...
+            @ShardTensor.register_tensor_type("my_shard_tensor")
+            class MyShardTensor(ShardTensor): ...
         """
 
         def register_shard_tensor_cls(cls):
             if name in ShardTensor.__TENSOR_TYPES__:
                 raise ValueError(
-                    "Cannot register duplicate ShardTensor type: \
-                    tensor type {} already exists.".format(name)
+                    f"Cannot register duplicate ShardTensor type: \
+                    tensor type {name} already exists."
                 )
             if not issubclass(cls, ShardTensor):
                 raise ValueError(
-                    "Registered tensor ({}: {}) must extend \
-                    ShardTensor".format(name, cls.__name__)
+                    f"Registered tensor ({name}: {cls.__name__}) must extend \
+                    ShardTensor"
                 )
             ShardTensor.__TENSOR_TYPES__[name] = cls
             return cls
@@ -223,9 +221,7 @@ class ShardTensor(object, metaclass=ShardTensorMetaclass):
                     if self.nelement() == 1:
                         grad_input = self.new(torch.ones_like(self.data))
                     else:
-                        raise RuntimeError(
-                            "grad can be implicitly created only for scalar outputs"
-                        )
+                        raise RuntimeError("grad can be implicitly created only for scalar outputs")
 
                 # process gradient input:
                 self.grad_received += 1
@@ -252,9 +248,9 @@ class ShardTensor(object, metaclass=ShardTensorMetaclass):
                 # call backward function on children:
                 if not isinstance(grad, (list, tuple)):
                     grad = (grad,)
-                assert len(differentiable_children) <= len(
-                    grad
-                ), "number of gradients does not match number of children"
+                assert len(differentiable_children) <= len(grad), (
+                    "number of gradients does not match number of children"
+                )
                 for idx, child in enumerate(differentiable_children):
                     child.backward(grad_input=grad[idx], top_node=False)
 
@@ -288,9 +284,7 @@ class ShardTensor(object, metaclass=ShardTensorMetaclass):
             # dispatch torch.{cat,stack} call on ShardTensor to Shardwise:
             return getattr(shardwise, STATIC_FUNCTION_MAPPING[func])(*args, **kwargs)
         else:
-            raise NotImplementedError(
-                f"Shardwise does not support torch function {func}."
-            )
+            raise NotImplementedError(f"Shardwise does not support torch function {func}.")
 
     def _get_forward_function_no_ctx(self, grad_fn):
         # determine if self is a dummy object (the case for staticmethods):

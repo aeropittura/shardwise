@@ -1,19 +1,17 @@
 #!/usr/bin/env python3
 
 
-import shardwise.comm as comm
-
 # dependencies:
 import torch
+
+import shardwise.comm as comm
+from shardwise.core.encoding import FixedPointEncoder
+from shardwise.gpu import CUDALongTensor
 from shardwise.ops import elementwise
-from shardwise.utils.random import generate_kbit_random_tensor
+from shardwise.protocols import beaver, circuit
 from shardwise.utils.dtypes import is_tensor
 from shardwise.utils.helpers import torch_cat, torch_stack
-from shardwise.gpu import CUDALongTensor
-from shardwise.core.encoding import FixedPointEncoder
-
-from shardwise.protocols import beaver, circuit
-
+from shardwise.utils.random import generate_kbit_random_tensor
 
 SENTINEL = -1
 
@@ -28,9 +26,7 @@ class BinarySharedTensor:
     where n is the number of parties present in the protocol (world_size).
     """
 
-    def __init__(
-        self, tensor=None, size=None, broadcast_size=False, src=0, device=None
-    ):
+    def __init__(self, tensor=None, size=None, broadcast_size=False, src=0, device=None):
         """
         Creates the shared tensor from the input `tensor` provided by party `src`.
 
@@ -54,19 +50,17 @@ class BinarySharedTensor:
             return
 
         # assertions on inputs:
-        assert (
-            isinstance(src, int) and src >= 0 and src < comm.get().get_world_size()
-        ), "specified source party does not exist"
+        assert isinstance(src, int) and src >= 0 and src < comm.get().get_world_size(), (
+            "specified source party does not exist"
+        )
         if self.rank == src:
             assert tensor is not None, "source must provide a data tensor"
             if hasattr(tensor, "src"):
-                assert (
-                    tensor.src == src
-                ), "source of data tensor must match source of encryption"
+                assert tensor.src == src, "source of data tensor must match source of encryption"
         if not broadcast_size:
-            assert (
-                tensor is not None or size is not None
-            ), "must specify tensor or size, or set broadcast_size"
+            assert tensor is not None or size is not None, (
+                "must specify tensor or size, or set broadcast_size"
+            )
 
         # if device is unspecified, try and get it from tensor:
         if device is None and tensor is not None and hasattr(tensor, "device"):
@@ -215,7 +209,7 @@ class BinarySharedTensor:
         elif isinstance(y, BinarySharedTensor):
             self.share ^= y.share
         else:
-            raise TypeError("Cannot XOR %s with %s." % (type(y), type(self)))
+            raise TypeError(f"Cannot XOR {type(y)} with {type(self)}.")
         return self
 
     def __xor__(self, y):
@@ -236,7 +230,7 @@ class BinarySharedTensor:
         elif isinstance(y, BinarySharedTensor):
             self.share.set_(beaver.AND(self, y).share.data)
         else:
-            raise TypeError("Cannot AND %s with %s." % (type(y), type(self)))
+            raise TypeError(f"Cannot AND {type(y)} with {type(self)}.")
         return self
 
     def __and__(self, y):
@@ -315,7 +309,7 @@ class BinarySharedTensor:
         if is_tensor(value) or isinstance(value, list):
             value = BinarySharedTensor(value)
         assert isinstance(value, BinarySharedTensor), (
-            "Unsupported input type %s for __setitem__" % type(value)
+            f"Unsupported input type {type(value)} for __setitem__"
         )
         self.share.__setitem__(index, value.share)
 
@@ -323,9 +317,7 @@ class BinarySharedTensor:
     def stack(seq, *args, **kwargs):
         """Stacks a list of tensors along a given dimension"""
         assert isinstance(seq, list), "Stack input must be a list"
-        assert isinstance(
-            seq[0], BinarySharedTensor
-        ), "Sequence must contain BinarySharedTensors"
+        assert isinstance(seq[0], BinarySharedTensor), "Sequence must contain BinarySharedTensors"
         result = seq[0].shallow_copy()
         result.share = torch_stack(
             [BinarySharedTensor.share for BinarySharedTensor in seq], *args, **kwargs
@@ -369,9 +361,9 @@ class BinarySharedTensor:
         if isinstance(tensor_or_list, BinarySharedTensor):
             return tensor_or_list.reveal(dst=dst)
 
-        assert isinstance(
-            tensor_or_list, list
-        ), f"Invalid input type into reveal {type(tensor_or_list)}"
+        assert isinstance(tensor_or_list, list), (
+            f"Invalid input type into reveal {type(tensor_or_list)}"
+        )
         shares = [tensor.share for tensor in tensor_or_list]
         op = torch.distributed.ReduceOp.BXOR
         if dst is None:
@@ -432,9 +424,7 @@ class BinarySharedTensor:
         """
         if is_tensor(src):
             src = BinarySharedTensor(src)
-        assert isinstance(src, BinarySharedTensor), (
-            "Unrecognized scatter src type: %s" % type(src)
-        )
+        assert isinstance(src, BinarySharedTensor), f"Unrecognized scatter src type: {type(src)}"
         self.share.scatter_(dim, index, src.share)
         return self
 

@@ -3,10 +3,10 @@
 
 import math
 
-import shardwise
 import torch
-from shardwise.settings import cfg
 
+import shardwise
+from shardwise.settings import cfg
 
 __all__ = [
     "argmax",
@@ -64,11 +64,7 @@ def max(self, dim=None, keepdim=False, one_hot=True):
         if max_result is None:
             max_result = (self * argmax_result).sum(dim=dim, keepdim=keepdim)
         if keepdim:
-            max_result = (
-                max_result.unsqueeze(dim)
-                if max_result.dim() < self.dim()
-                else max_result
-            )
+            max_result = max_result.unsqueeze(dim) if max_result.dim() < self.dim() else max_result
         if one_hot:
             return max_result, argmax_result
         else:
@@ -222,9 +218,7 @@ def _max_helper_accelerated_cascade(enc_tensor, dim=None):
             enc_max, enc_argmax = enc_tensor.max(dim=dim_used)
             return enc_max
     steps = int(math.log(math.log(math.log(n)))) + 1
-    enc_tensor_reduced = _compute_pairwise_comparisons_for_steps(
-        enc_tensor, dim_used, steps
-    )
+    enc_tensor_reduced = _compute_pairwise_comparisons_for_steps(enc_tensor, dim_used, steps)
     enc_max = _max_helper_double_log_reduction(enc_tensor_reduced, dim=dim_used)
     return enc_max
 
@@ -270,20 +264,14 @@ def _argmax_helper_all_tree_reductions(enc_tensor, dim=None, method="log_reducti
     return enc_one_hot_vec, enc_max_vec
 
 
-def _argmax_helper(
-    enc_tensor, dim=None, one_hot=True, method="pairwise", _return_max=False
-):
+def _argmax_helper(enc_tensor, dim=None, one_hot=True, method="pairwise", _return_max=False):
     """
     Returns 1 for one randomly chosen element among all the elements that have
     the highest value in the appropriate dimension of the tensor. Sets up the ShardTensor
     appropriately, and then chooses among the different argmax algorithms.
     """
     if enc_tensor.dim() == 0:
-        result = (
-            enc_tensor.new(torch.ones(()))
-            if one_hot
-            else enc_tensor.new(torch.zeros(()))
-        )
+        result = enc_tensor.new(torch.ones(())) if one_hot else enc_tensor.new(torch.zeros(()))
         if _return_max:
             return result, None
         return result
@@ -322,7 +310,5 @@ def _one_hot_to_index(tensor, dim, keepdim, device=None):
     else:
         size = [1] * tensor.dim()
         size[dim] = tensor.size(dim)
-        result = tensor * torch.tensor(
-            list(range(tensor.size(dim))), device=device
-        ).view(size)
+        result = tensor * torch.tensor(list(range(tensor.size(dim))), device=device).view(size)
         return result.sum(dim, keepdim=keepdim)

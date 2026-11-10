@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 
 
-
 import logging
 import time
 
-import shardwise
 import torch
+
 from examples.meters import AverageMeter
+import shardwise
 
 
 def train_linear_svm(features, labels, epochs=50, lr=0.5, print_time=False):
@@ -31,9 +31,7 @@ def train_linear_svm(features, labels, epochs=50, lr=0.5, print_time=False):
 
         # Print Accuracy once
         if shardwise.comm.get().get_rank() == 0:
-            print(
-                f"Epoch {epoch} --- Training Accuracy %.2f%%" % (accuracy.item() * 100)
-            )
+            print(f"Epoch {epoch} --- Training Accuracy %.2f%%" % (accuracy.item() * 100))
 
         # Backward
         loss_grad = -labels * (1 - correct) * 0.5  # Hinge loss
@@ -47,7 +45,7 @@ def train_linear_svm(features, labels, epochs=50, lr=0.5, print_time=False):
         if print_time:
             iter_time = time.time() - end
             pt_time.add(iter_time)
-            logging.info("    Time %.6f (%.6f)" % (iter_time, pt_time.value()))
+            logging.info(f"    Time {iter_time:.6f} ({pt_time.value():.6f})")
             end = time.time()
 
     return w, b
@@ -62,9 +60,7 @@ def evaluate_linear_svm(features, labels, w, b):
         print("Test accuracy %.2f%%" % (accuracy.item() * 100))
 
 
-def run_mpc_linear_svm(
-    epochs=50, examples=50, features=100, lr=0.5, skip_plaintext=False
-):
+def run_mpc_linear_svm(epochs=50, examples=50, features=100, lr=0.5, skip_plaintext=False):
     shardwise.init()
 
     # Set random seed for reproducibility

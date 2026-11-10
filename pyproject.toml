@@ -65,10 +65,16 @@ ignore = [
     "E731",  # lambda assignments are used deliberately in tests
     "E741",  # short math-style variable names (l, I) are intentional
     "F403", "F405",  # nn.init is re-exported with a star import
+    "E721",  # exact type checks are intentional; isinstance would change behavior for subclasses
+    "UP028",  # explicit yield loops kept as written
+    "UP031",  # remaining %-formats take values that may be tensors; f-string specs could differ
 ]
 
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401"]
+"src/shardwise/core/base.py" = ["E402"]  # ops are imported last to avoid a circular import
+"benchmarks/benchmark.py" = ["F401"]
+"benchmarks/dash_app/app.py" = ["F811"]  # Dash callbacks are registered by decorator
 
 [tool.ruff.lint.isort]
 known-first-party = ["shardwise", "tests", "examples", "benchmarks"]

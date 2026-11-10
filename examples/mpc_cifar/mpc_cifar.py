@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 
-
 import logging
 import os
 import random
@@ -9,17 +8,18 @@ import shutil
 import tempfile
 import time
 
-import shardwise
-import shardwise.comm as comm
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim
 import torch.utils.data
 import torch.utils.data.distributed
+from torchvision import datasets, transforms
+
 from examples.meters import AverageMeter
 from examples.util import NoopContextManager
-from torchvision import datasets, transforms
+import shardwise
+import shardwise.comm as comm
 
 
 def run_mpc_cifar(
@@ -55,19 +55,17 @@ def run_mpc_cifar(
     best_prec1 = 0
     if resume:
         if os.path.isfile(model_location):
-            logging.info("=> loading checkpoint '{}'".format(model_location))
+            logging.info(f"=> loading checkpoint '{model_location}'")
             checkpoint = torch.load(model_location)
             start_epoch = checkpoint["epoch"]
             best_prec1 = checkpoint["best_prec1"]
             model.load_state_dict(checkpoint["state_dict"])
             optimizer.load_state_dict(checkpoint["optimizer"])
             logging.info(
-                "=> loaded checkpoint '{}' (epoch {})".format(
-                    model_location, checkpoint["epoch"]
-                )
+                "=> loaded checkpoint '{}' (epoch {})".format(model_location, checkpoint["epoch"])
             )
         else:
-            raise IOError("=> no checkpoint found at '{}'".format(model_location))
+            raise OSError(f"=> no checkpoint found at '{model_location}'")
 
     # Data loading code
     def preprocess_data(context_manager, data_dirname):
@@ -170,23 +168,11 @@ def train(train_loader, model, criterion, optimizer, epoch, print_freq=10):
 
         if i % print_freq == 0:
             logging.info(
-                "Epoch: [{}][{}/{}]\t"
-                "Time {:.3f} ({:.3f})\t"
-                "Loss {:.4f} ({:.4f})\t"
-                "Prec@1 {:.3f} ({:.3f})\t"
-                "Prec@5 {:.3f} ({:.3f})".format(
-                    epoch,
-                    i,
-                    len(train_loader),
-                    current_batch_time,
-                    batch_time.value(),
-                    loss.item(),
-                    losses.value(),
-                    prec1[0],
-                    top1.value(),
-                    prec5[0],
-                    top5.value(),
-                )
+                f"Epoch: [{epoch}][{i}/{len(train_loader)}]\t"
+                f"Time {current_batch_time:.3f} ({batch_time.value():.3f})\t"
+                f"Loss {loss.item():.4f} ({losses.value():.4f})\t"
+                f"Prec@1 {prec1[0]:.3f} ({top1.value():.3f})\t"
+                f"Prec@5 {prec5[0]:.3f} ({top5.value():.3f})"
             )
 
 
@@ -207,8 +193,8 @@ def validate_side_by_side(val_loader, plaintext_model, private_model):
             # log all info
             logging.info("==============================")
             logging.info("Example %d\t target = %d" % (i, target))
-            logging.info("Plaintext:\n%s" % output_plaintext)
-            logging.info("Encrypted:\n%s\n" % output_encr.get_plain_text())
+            logging.info(f"Plaintext:\n{output_plaintext}")
+            logging.info(f"Encrypted:\n{output_encr.get_plain_text()}\n")
             # only use the first 1000 examples
             if i > 1000:
                 break
@@ -268,9 +254,7 @@ def validate(val_loader, model, criterion, print_freq=10):
     with torch.no_grad():
         end = time.time()
         for i, (input, target) in enumerate(val_loader):
-            if isinstance(model, shardwise.nn.Module) and not shardwise.is_encrypted_tensor(
-                input
-            ):
+            if isinstance(model, shardwise.nn.Module) and not shardwise.is_encrypted_tensor(input):
                 input = encrypt_data_tensor_with_src(input)
             # compute output
             output = model(input)
@@ -291,27 +275,14 @@ def validate(val_loader, model, criterion, print_freq=10):
 
             if (i + 1) % print_freq == 0:
                 logging.info(
-                    "\nTest: [{}/{}]\t"
-                    "Time {:.3f} ({:.3f})\t"
-                    "Loss {:.4f} ({:.4f})\t"
-                    "Prec@1 {:.3f} ({:.3f})   \t"
-                    "Prec@5 {:.3f} ({:.3f})".format(
-                        i + 1,
-                        len(val_loader),
-                        current_batch_time,
-                        batch_time.value(),
-                        loss.item(),
-                        losses.value(),
-                        prec1[0],
-                        top1.value(),
-                        prec5[0],
-                        top5.value(),
-                    )
+                    f"\nTest: [{i + 1}/{len(val_loader)}]\t"
+                    f"Time {current_batch_time:.3f} ({batch_time.value():.3f})\t"
+                    f"Loss {loss.item():.4f} ({losses.value():.4f})\t"
+                    f"Prec@1 {prec1[0]:.3f} ({top1.value():.3f})   \t"
+                    f"Prec@5 {prec5[0]:.3f} ({top5.value():.3f})"
                 )
 
-        logging.info(
-            " * Prec@1 {:.3f} Prec@5 {:.3f}".format(top1.value(), top5.value())
-        )
+        logging.info(f" * Prec@1 {top1.value():.3f} Prec@5 {top5.value():.3f}")
     return top1.value()
 
 
@@ -356,7 +327,7 @@ class LeNet(nn.Sequential):
 
     # network architecture:
     def __init__(self):
-        super(LeNet, self).__init__()
+        super().__init__()
         self.conv1 = nn.Conv2d(3, 6, 5)
         self.pool = nn.MaxPool2d(2, 2)
         self.conv2 = nn.Conv2d(6, 16, 5)

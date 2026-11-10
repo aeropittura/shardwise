@@ -2,6 +2,7 @@
 
 
 import torch
+
 from shardwise import ShardTensor, register_tensor_type
 
 
@@ -79,17 +80,13 @@ class PyTorchTensor(ShardTensor):
     def conv1d(self, kernel, *args, **kwargs):
         result = self.clone()
         kernel = getattr(kernel, "_tensor", kernel)
-        result._tensor = torch.nn.functional.conv1d(
-            result._tensor, kernel, *args, **kwargs
-        )
+        result._tensor = torch.nn.functional.conv1d(result._tensor, kernel, *args, **kwargs)
         return result
 
     def conv2d(self, kernel, *args, **kwargs):
         result = self.clone()
         kernel = getattr(kernel, "_tensor", kernel)
-        result._tensor = torch.nn.functional.conv2d(
-            result._tensor, kernel, *args, **kwargs
-        )
+        result._tensor = torch.nn.functional.conv2d(result._tensor, kernel, *args, **kwargs)
         return result
 
     def conv_transpose1d(self, kernel, *args, **kwargs):

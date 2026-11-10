@@ -9,19 +9,18 @@ import logging
 import os
 import warnings
 
-import shardwise.utils  # noqa: F401
-import shardwise.comm as comm
-import shardwise.settings  # noqa: F401
-import shardwise.sharing  # noqa: F401
-import shardwise.nn  # noqa: F401
-import shardwise.optim  # noqa: F401
 import torch
 
 # other imports:
 from shardwise import debug
-from shardwise.settings import cfg
+import shardwise.comm as comm
 from shardwise.core.base import ShardTensor
-
+import shardwise.nn  # noqa: F401
+import shardwise.optim  # noqa: F401
+import shardwise.settings  # noqa: F401
+from shardwise.settings import cfg
+import shardwise.sharing  # noqa: F401
+import shardwise.utils  # noqa: F401
 
 # functions controlling autograd:
 no_grad = ShardTensor.no_grad
@@ -106,9 +105,8 @@ def register_tensor_type(name):
 
     .. code-block:: python
 
-        @ShardTensor.register_tensor_type('my_shard_tensor')
-        class MyShardTensor(ShardTensor):
-            ...
+        @ShardTensor.register_tensor_type("my_shard_tensor")
+        class MyShardTensor(ShardTensor): ...
     """
     return ShardTensor.register_tensor_type(name)
 
@@ -116,7 +114,7 @@ def register_tensor_type(name):
 def set_default_tensor_type(tensor_type):
     """Sets the default type used to create `ShardTensor`s."""
     if tensor_type not in ShardTensor.__TENSOR_TYPES__.keys():
-        raise ValueError("ShardTensor type %s does not exist." % tensor_type)
+        raise ValueError(f"ShardTensor type {tensor_type} does not exist.")
     ShardTensor.__DEFAULT_TENSOR_TYPE__ = tensor_type
 
 
@@ -128,13 +126,11 @@ def get_default_tensor_type():
 def get_tensor_type(tensor):
     """Gets the type name of the specified `tensor` `ShardTensor`."""
     if not isinstance(tensor, ShardTensor):
-        raise ValueError(
-            "Specified tensor is not a ShardTensor: {}".format(type(tensor))
-        )
+        raise ValueError(f"Specified tensor is not a ShardTensor: {type(tensor)}")
     for name, cls in ShardTensor.__TENSOR_TYPES__.items():
         if isinstance(tensor, cls):
             return name
-    raise ValueError("Unregistered ShardTensor type: {}".format(type(tensor)))
+    raise ValueError(f"Unregistered ShardTensor type: {type(tensor)}")
 
 
 def tensor(*args, tensor_type=None, **kwargs):
@@ -147,7 +143,7 @@ def tensor(*args, tensor_type=None, **kwargs):
     if tensor_type is None:
         tensor_type = get_default_tensor_type()
     if tensor_type not in ShardTensor.__TENSOR_TYPES__:
-        raise ValueError("ShardTensor type %s does not exist." % tensor_type)
+        raise ValueError(f"ShardTensor type {tensor_type} does not exist.")
 
     # create ShardTensor:
     return ShardTensor.__TENSOR_TYPES__[tensor_type](*args, **kwargs)
@@ -183,9 +179,7 @@ def _setup_prng():
 
     # Initialize RNG Generators
     for key in generators.keys():
-        generators[key][torch.device("cpu")] = torch.Generator(
-            device=torch.device("cpu")
-        )
+        generators[key][torch.device("cpu")] = torch.Generator(device=torch.device("cpu"))
 
     if torch.cuda.is_available():
         cuda_device_names = ["cuda"]
@@ -314,9 +308,9 @@ def load_from_party(
         raise NotImplementedError("Loading encrypted tensors is not yet supported")
     else:
         assert isinstance(src, int), "Load failed: src argument must be an integer"
-        assert (
-            src >= 0 and src < comm.get().get_world_size()
-        ), "Load failed: src must be in [0, world_size)"
+        assert src >= 0 and src < comm.get().get_world_size(), (
+            "Load failed: src must be in [0, world_size)"
+        )
 
         # source party
         if comm.get().get_rank() == src:
@@ -338,7 +332,7 @@ def load_from_party(
                     p.data.fill_(0)
             else:
                 result = comm.get().broadcast_obj(-1, src)
-                raise TypeError("Unrecognized load type %s" % type(result))
+                raise TypeError(f"Unrecognized load type {type(result)}")
 
             comm.get().broadcast_obj(result_zeros, src)
 
@@ -402,9 +396,9 @@ def save_from_party(obj, f, src=0, save_closure=torch.save, **kwargs):
         raise NotImplementedError("Saving encrypted tensors is not yet supported")
     else:
         assert isinstance(src, int), "Save failed: src must be an integer"
-        assert (
-            src >= 0 and src < comm.get().get_world_size()
-        ), "Save failed: src must be an integer in [0, world_size)"
+        assert src >= 0 and src < comm.get().get_world_size(), (
+            "Save failed: src must be an integer in [0, world_size)"
+        )
 
         if comm.get().get_rank() == src:
             save_closure(obj, f, **kwargs)
@@ -452,9 +446,9 @@ def cat(tensors, dim=0):
 
     assert all(isinstance(t, ShardTensor) for t in tensors), "inputs must be ShardTensors"
     tensor_types = [get_tensor_type(t) for t in tensors]
-    assert all(
-        ttype == tensor_types[0] for ttype in tensor_types
-    ), "cannot concatenate ShardTensors with different underlying types"
+    assert all(ttype == tensor_types[0] for ttype in tensor_types), (
+        "cannot concatenate ShardTensors with different underlying types"
+    )
     if len(tensors) == 1:
         return tensors[0]
     return type(tensors[0]).cat(tensors, dim=dim)
@@ -468,9 +462,9 @@ def stack(tensors, dim=0):
     assert isinstance(tensors, list), "input to stack must be a list"
     assert all(isinstance(t, ShardTensor) for t in tensors), "inputs must be ShardTensors"
     tensor_types = [get_tensor_type(t) for t in tensors]
-    assert all(
-        ttype == tensor_types[0] for ttype in tensor_types
-    ), "cannot stack ShardTensors with different underlying types"
+    assert all(ttype == tensor_types[0] for ttype in tensor_types), (
+        "cannot stack ShardTensors with different underlying types"
+    )
     if len(tensors) == 1:
         return tensors[0].unsqueeze(dim)
     return type(tensors[0]).stack(tensors, dim=dim)
@@ -483,9 +477,7 @@ def rand(*sizes, device=None, tensor_type=None):
     with no_grad():
         if tensor_type is None:
             tensor_type = get_default_tensor_type()
-        return ShardTensor.__TENSOR_TYPES__[tensor_type].rand(
-            *sizes, device=device
-        )
+        return ShardTensor.__TENSOR_TYPES__[tensor_type].rand(*sizes, device=device)
 
 
 def randn(*sizes, tensor_type=None):
@@ -522,9 +514,9 @@ def __multiprocess_print_helper(print_func, *args, in_order=False, dst=0, **kwar
     # in_order : False
     if isinstance(dst, int):
         dst = [dst]
-    assert isinstance(
-        dst, (list, tuple)
-    ), "print destination must be a list or tuple of party ranks"
+    assert isinstance(dst, (list, tuple)), (
+        "print destination must be a list or tuple of party ranks"
+    )
 
     if comm.get().get_rank() in dst:
         print_func(*args, **kwargs)
@@ -546,9 +538,7 @@ def print(*args, in_order=False, dst=0, **kwargs):
             This can be an integer or list of integers denoting a single rank or
             multiple ranks to print from.
     """
-    __multiprocess_print_helper(
-        builtins.print, *args, in_order=in_order, dst=dst, **kwargs
-    )
+    __multiprocess_print_helper(builtins.print, *args, in_order=in_order, dst=dst, **kwargs)
 
 
 def log(*args, in_order=False, dst=0, **kwargs):
@@ -567,9 +557,7 @@ def log(*args, in_order=False, dst=0, **kwargs):
             This can be an integer or list of integers denoting a single rank or
             multiple ranks to log from.
     """
-    __multiprocess_print_helper(
-        logging.info, *args, in_order=in_order, dst=dst, **kwargs
-    )
+    __multiprocess_print_helper(logging.info, *args, in_order=in_order, dst=dst, **kwargs)
 
 
 # TupleProvider tracing functions

@@ -7,11 +7,11 @@ Contains models used for benchmarking
 from dataclasses import dataclass
 from typing import Any
 
-import shardwise
 import torch
 import torch.nn as nn
 from torchvision import models
 
+import shardwise
 
 try:
     from . import data
@@ -86,7 +86,7 @@ class ResNet(nn.Module):
     def __init__(self, n_layers=18):
         super().__init__()
         assert n_layers in [18, 34, 50]
-        self.model = getattr(models, "resnet{}".format(n_layers))(pretrained=True)
+        self.model = getattr(models, f"resnet{n_layers}")(pretrained=True)
 
     def forward(self, x):
         return self.model(x)
@@ -96,7 +96,7 @@ class ResNetShardwise(shardwise.nn.Module):
     def __init__(self, n_layers=18):
         super().__init__()
         assert n_layers in [18, 34, 50]
-        model = getattr(models, "resnet{}".format(n_layers))(pretrained=True)
+        model = getattr(models, f"resnet{n_layers}")(pretrained=True)
         dummy_input = torch.rand([1, 3, 224, 224])
         self.model = shardwise.nn.from_pytorch(model, dummy_input)
 

@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 
 
-
 import sys
 import unittest
 
-import shardwise
 import torch
-from shardwise.utils.helpers import chebyshev_series
-from shardwise.settings import cfg
+
+import shardwise
 from shardwise.core.encoding import FixedPointEncoder, nearest_integer_division
+from shardwise.settings import cfg
+from shardwise.utils.helpers import chebyshev_series
 
 
 def get_test_tensor(max_value=10, float=False):
@@ -41,7 +41,7 @@ class TestCommon(unittest.TestCase):
             self._check(
                 decoded,
                 tensor,
-                "Encoding/decoding a %s failed." % "float" if float else "long",
+                "Encoding/decoding a {} failed.".format("float") if float else "long",
             )
 
         # Make sure encoding a subclass of ShardTensor is a no-op
@@ -62,7 +62,7 @@ class TestCommon(unittest.TestCase):
         for dtype in [torch.uint8, torch.int8, torch.int16]:
             tensor = torch.zeros(5, dtype=dtype).random_()
             decoded = fpe.decode(fpe.encode(tensor)).type(dtype)
-            self._check(decoded, tensor, "Encoding/decoding a %s failed." % dtype)
+            self._check(decoded, tensor, f"Encoding/decoding a {dtype} failed.")
 
     def test_nearest_integer_division(self) -> None:
         # test without scaling:

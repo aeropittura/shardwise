@@ -50,15 +50,15 @@ $ python3 shardwise/scripts/aws_launcher.py \
 
 """
 
+from argparse import REMAINDER, ArgumentParser
 import concurrent.futures
 import configparser
 import os
+from pathlib import Path
 import sys
 import time
 import uuid
 import warnings
-from argparse import ArgumentParser, REMAINDER
-from pathlib import Path
 
 import boto3
 import paramiko
@@ -110,9 +110,7 @@ def add_prefix_each_line(prefix, str):
 
 
 def run_command(instance, client, cmd, environment=None, inputs=None):
-    stdin, stdout, stderr = client.exec_command(
-        cmd, get_pty=True, environment=environment
-    )
+    stdin, stdout, stderr = client.exec_command(cmd, get_pty=True, environment=environment)
     if inputs:
         for inp in inputs:
             stdin.write(inp)
@@ -160,16 +158,12 @@ def main():
     if len(regions) > 1:
         print("Multiple regions detected")
 
-        assert len(instance_ids) == len(
-            ssh_key_files
-        ), "{} instance ids are provided, but {} SSH keys found.".format(
-            len(instance_ids), len(ssh_key_files)
+        assert len(instance_ids) == len(ssh_key_files), (
+            f"{len(instance_ids)} instance ids are provided, but {len(ssh_key_files)} SSH keys found."
         )
 
-        assert len(instance_ids) == len(
-            regions
-        ), "{} instance ids are provided, but {} regions found.".format(
-            len(instance_ids), len(regions)
+        assert len(instance_ids) == len(regions), (
+            f"{len(instance_ids)} instance ids are provided, but {len(regions)} regions found."
         )
 
         for i, region in enumerate(regions):
@@ -191,16 +185,14 @@ def main():
         ec2 = session.resource("ec2")
         instances = get_instances(ec2, instance_ids)
 
-        assert (
-            len(ssh_key_files) == 1
-        ), "1 region is detected, but {} SSH keys found.".format(len(ssh_key_files))
+        assert len(ssh_key_files) == 1, (
+            f"1 region is detected, but {len(ssh_key_files)} SSH keys found."
+        )
 
         ssh_key_files = [ssh_key_files[0] for _ in range(len(instances))]
 
-    assert len(instance_ids) == len(
-        instances
-    ), "{} instance ids are provided, but {} found.".format(
-        len(instance_ids), len(instances)
+    assert len(instance_ids) == len(instances), (
+        f"{len(instance_ids)} instance ids are provided, but {len(instances)} found."
     )
 
     # Only print the public IP addresses of the instances.
@@ -217,14 +209,10 @@ def main():
     # Key: instance id; value: paramiko.SSHClient object.
     client_dict = {}
     for i, instance in enumerate(instances):
-        client = connect_to_instance(
-            instance, ssh_key_files[i], args.ssh_user, args.http_proxy
-        )
+        client = connect_to_instance(instance, ssh_key_files[i], args.ssh_user, args.http_proxy)
         client_dict[instance.id] = client
 
-    assert os.path.exists(
-        args.training_script
-    ), f"File `{args.training_script}` does not exist"
+    assert os.path.exists(args.training_script), f"File `{args.training_script}` does not exist"
     file_paths = args.aux_files.split(",") if args.aux_files else []
     for local_path in file_paths:
         assert os.path.exists(local_path), f"File `{local_path}` does not exist"
@@ -237,9 +225,7 @@ def main():
     with concurrent.futures.ThreadPoolExecutor(max_workers=8) as uploaders:
         for instance_id, client in client_dict.items():
             run_command(instance_id, client, f"mkdir -p {remote_dir}")
-            uploaders.submit(
-                upload_file, instance_id, client, args.training_script, remote_script
-            )
+            uploaders.submit(upload_file, instance_id, client, args.training_script, remote_script)
             for local_path in file_paths:
                 uploaders.submit(
                     upload_file,
@@ -311,8 +297,7 @@ def parse_args():
         "--only_show_instance_ips",
         action="store_true",
         default=False,
-        help="Only show public IPs of the given instances."
-        "No other actions will be done",
+        help="Only show public IPs of the given instances.No other actions will be done",
     )
 
     parser.add_argument("--regions", type=str, default="us-west-2", help="AWS Region")
@@ -328,14 +313,14 @@ def parse_args():
         "--master_port",
         type=int,
         default=29500,
-        help="The port used by master instance " "for distributed training",
+        help="The port used by master instance for distributed training",
     )
 
     parser.add_argument(
         "--ssh_key_file",
         type=str,
         required=True,
-        help="Path to the RSA private key file " "used for instance authentication",
+        help="Path to the RSA private key file used for instance authentication",
     )
 
     parser.add_argument(

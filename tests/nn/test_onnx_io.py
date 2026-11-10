@@ -1,20 +1,20 @@
 #!/usr/bin/env python3
 
 
-
 import collections
 import io
 import logging
 import unittest
 
-import shardwise
 import torch
-from shardwise.utils.dtypes import is_float_tensor
-from shardwise.settings import cfg
+
+import shardwise
 from shardwise.nn import onnx_io
+from shardwise.settings import cfg
+from shardwise.utils.dtypes import is_float_tensor
 from tests.support.multiprocess import (
-    get_random_test_tensor,
     MultiProcessTestCase,
+    get_random_test_tensor,
     onehot,
 )
 
@@ -39,7 +39,7 @@ class TestOnnxConverter:
             test_passed = (tensor == reference).all().item() == 1
         if not test_passed:
             logging.info(msg)
-            logging.info("Result %s" % tensor)
+            logging.info(f"Result {tensor}")
             logging.info("Result - Reference = %s" % (tensor - reference))
         self.assertTrue(test_passed, msg=msg)
 
@@ -197,9 +197,7 @@ class TestOnnxConverter:
         model_plaintext = CNN()
         batch_size = 5
         x_orig = get_random_test_tensor(size=(batch_size, 1, 28, 28), is_float=True)
-        y_orig = (
-            get_random_test_tensor(size=(batch_size, 1), is_float=True).gt(0).long()
-        )
+        y_orig = get_random_test_tensor(size=(batch_size, 1), is_float=True).gt(0).long()
         y_one_hot = onehot(y_orig, num_targets=2)
 
         # encrypt training sample:
@@ -273,15 +271,11 @@ class TestOnnxConverter:
             loss_value.backward()
             for param in model.parameters():
                 if param.requires_grad:
-                    self.assertIsNotNone(
-                        param.grad, "required parameter gradient not created"
-                    )
+                    self.assertIsNotNone(param.grad, "required parameter gradient not created")
 
             # update parameters
             orig_parameters, upd_parameters = {}, {}
-            orig_parameters = self._compute_reference_parameters(
-                "", orig_parameters, model, 0
-            )
+            orig_parameters = self._compute_reference_parameters("", orig_parameters, model, 0)
             model.update_parameters(learning_rate)
             upd_parameters = self._compute_reference_parameters(
                 "", upd_parameters, model, learning_rate
@@ -294,9 +288,7 @@ class TestOnnxConverter:
                     unchanged = torch.allclose(upd_parameters[name], value)
                     if unchanged is False:
                         parameter_changed = True
-                    self.assertTrue(
-                        parameter_changed, "no parameter changed in training step"
-                    )
+                    self.assertTrue(parameter_changed, "no parameter changed in training step")
 
             # record initial and current loss
             if i == 0:
@@ -407,22 +399,22 @@ class TestTFP(MultiProcessTestCase, TestOnnxConverter):
     def setUp(self) -> None:
         self._original_provider = cfg.mpc.provider
         cfg.mpc.provider = "TFP"
-        super(TestTFP, self).setUp()
+        super().setUp()
 
     def tearDown(self) -> None:
         cfg.mpc.provider = self._original_provider
-        super(TestTFP, self).tearDown()
+        super().tearDown()
 
 
 class TestTTP(MultiProcessTestCase, TestOnnxConverter):
     def setUp(self) -> None:
         self._original_provider = cfg.mpc.provider
         cfg.mpc.provider = "TTP"
-        super(TestTTP, self).setUp()
+        super().setUp()
 
     def tearDown(self) -> None:
         cfg.mpc.provider = self._original_provider
-        super(TestTTP, self).tearDown()
+        super().tearDown()
 
 
 # This code only runs when executing the file outside the test harness

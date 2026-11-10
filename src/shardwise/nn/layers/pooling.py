@@ -1,8 +1,8 @@
 """Pooling layers."""
 
-from shardwise.ops.pooling import _adaptive_pool2d_helper
 from shardwise.nn.layers._onnx_attrs import _all_the_same
 from shardwise.nn.layers.base import Module
+from shardwise.ops.pooling import _adaptive_pool2d_helper
 
 
 class _Pool2d(Module):
@@ -54,7 +54,7 @@ class _Pool2d(Module):
         elif self.pool_type == "max":
             return x.max_pool2d(*args, **kwargs)
         else:
-            raise ValueError("Unknown pooling type: %s" % self.pool_type)
+            raise ValueError(f"Unknown pooling type: {self.pool_type}")
 
     @staticmethod
     def from_onnx(pool_type, attributes=None):
@@ -64,9 +64,7 @@ class _Pool2d(Module):
         if "pads" not in attributes:
             attributes["pads"] = [0]
         assert _all_the_same(["kernel_shape"]), "only square kernels are supported"
-        assert _all_the_same(
-            attributes["strides"]
-        ), "stride must be the same in each dimension"
+        assert _all_the_same(attributes["strides"]), "stride must be the same in each dimension"
         attributes["ceil_mode"] = attributes.get("ceil_mode", 0)
         attributes["ceil_mode"] = attributes["ceil_mode"] > 0
 
@@ -82,7 +80,7 @@ class _Pool2d(Module):
         elif pool_type == "max":
             return MaxPool2d(*args, **kwargs)
         else:
-            raise ValueError("Unknown pooling type: %s" % pool_type)
+            raise ValueError(f"Unknown pooling type: {pool_type}")
 
 
 class AvgPool2d(_Pool2d):
@@ -144,9 +142,7 @@ class MaxPool2d(_Pool2d):
     """
 
     def __init__(self, kernel_size, stride=None, padding=0, ceil_mode=False):
-        super().__init__(
-            "max", kernel_size, stride=stride, padding=padding, ceil_mode=ceil_mode
-        )
+        super().__init__("max", kernel_size, stride=stride, padding=padding, ceil_mode=ceil_mode)
 
     @staticmethod
     def from_onnx(attributes=None):
@@ -167,7 +163,7 @@ class AdaptiveAvgPool2d(Module):
 
     Examples:
         >>> # target output size of 5x7
-        >>> m = nn.AdaptiveAvgPool2d((5,7))
+        >>> m = nn.AdaptiveAvgPool2d((5, 7))
         >>> input = shardwise.randn(1, 64, 8, 9)
         >>> output = m(input)
         >>> # target output size of 7x7 (square)
@@ -181,18 +177,18 @@ class AdaptiveAvgPool2d(Module):
     """
 
     def __init__(self, output_size=None):
-        super(AdaptiveAvgPool2d, self).__init__()
+        super().__init__()
         self.output_size = output_size
 
     def extra_repr(self) -> str:
-        return "output_size={}".format(self.output_size)
+        return f"output_size={self.output_size}"
 
     def forward(self, input_tensor, output_size=None):
         if output_size is None:
             output_size = self.output_size
-        assert (
-            output_size is not None
-        ), "AdaptiveAvgPool2d requires an output_size in forward if not supplied in initialization"
+        assert output_size is not None, (
+            "AdaptiveAvgPool2d requires an output_size in forward if not supplied in initialization"
+        )
         resized_input, args, kwargs = _adaptive_pool2d_helper(
             input_tensor, output_size, reduction="mean"
         )
@@ -219,7 +215,7 @@ class AdaptiveMaxPool2d(Module):
 
     Examples:
         >>> # target output size of 5x7
-        >>> m = nn.AdaptiveMaxPool2d((5,7))
+        >>> m = nn.AdaptiveMaxPool2d((5, 7))
         >>> input = shardwise.randn(1, 64, 8, 9)
         >>> output = m(input)
         >>> # target output size of 7x7 (square)
@@ -234,18 +230,18 @@ class AdaptiveMaxPool2d(Module):
     """
 
     def __init__(self, output_size=None):
-        super(AdaptiveMaxPool2d, self).__init__()
+        super().__init__()
         self.output_size = output_size
 
     def extra_repr(self) -> str:
-        return "output_size={}".format(self.output_size)
+        return f"output_size={self.output_size}"
 
     def forward(self, input_tensor, output_size=None):
         if output_size is None:
             output_size = self.output_size
-        assert (
-            output_size is not None
-        ), "AdaptiveMaxPool2d requires an output_size in forward if not supplied in initialization"
+        assert output_size is not None, (
+            "AdaptiveMaxPool2d requires an output_size in forward if not supplied in initialization"
+        )
         resized_input, args, kwargs = _adaptive_pool2d_helper(
             input_tensor, output_size, reduction="max"
         )

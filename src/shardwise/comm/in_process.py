@@ -2,9 +2,9 @@
 
 
 import logging
-import threading
 from operator import itemgetter
 from queue import Queue
+import threading
 
 import torch
 from torch.distributed import ReduceOp
@@ -31,9 +31,7 @@ class InProcessCommunicator(Communicator):
 
         with InProcessCommunicator.lock:
             if InProcessCommunicator.mailbox is None:
-                InProcessCommunicator.mailbox = [
-                    Queue() for _ in range(self.world_size)
-                ]
+                InProcessCommunicator.mailbox = [Queue() for _ in range(self.world_size)]
 
                 # This prevents one thread from running ahead of the others and doing
                 # multiple puts that would show up in the get calls below
@@ -199,9 +197,7 @@ class InProcessCommunicator(Communicator):
 
     def set_name(self, name):
         """Sets the party name of the current rank."""
-        assert isinstance(
-            name, str
-        ), f"Improper name provided to process on rank {self.get_rank()}"
+        assert isinstance(name, str), f"Improper name provided to process on rank {self.get_rank()}"
         self._name = name
 
     def get_name(self):

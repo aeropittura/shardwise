@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
 
-import shardwise
 import torch
 
+import shardwise
 from shardwise.utils.dtypes import is_tensor
 
 __all__ = ["norm", "polynomial", "pos_pow", "pow"]
@@ -66,9 +66,9 @@ def polynomial(self, coeffs, func="mul"):
     # Coefficient input type-checking
     if isinstance(coeffs, list):
         coeffs = torch.tensor(coeffs, device=self.device)
-    assert is_tensor(coeffs) or shardwise.is_encrypted_tensor(
-        coeffs
-    ), "Polynomial coefficients must be a list or tensor"
+    assert is_tensor(coeffs) or shardwise.is_encrypted_tensor(coeffs), (
+        "Polynomial coefficients must be a list or tensor"
+    )
     assert coeffs.dim() == 1, "Polynomial coefficients must be a 1-D tensor"
 
     # Handle linear case
@@ -78,9 +78,7 @@ def polynomial(self, coeffs, func="mul"):
     # Compute terms of polynomial using exponentially growing tree
     terms = shardwise.stack([self, self.square()])
     while terms.size(0) < coeffs.size(0):
-        highest_term = terms.index_select(
-            0, torch.tensor(terms.size(0) - 1, device=self.device)
-        )
+        highest_term = terms.index_select(0, torch.tensor(terms.size(0) - 1, device=self.device))
         new_terms = getattr(terms, func)(highest_term)
         terms = shardwise.cat([terms, new_terms])
 

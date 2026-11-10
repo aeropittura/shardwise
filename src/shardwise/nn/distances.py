@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 
 
-
-from shardwise.nn.loss import _Loss
 from shardwise.nn.layers import Module
+from shardwise.nn.loss import _Loss
 
 
 class CosineSimilarity(Module):
@@ -27,7 +26,7 @@ class CosineSimilarity(Module):
     """
 
     def __init__(self, dim=1, eps=1e-8):
-        super(CosineSimilarity, self).__init__()
+        super().__init__()
         self.dim = dim
 
     def forward(self, x1, x2):

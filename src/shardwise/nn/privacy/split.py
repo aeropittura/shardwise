@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 
 
-import shardwise
-import shardwise.comm as comm
 import torch
 import torch.nn as nn
-from shardwise.settings import cfg
+
+import shardwise
+import shardwise.comm as comm
 from shardwise.core.grad_fns import _inverse_broadcast
+from shardwise.settings import cfg
 
 
 # TODO: Move SkippedLoss elsewhere
@@ -126,18 +127,18 @@ class DPSplitModel(nn.Module):
 
         # Model must be defined for model owning party
         if self.is_feature_src():
-            assert isinstance(
-                pytorch_model, torch.nn.Module
-            ), "pytorch_model must be a torch Module"
+            assert isinstance(pytorch_model, torch.nn.Module), (
+                "pytorch_model must be a torch Module"
+            )
 
         self.model = pytorch_model
         self.train()
 
         # Process Randomized Response parameters
         if randomized_response_prob is not None:
-            assert (
-                0 < randomized_response_prob < 0.5
-            ), "randomized_response_prob must be in the interval [0, 0.5)"
+            assert 0 < randomized_response_prob < 0.5, (
+                "randomized_response_prob must be in the interval [0, 0.5)"
+            )
         self.rr_prob = randomized_response_prob
 
         # Apply RAPPOR correction:
@@ -289,9 +290,7 @@ class DPSplitModel(nn.Module):
                 self.preds_rappor, src=self.feature_src, requires_grad=True
             )
         else:
-            self.preds_enc = shardwise.tensor(
-                self.preds, src=self.feature_src, requires_grad=True
-            )
+            self.preds_enc = shardwise.tensor(self.preds, src=self.feature_src, requires_grad=True)
 
         self.targets_enc = self._process_targets(targets)
 
@@ -303,9 +302,7 @@ class DPSplitModel(nn.Module):
             # BCEWithLogitsLoss
             if not self.multiclass:
                 if self.alpha is None:
-                    self.loss = logits_enc.binary_cross_entropy_with_logits(
-                        self.targets_enc
-                    )
+                    self.loss = logits_enc.binary_cross_entropy_with_logits(self.targets_enc)
                 else:
                     self.loss = logits_enc.rappor_loss(self.targets_enc, self.alpha)
             # CrossEntropyLoss
@@ -346,9 +343,7 @@ class DPSplitModel(nn.Module):
 
         # Determine noise generation function
         generate_noise = (
-            self._generate_noise_from_src
-            if self.noise_src
-            else self._generate_noise_no_src
+            self._generate_noise_from_src if self.noise_src else self._generate_noise_no_src
         )
         noise = generate_noise(grad.size())
         with shardwise.no_grad():
@@ -403,9 +398,7 @@ class DPSplitModel(nn.Module):
             self._communicate_and_cache("num_params", num_params)
 
             # Process jacobian
-            jacobian = torch.cat(
-                [jacobians[param] for param in self.model.parameters()], dim=0
-            )
+            jacobian = torch.cat([jacobians[param] for param in self.model.parameters()], dim=0)
         else:
             num_params = self._communicate_and_cache("num_params", None)
             jacobian_size = (num_params, dLdZ.size(-2))
@@ -533,13 +526,9 @@ class DPSplitModel(nn.Module):
         with shardwise.no_grad():
             if protocol == "full_jacobian":
                 self._backward_full_jacobian(grad_output=grad_output)
-                raise NotImplementedError(
-                    "DPS protocol full_jacobian must be fixed before use."
-                )
+                raise NotImplementedError("DPS protocol full_jacobian must be fixed before use.")
             elif protocol == "layer_estimation":
                 with torch.no_grad():
                     self._backward_layer_estimation(grad_output=grad_output)
             else:
-                raise ValueError(
-                    f"Unrecognized DPSplitMPC backward protocol: {protocol}"
-                )
+                raise ValueError(f"Unrecognized DPSplitMPC backward protocol: {protocol}")

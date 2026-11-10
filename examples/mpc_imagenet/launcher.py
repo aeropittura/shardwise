@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 
-
 """
 To run tfe_benchmarks example in multiprocess mode:
 
@@ -24,9 +23,7 @@ import os
 from examples.multiprocess_launcher import (
     MultiProcessLauncher,
 )
-
 from mpc_imagenet import run_experiment
-
 
 # input arguments:
 parser = argparse.ArgumentParser(description="Encrypted inference of vision models")

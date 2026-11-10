@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 
 
+import torch
 
 import shardwise
-import torch
-from shardwise.settings import cfg
 from shardwise.debug import configure_logging, pdb
-from tests.support.multiprocess import get_random_test_tensor, MultiProcessTestCase
+from shardwise.settings import cfg
+from tests.support.multiprocess import MultiProcessTestCase, get_random_test_tensor
 
 
 class TestDebug(MultiProcessTestCase):

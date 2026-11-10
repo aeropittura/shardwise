@@ -2,6 +2,7 @@
 
 
 import torch
+
 from shardwise.gpu import CUDALongTensor
 
 
@@ -26,6 +27,4 @@ def is_float_tensor(tensor):
 
 def is_int_tensor(tensor):
     """Checks if the input tensor is a Torch tensor of an int type."""
-    return _is_type_tensor(
-        tensor, [torch.uint8, torch.int8, torch.int16, torch.int32, torch.int64]
-    )
+    return _is_type_tensor(tensor, [torch.uint8, torch.int8, torch.int16, torch.int32, torch.int64])

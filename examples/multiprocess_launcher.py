@@ -17,7 +17,7 @@ class MultiProcessLauncher:
         multiprocessing.set_start_method("spawn")
 
         # Use random file so multiple jobs can be run simultaneously
-        INIT_METHOD = "file:///tmp/shardwise-rendezvous-{}".format(uuid.uuid1())
+        INIT_METHOD = f"file:///tmp/shardwise-rendezvous-{uuid.uuid1()}"
         env["RENDEZVOUS"] = INIT_METHOD
 
         self.processes = []
@@ -65,9 +65,9 @@ class MultiProcessLauncher:
     def join(self):
         for process in self.processes:
             process.join()
-            assert (
-                process.exitcode == 0
-            ), f"{process.name} has non-zero exit code {process.exitcode}"
+            assert process.exitcode == 0, (
+                f"{process.name} has non-zero exit code {process.exitcode}"
+            )
 
     def terminate(self):
         for process in self.processes:

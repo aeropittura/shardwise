@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 
-
 import logging
 import os
 import random
@@ -10,17 +9,18 @@ import tempfile
 import time
 import warnings
 
-import shardwise
-import shardwise.comm as comm
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim
 import torch.utils.data
 import torch.utils.data.distributed
+from torchvision import datasets, transforms
+
 from examples.meters import AverageMeter
 from examples.util import NoopContextManager, process_mnist_files
-from torchvision import datasets, transforms
+import shardwise
+import shardwise.comm as comm
 
 
 def run_tfe_benchmarks(
@@ -61,26 +61,20 @@ def run_tfe_benchmarks(
     best_prec1 = 0
     if resume:
         if os.path.isfile(resume):
-            logging.info("=> loading checkpoint '{}'".format(resume))
+            logging.info(f"=> loading checkpoint '{resume}'")
             checkpoint = torch.load(resume)
             start_epoch = checkpoint["epoch"]
             best_prec1 = checkpoint["best_prec1"]
             model.load_state_dict(checkpoint["state_dict"])
             optimizer.load_state_dict(checkpoint["optimizer"])
-            logging.info(
-                "=> loaded checkpoint '{}' (epoch {})".format(
-                    resume, checkpoint["epoch"]
-                )
-            )
+            logging.info("=> loaded checkpoint '{}' (epoch {})".format(resume, checkpoint["epoch"]))
         else:
-            logging.info("=> no checkpoint found at '{}'".format(resume))
+            logging.info(f"=> no checkpoint found at '{resume}'")
 
     # Loading MNIST. Normalizing per pytorch/examples/blob/master/mnist/main.py
     def preprocess_data(context_manager, data_dirname):
         if mnist_dir is not None:
-            process_mnist_files(
-                mnist_dir, os.path.join(data_dirname, "MNIST", "processed")
-            )
+            process_mnist_files(mnist_dir, os.path.join(data_dirname, "MNIST", "processed"))
             download = False
         else:
             download = True
@@ -108,15 +102,11 @@ def run_tfe_benchmarks(
                 ),
             )
         train_loader = (
-            torch.utils.data.DataLoader(
-                mnist_train, batch_size=batch_size, shuffle=True
-            )
+            torch.utils.data.DataLoader(mnist_train, batch_size=batch_size, shuffle=True)
             if not evaluate
             else None
         )
-        test_loader = torch.utils.data.DataLoader(
-            mnist_test, batch_size=batch_size, shuffle=False
-        )
+        test_loader = torch.utils.data.DataLoader(mnist_test, batch_size=batch_size, shuffle=False)
         return train_loader, test_loader
 
     if context_manager is None:
@@ -181,9 +171,7 @@ def run_tfe_benchmarks(
     shutil.rmtree(save_checkpoint_dir)
 
 
-def train(
-    train_loader, model, criterion, optimizer, epoch, print_freq=10, flatten=False
-):
+def train(train_loader, model, criterion, optimizer, epoch, print_freq=10, flatten=False):
     batch_time = AverageMeter()
     losses = AverageMeter()
     top1 = AverageMeter()
@@ -218,23 +206,11 @@ def train(
 
         if i % print_freq == 0:
             logging.info(
-                "Epoch: [{}][{}/{}]\t"
-                "Time {:.3f} ({:.3f})\t"
-                "Loss {:.4f} ({:.4f})\t"
-                "Prec@1 {:.3f} ({:.3f})\t"
-                "Prec@5 {:.3f} ({:.3f})".format(
-                    epoch,
-                    i,
-                    len(train_loader),
-                    current_batch_time,
-                    batch_time.value(),
-                    loss.item(),
-                    losses.value(),
-                    prec1[0],
-                    top1.value(),
-                    prec5[0],
-                    top5.value(),
-                )
+                f"Epoch: [{epoch}][{i}/{len(train_loader)}]\t"
+                f"Time {current_batch_time:.3f} ({batch_time.value():.3f})\t"
+                f"Loss {loss.item():.4f} ({losses.value():.4f})\t"
+                f"Prec@1 {prec1[0]:.3f} ({top1.value():.3f})\t"
+                f"Prec@5 {prec5[0]:.3f} ({top5.value():.3f})"
             )
 
 
@@ -253,8 +229,8 @@ def validate_side_by_side(val_loader, plaintext_model, private_model, flatten=Fa
             output1 = private_model(encr_input)
             logging.info("==============================")
             logging.info("Example %d\t target = %d" % (i, target))
-            logging.info("Plaintext:\n%s" % output0)
-            logging.info("Encrypted:\n%s\n" % output1.get_plain_text())
+            logging.info(f"Plaintext:\n{output0}")
+            logging.info(f"Encrypted:\n{output1.get_plain_text()}\n")
             if i > 1000:
                 break
 
@@ -274,9 +250,7 @@ def validate(val_loader, model, criterion, print_freq=10, flatten=False):
             # compute output
             if flatten:
                 input = input.view(input.size(0), -1)
-            if isinstance(model, shardwise.nn.Module) and not shardwise.is_encrypted_tensor(
-                input
-            ):
+            if isinstance(model, shardwise.nn.Module) and not shardwise.is_encrypted_tensor(input):
                 input = shardwise.tensor(input)
 
             output = model(input)
@@ -298,36 +272,21 @@ def validate(val_loader, model, criterion, print_freq=10, flatten=False):
 
             if (i + 1) % print_freq == 0:
                 logging.info(
-                    "\nTest: [{}/{}]\t"
-                    "Time {:.3f} ({:.3f})\t"
-                    "Loss {:.4f} ({:.4f})\t"
-                    "Prec@1 {:.3f} ({:.3f})   \t"
-                    "Prec@5 {:.3f} ({:.3f})".format(
-                        i + 1,
-                        len(val_loader),
-                        current_batch_time,
-                        batch_time.value(),
-                        loss.item(),
-                        losses.value(),
-                        prec1[0],
-                        top1.value(),
-                        prec5[0],
-                        top5.value(),
-                    )
+                    f"\nTest: [{i + 1}/{len(val_loader)}]\t"
+                    f"Time {current_batch_time:.3f} ({batch_time.value():.3f})\t"
+                    f"Loss {loss.item():.4f} ({losses.value():.4f})\t"
+                    f"Prec@1 {prec1[0]:.3f} ({top1.value():.3f})   \t"
+                    f"Prec@5 {prec5[0]:.3f} ({top5.value():.3f})"
                 )
             if i > 100:
                 break
 
-        logging.info(
-            " * Prec@1 {:.3f} Prec@5 {:.3f}".format(top1.value(), top5.value())
-        )
+        logging.info(f" * Prec@1 {top1.value():.3f} Prec@5 {top5.value():.3f}")
 
     return top1.value()
 
 
-def save_checkpoint(
-    state, is_best, filename="checkpoint.pth.tar", model_best="model_best.pth.tar"
-):
+def save_checkpoint(state, is_best, filename="checkpoint.pth.tar", model_best="model_best.pth.tar"):
     # TODO: use shardwise.save_from_party() in future.
     rank = comm.get().get_rank()
     # only save for process rank = 0
@@ -383,7 +342,7 @@ def create_private_benchmark_model(model, flatten=False):
 
 class NetworkA(nn.Module):
     def __init__(self):
-        super(NetworkA, self).__init__()
+        super().__init__()
         self.fc1 = nn.Linear(784, 128)
         self.fc2 = nn.Linear(128, 128)
         self.fc3 = nn.Linear(128, 10)
@@ -403,7 +362,7 @@ class NetworkA(nn.Module):
 
 class NetworkB(nn.Module):
     def __init__(self):
-        super(NetworkB, self).__init__()
+        super().__init__()
         self.conv1 = nn.Conv2d(1, 16, kernel_size=5, padding=0)
         self.conv2 = nn.Conv2d(16, 16, kernel_size=5, padding=0)
         self.fc1 = nn.Linear(16 * 4 * 4, 100)
@@ -431,7 +390,7 @@ class NetworkB(nn.Module):
 
 class NetworkC(nn.Module):
     def __init__(self):
-        super(NetworkC, self).__init__()
+        super().__init__()
         self.conv1 = nn.Conv2d(1, 20, kernel_size=5, padding=0)
         self.conv2 = nn.Conv2d(20, 50, kernel_size=5, padding=0)
         self.fc1 = nn.Linear(50 * 4 * 4, 500)

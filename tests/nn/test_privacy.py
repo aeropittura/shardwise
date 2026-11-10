@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 
 
-
 import copy
 import itertools
 import logging
 
-import shardwise
 import torch
-from shardwise.utils.dtypes import is_float_tensor
-from shardwise.settings import cfg
+
+import shardwise
 from shardwise.nn.privacy import DPSplitModel, SkippedLoss
-from tests.support.multiprocess import get_random_test_tensor, MultiProcessTestCase
+from shardwise.settings import cfg
+from shardwise.utils.dtypes import is_float_tensor
+from tests.support.multiprocess import MultiProcessTestCase, get_random_test_tensor
 
 
 class TestMLP(torch.nn.Module):
@@ -88,7 +88,7 @@ class TestPrivacyModels(MultiProcessTestCase):
         test_passed = test_passed.gt(0).all().item() == 1
         if not test_passed:
             logging.info(msg)
-            logging.info("Result %s" % tensor)
+            logging.info(f"Result {tensor}")
             logging.info("Result - Reference = %s" % (tensor - reference))
         self.assertTrue(test_passed, msg=msg)
 
@@ -100,9 +100,7 @@ class TestPrivacyModels(MultiProcessTestCase):
         dp_grad = torch.cat([p.grad.flatten() for p in dp_model.parameters()])
 
         if std == 0:
-            self.assertTrue(
-                torch.allclose(grad, dp_grad, rtol=tolerance, atol=tolerance * 0.2)
-            )
+            self.assertTrue(torch.allclose(grad, dp_grad, rtol=tolerance, atol=tolerance * 0.2))
         else:
             errors = grad - dp_grad
             sample_mean = errors.mean()
@@ -129,9 +127,7 @@ class TestPrivacyModels(MultiProcessTestCase):
             rr_prob,
             rappor_prob,
             skip_forward,
-        ) in itertools.product(
-            TEST_MODELS, PROTOCOLS, RR_PROBS, RAPPOR_PROBS, [False, True]
-        ):
+        ) in itertools.product(TEST_MODELS, PROTOCOLS, RR_PROBS, RAPPOR_PROBS, [False, True]):
             logging.info(f"Model: {model_tuple}; Protocol: {protocol}")
             cfg.nn.dpsmpc.protocol = protocol
             cfg.nn.dpsmpc.skip_loss_forward = skip_forward
@@ -187,9 +183,7 @@ class TestPrivacyModels(MultiProcessTestCase):
 
                 # Check forward pass
                 if self.rank == FEATURE_SRC:
-                    self.assertTrue(
-                        dp_logits.eq(logits).all(), "model outputs do not match"
-                    )
+                    self.assertTrue(dp_logits.eq(logits).all(), "model outputs do not match")
 
                 dp_model.compute_loss(labels_enc)
 

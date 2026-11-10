@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 
 
+import torch
+
 import shardwise
 import shardwise.comm as comm
-import torch
-from shardwise.utils.helpers import count_wraps
 from shardwise.settings import cfg
+from shardwise.utils.helpers import count_wraps
 
 
 class IgnoreEncodings:

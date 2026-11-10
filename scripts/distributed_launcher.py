@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
 
 
-
+from argparse import REMAINDER, ArgumentParser
 import os
 import subprocess
 import uuid
-from argparse import ArgumentParser, REMAINDER
-
 
 """
 Wrapper to launch MPC scripts as multiple processes.
@@ -23,7 +21,7 @@ def main():
     processes = []
 
     # Use random file so multiple jobs can be run simultaneously
-    INIT_METHOD = "file:///tmp/shardwise-rendezvous-{}".format(uuid.uuid1())
+    INIT_METHOD = f"file:///tmp/shardwise-rendezvous-{uuid.uuid1()}"
 
     for rank in range(0, args.world_size):
         # each process's rank
@@ -39,9 +37,7 @@ def main():
     for process in processes:
         process.wait()
         if process.returncode != 0:
-            raise subprocess.CalledProcessError(
-                returncode=process.returncode, cmd=process.args
-            )
+            raise subprocess.CalledProcessError(returncode=process.returncode, cmd=process.args)
 
 
 def parse_args():
@@ -59,7 +55,7 @@ def parse_args():
         "--world_size",
         type=int,
         default=1,
-        help="The number of parties to launch." "Each party acts as its own process",
+        help="The number of parties to launch.Each party acts as its own process",
     )
 
     # positional

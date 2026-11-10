@@ -4,7 +4,6 @@
 import shardwise
 from shardwise.utils.dtypes import is_tensor
 
-
 __all__ = [
     "__eq__",
     "__ge__",

@@ -1,6 +1,7 @@
 """Dropout layers."""
 
 import logging
+
 from shardwise.nn.layers.base import Module
 
 
@@ -22,9 +23,7 @@ class Dropout(Module):
     def __init__(self, p=0.5, inplace=False):
         super().__init__()
         if inplace:
-            logging.warning(
-                "Shardwise Dropout module does not support inplace computation."
-            )
+            logging.warning("Shardwise Dropout module does not support inplace computation.")
         self.p = p
 
     def forward(self, input):
@@ -51,9 +50,7 @@ class DropoutNd(Module):
     def __init__(self, p=0.5, inplace=False):
         super().__init__()
         if inplace:
-            logging.warning(
-                "Shardwise DropoutNd module does not support inplace computation."
-            )
+            logging.warning("Shardwise DropoutNd module does not support inplace computation.")
         self.p = p
 
     def forward(self, input):

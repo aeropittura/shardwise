@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
 
 
-
-
 import unittest
+
+import torch
 
 import shardwise
 import shardwise.comm as comm
-import shardwise.sharing as mpc
-import torch
 from shardwise.settings import cfg
+import shardwise.sharing as mpc
 
 
 @mpc.run_multiprocess(world_size=2)

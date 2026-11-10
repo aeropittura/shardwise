@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 
 
-
 import tempfile
 
-import shardwise
-import shardwise.comm as comm
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from examples.util import NoopContextManager
 from torchvision import datasets, transforms
+
+from examples.util import NoopContextManager
+import shardwise
+import shardwise.comm as comm
 
 
 def run_mpc_autograd_cnn(
@@ -62,9 +62,7 @@ def run_mpc_autograd_cnn(
     model.encrypt()
 
     # encrypted training
-    train_encrypted(
-        x_reduced, y_reduced, model, num_epochs, learning_rate, batch_size, print_freq
-    )
+    train_encrypted(x_reduced, y_reduced, model, num_epochs, learning_rate, batch_size, print_freq)
 
 
 def train_encrypted(
@@ -119,10 +117,7 @@ def train_encrypted(
         accuracy = correct_count.mul_(100.0 / output.size(0))
 
         loss_plaintext = loss_value.get_plain_text().item()
-        print(
-            f"Epoch {epoch} completed: "
-            f"Loss {loss_plaintext:.4f} Accuracy {accuracy.item():.2f}"
-        )
+        print(f"Epoch {epoch} completed: Loss {loss_plaintext:.4f} Accuracy {accuracy.item():.2f}")
 
 
 def preprocess_mnist(context_manager):
@@ -161,7 +156,7 @@ def preprocess_mnist(context_manager):
 
 class CNN(nn.Module):
     def __init__(self):
-        super(CNN, self).__init__()
+        super().__init__()
         self.conv1 = nn.Conv2d(1, 16, kernel_size=5, padding=0)
         self.fc1 = nn.Linear(16 * 12 * 12, 100)
         self.fc2 = nn.Linear(100, 2)

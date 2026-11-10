@@ -6,7 +6,6 @@ import torch
 from shardwise.utils.dtypes import is_tensor
 from shardwise.utils.helpers import torch_cat, torch_stack
 
-
 __all__ = [  # noqa: F822
     "__getitem__",
     "__len__",
@@ -72,9 +71,7 @@ def pad(self, pad, mode="constant", value=0):
     if hasattr(result._tensor, "pad"):
         result._tensor = self._tensor.pad(pad, mode=mode, value=value)
     else:
-        result._tensor = torch.nn.functional.pad(
-            self._tensor, pad, mode=mode, value=value
-        )
+        result._tensor = torch.nn.functional.pad(self._tensor, pad, mode=mode, value=value)
     return result
 
 
@@ -107,7 +104,7 @@ def scatter(self, dim, index, src):
     result = self.clone()
     if is_tensor(src):
         src = self.new(src)
-    assert isinstance(src, type(self)), "Unrecognized scatter src type: %s" % type(src)
+    assert isinstance(src, type(self)), f"Unrecognized scatter src type: {type(src)}"
     result._tensor.scatter_(dim, index, src._tensor)
     return result
 
@@ -241,7 +238,7 @@ def ger(self, y):
 
 def __cat_stack_helper(op, tensors, *args, **kwargs):
     assert op in ["cat", "stack"], "Unsupported op for helper function"
-    assert isinstance(tensors, list), "%s input must be a list" % op
+    assert isinstance(tensors, list), f"{op} input must be a list"
     assert len(tensors) > 0, "expected a non-empty list of ShardTensors"
 
     # Determine op-type

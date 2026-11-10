@@ -1,6 +1,7 @@
 """Activation functions."""
 
 import logging
+
 from shardwise.nn.layers.base import Module
 
 
@@ -66,9 +67,7 @@ class Hardtanh(Module):
         self.min_val = min_val
         self.max_val = max_val
         if inplace:
-            logging.warning(
-                "Shardwise Hardtanh module does not support inplace computation."
-            )
+            logging.warning("Shardwise Hardtanh module does not support inplace computation.")
 
     def forward(self, input):
         if isinstance(input, list):
@@ -111,10 +110,8 @@ class ReLU6(Hardtanh):
 
     def __init__(self, inplace=False):
         if inplace:
-            logging.warning(
-                "Shardwise ReLU6 module does not support inplace computation."
-            )
-        super(ReLU6, self).__init__(min_val=0, max_val=6, inplace=False)
+            logging.warning("Shardwise ReLU6 module does not support inplace computation.")
+        super().__init__(min_val=0, max_val=6, inplace=False)
 
 
 class Sigmoid(Module):

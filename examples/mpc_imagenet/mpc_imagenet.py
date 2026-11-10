@@ -1,18 +1,17 @@
 #!/usr/bin/env python3
 
 
-
 import logging
 import tempfile
 
-import shardwise
 import torch
 import torchvision.datasets as datasets
 import torchvision.models as models
 import torchvision.transforms as transforms
+
 from examples.meters import AccuracyMeter
 from examples.util import NoopContextManager
-
+import shardwise
 
 try:
     from shardwise.nn.tensorboard import SummaryWriter
@@ -31,9 +30,7 @@ def run_experiment(
 
     shardwise.init()
     # check inputs:
-    assert hasattr(models, model_name), (
-        "torchvision does not provide %s model" % model_name
-    )
+    assert hasattr(models, model_name), f"torchvision does not provide {model_name} model"
     if imagenet_folder is None:
         imagenet_folder = tempfile.gettempdir()
         download = True
@@ -89,9 +86,7 @@ def run_experiment(
         meter.add(output, target)
 
         # progress:
-        logging.info(
-            "[sample %d of %d] Accuracy: %f" % (idx + 1, len(dataset), meter.value()[1])
-        )
+        logging.info("[sample %d of %d] Accuracy: %f" % (idx + 1, len(dataset), meter.value()[1]))
         if num_samples is not None and idx == num_samples - 1:
             break
 

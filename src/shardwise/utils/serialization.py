@@ -102,9 +102,7 @@ class RestrictedUnpickler(pickle.Unpickler):
 
     @classmethod
     def register_safe_class(cls, input_class):
-        assert isinstance(input_class, type), "Cannot register %s type as safe" % type(
-            input_class
-        )
+        assert isinstance(input_class, type), f"Cannot register {type(input_class)} type as safe"
         classname = str(input_class).split("'")[1]
         logging.info(f"Registering {classname} class as safe for deserialization.")
         cls.__SAFE_CLASSES[classname] = input_class
@@ -112,9 +110,7 @@ class RestrictedUnpickler(pickle.Unpickler):
     def find_class(self, module, name):
         classname = f"{module}.{name}"
         if classname not in self.__SAFE_CLASSES.keys():
-            raise ValueError(
-                f"Deserialization is restricted for pickled module {classname}"
-            )
+            raise ValueError(f"Deserialization is restricted for pickled module {classname}")
         return self.__SAFE_CLASSES[classname]
 
 
@@ -154,6 +150,4 @@ class safe_pickle:
 
 
 def _safe_legacy_load(f):
-    return torch.serialization._legacy_load(
-        f, map_location=None, pickle_module=safe_pickle
-    )
+    return torch.serialization._legacy_load(f, map_location=None, pickle_module=safe_pickle)

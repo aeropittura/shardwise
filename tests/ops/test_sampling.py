@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 
 
-
-
 import math
 
-import shardwise
 import torch
+
+import shardwise
 from shardwise.settings import cfg
 from tests.support.multiprocess import MultiProcessTestCase
 
@@ -16,9 +15,7 @@ class TestDistributions:
     This class tests accuracy of distributions provided by random sampling in shardwise.
     """
 
-    def _check_distribution(
-        self, func, expected_mean, expected_variance, lb=None, ub=None
-    ):
+    def _check_distribution(self, func, expected_mean, expected_variance, lb=None, ub=None):
         """
         Checks that the function `func` returns a distribution with the expected
         size, mean, and variance.
@@ -34,30 +31,28 @@ class TestDistributions:
         for size in [(10000,), (1000, 10), (101, 11, 11)]:
             sample = func(size)
 
-            self.assertTrue(
-                sample.size() == size, "Incorrect size for %s distribution" % name
-            )
+            self.assertTrue(sample.size() == size, f"Incorrect size for {name} distribution")
 
             plain_sample = sample.get_plain_text().float()
             mean = plain_sample.mean()
             var = plain_sample.var()
             self.assertTrue(
                 math.isclose(mean, expected_mean, rel_tol=1e-1, abs_tol=1e-1),
-                "incorrect variance for %s distribution: %f" % (name, mean),
+                f"incorrect variance for {name} distribution: {mean:f}",
             )
             self.assertTrue(
                 math.isclose(var, expected_variance, rel_tol=1e-1, abs_tol=1e-1),
-                "incorrect variance for %s distribution: %f" % (name, var),
+                f"incorrect variance for {name} distribution: {var:f}",
             )
             if lb is not None:
                 self.assertTrue(
                     plain_sample.ge(lb).all(),
-                    "Sample detected below lower bound for %s distribution" % name,
+                    f"Sample detected below lower bound for {name} distribution",
                 )
             if ub is not None:
                 self.assertTrue(
                     plain_sample.le(ub).all(),
-                    "Sample detected below lower bound for %s distribution" % name,
+                    f"Sample detected below lower bound for {name} distribution",
                 )
 
     def test_uniform(self):
@@ -77,9 +72,7 @@ class TestDistributions:
 
             # Assert all values are in discrete set {0, 1}
             tensor = bernoulli((1000,)).get_plain_text()
-            self.assertTrue(
-                ((tensor == 0) + (tensor == 1)).all(), "Invalid Bernoulli values"
-            )
+            self.assertTrue(((tensor == 0) + (tensor == 1)).all(), "Invalid Bernoulli values")
 
 
 # Run all unit tests with both TFP and TTP providers
@@ -88,12 +81,12 @@ class TestTFP(MultiProcessTestCase, TestDistributions):
         self._original_provider = cfg.mpc.provider
         shardwise.ShardTensor.set_grad_enabled(False)
         cfg.mpc.provider = "TFP"
-        super(TestTFP, self).setUp()
+        super().setUp()
 
     def tearDown(self) -> None:
         cfg.mpc.provider = self._original_provider
         shardwise.ShardTensor.set_grad_enabled(True)
-        super(TestTFP, self).tearDown()
+        super().tearDown()
 
 
 class TestTTP(MultiProcessTestCase, TestDistributions):
@@ -101,9 +94,9 @@ class TestTTP(MultiProcessTestCase, TestDistributions):
         self._original_provider = cfg.mpc.provider
         shardwise.ShardTensor.set_grad_enabled(False)
         cfg.mpc.provider = "TTP"
-        super(TestTTP, self).setUp()
+        super().setUp()
 
     def tearDown(self) -> None:
         cfg.mpc.provider = self._original_provider
         shardwise.ShardTensor.set_grad_enabled(True)
-        super(TestTTP, self).tearDown()
+        super().tearDown()

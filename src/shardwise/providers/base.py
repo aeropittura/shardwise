@@ -3,9 +3,10 @@
 
 import os
 
+import torch
+
 import shardwise
 import shardwise.comm as comm
-import torch
 
 
 class TupleProvider:
@@ -152,9 +153,7 @@ class TupleProvider:
 
     def generate_additive_triple(self, size0, size1, op, device=None, *args, **kwargs):
         """Generate multiplicative triples of given sizes"""
-        raise NotImplementedError(
-            "TupleProvider generate_additive_triple not implemented."
-        )
+        raise NotImplementedError("TupleProvider generate_additive_triple not implemented.")
 
     def square(self, size, device=None):
         """Generate square double of given size"""
@@ -162,9 +161,7 @@ class TupleProvider:
 
     def generate_binary_triple(self, size0, size1, device=None):
         """Generate xor triples of given size"""
-        raise NotImplementedError(
-            "TupleProvider generate_binary_triple not implemented."
-        )
+        raise NotImplementedError("TupleProvider generate_binary_triple not implemented.")
 
     def wrap_rng(self, size, device=None):
         """Generate random shared tensor of given size and sharing of its wraps"""
