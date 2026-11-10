@@ -21,12 +21,12 @@ import argparse
 import logging
 import os
 
-from deeplearning.projects.crypten.examples.multiprocess_launcher import (
+from examples.multiprocess_launcher import (
     MultiProcessLauncher,
 )
 
 
-parser = argparse.ArgumentParser(description="CrypTen Linear SVM Training")
+parser = argparse.ArgumentParser(description="Shardwise Linear SVM Training")
 parser.add_argument(
     "--world_size",
     type=int,

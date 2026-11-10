@@ -1,6 +1,6 @@
 i---
 name: "Bug Report"
-about: Submit a bug report to help us improve CrypTen
+about: Submit a bug report to help us improve Shardwise
 
 ---
 

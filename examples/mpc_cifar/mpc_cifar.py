@@ -10,8 +10,8 @@ import shutil
 import tempfile
 import time
 
-import crypten
-import crypten.communicator as comm
+import shardwise
+import shardwise.comm as comm
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -42,7 +42,7 @@ def run_mpc_cifar(
         random.seed(seed)
         torch.manual_seed(seed)
 
-    crypten.init()
+    shardwise.init()
 
     # create model
     model = LeNet()
@@ -231,7 +231,7 @@ def construct_private_model(input_size, model):
         model_upd = model
     else:
         model_upd = LeNet()
-    private_model = crypten.nn.from_pytorch(model_upd, dummy_input).encrypt(src=0)
+    private_model = shardwise.nn.from_pytorch(model_upd, dummy_input).encrypt(src=0)
     return private_model
 
 
@@ -253,7 +253,7 @@ def encrypt_data_tensor_with_src(input):
         input_upd = input
     else:
         input_upd = torch.empty(input.size())
-    private_input = crypten.cryptensor(input_upd, src=src_id)
+    private_input = shardwise.tensor(input_upd, src=src_id)
     return private_input
 
 
@@ -269,13 +269,13 @@ def validate(val_loader, model, criterion, print_freq=10):
     with torch.no_grad():
         end = time.time()
         for i, (input, target) in enumerate(val_loader):
-            if isinstance(model, crypten.nn.Module) and not crypten.is_encrypted_tensor(
+            if isinstance(model, shardwise.nn.Module) and not shardwise.is_encrypted_tensor(
                 input
             ):
                 input = encrypt_data_tensor_with_src(input)
             # compute output
             output = model(input)
-            if crypten.is_encrypted_tensor(output):
+            if shardwise.is_encrypted_tensor(output):
                 output = output.get_plain_text()
             loss = criterion(output, target)
 

@@ -1,18 +1,18 @@
 nn
 ==
 
-``crypten.nn`` provides modules for defining and training neural
+``shardwise.nn`` provides modules for defining and training neural
 networks similar to ``torch.nn``.
 
-From PyTorch to CrypTen
+From PyTorch to Shardwise
 -----------------------
 
-The simplest way to create a CrypTen network is to start with a
+The simplest way to create a Shardwise network is to start with a
 PyTorch network, and use the ``from_pytorch`` function to convert it
-to a CrypTen network. This is particularly useful for pre-trained
+to a Shardwise network. This is particularly useful for pre-trained
 PyTorch networks that need to be encrypted before use. 
 
-.. automodule:: crypten.nn
+.. automodule:: shardwise.nn
     :members: from_pytorch
 
 
@@ -23,38 +23,38 @@ PyTorch networks that need to be encrypted before use.
     The dummy input simply needs to be a `torch` tensor of the same
     shape; the values inside the tensor do not matter. For a complete
     example of how to use ``from_pytorch`` function, please see
-    `Tutorial 4 <https://github.com/facebookresearch/CrypTen/blob/master/tutorials/Tutorial_4_Classification_with_Encrypted_Neural_Networks.ipynb>`_.
+    `Tutorial 4 <https://github.com/facebookresearch/Shardwise/blob/master/tutorials/Tutorial_4_Classification_with_Encrypted_Neural_Networks.ipynb>`_.
 
-Custom CrypTen Modules
+Custom Shardwise Modules
 ----------------------
 
-``crypten.nn`` also provides several modules and containers
+``shardwise.nn`` also provides several modules and containers
 for directly building neural networks. Here is an example of how
-to use these objects to build a CrypTen network: 
+to use these objects to build a Shardwise network: 
 
 .. code-block:: python
        
-       model = crypten.nn.Sequential(
-              crypten.nn.Linear(num_inputs, num_intermediate),
-              crypten.nn.ReLU(),
-              crypten.nn.Linear(num_intermediate, num_outputs),
+       model = shardwise.nn.Sequential(
+              shardwise.nn.Linear(num_inputs, num_intermediate),
+              shardwise.nn.ReLU(),
+              shardwise.nn.Linear(num_intermediate, num_outputs),
         )
 
 
-Alternately, you can create a custom CrypTen network in much
+Alternately, you can create a custom Shardwise network in much
 the same way as you create a custom PyTorch network, i.e., you
-can subclass ``crypten.nn.Module`` and allow it contain other
-``crypten.nn.Module``, nesting them in a tree structure. You can assign
+can subclass ``shardwise.nn.Module`` and allow it contain other
+``shardwise.nn.Module``, nesting them in a tree structure. You can assign
 the submodules as regular attribute modules within them. for example:
 
 
 .. code-block:: python
 
-        class CrypTenModel(crypten.nn.Module):
+        class ShardwiseModel(shardwise.nn.Module):
             def __init__(self):
-                super(CrypTenModel, self).__init__()
-                self.fc1 = crypten.nn.Linear(20, 5) 
-                self.fc2 = crypten.nn.Linear(5, 2)
+                super(ShardwiseModel, self).__init__()
+                self.fc1 = shardwise.nn.Linear(20, 5) 
+                self.fc2 = shardwise.nn.Linear(5, 2)
 
             def forward(self, x):
                 x = self.fc1(x)
@@ -65,110 +65,110 @@ the submodules as regular attribute modules within them. for example:
 Generic ``Modules``
 +++++++++++++++++++++++++++
 
-.. autoclass:: crypten.nn.module.Module
+.. autoclass:: shardwise.nn.layers.Module
     :members: train, eval, encrypt, decrypt, forward, zero_grad, modules, named_modules, named_parameters, update_parameters
 
-.. autoclass:: crypten.nn.module.Container
+.. autoclass:: shardwise.nn.layers.Container
     :members:
 
-.. autoclass:: crypten.nn.module.Graph
+.. autoclass:: shardwise.nn.layers.Graph
     :members:
 
-.. autoclass:: crypten.nn.module.Sequential
+.. autoclass:: shardwise.nn.layers.Sequential
     :members:
 
 
 ``Modules`` for Encrypted Layers
 ++++++++++++++++++++++++++++++++++++++++
 
-.. autoclass:: crypten.nn.module.Constant
+.. autoclass:: shardwise.nn.layers.Constant
    :members: forward
 
-.. autoclass:: crypten.nn.module.Add
+.. autoclass:: shardwise.nn.layers.Add
    :members: forward	
 
-.. autoclass:: crypten.nn.module.Sub
+.. autoclass:: shardwise.nn.layers.Sub
    :members: forward	
 
-.. autoclass:: crypten.nn.module.Squeeze
+.. autoclass:: shardwise.nn.layers.Squeeze
    :members: forward
 
-.. autoclass:: crypten.nn.module.Unsqueeze
+.. autoclass:: shardwise.nn.layers.Unsqueeze
    :members: forward   
 
-.. autoclass:: crypten.nn.module.Flatten
+.. autoclass:: shardwise.nn.layers.Flatten
    :members: forward   
 
-.. autoclass:: crypten.nn.module.Shape
+.. autoclass:: shardwise.nn.layers.Shape
    :members: forward
 
-.. autoclass:: crypten.nn.module.Concat
+.. autoclass:: shardwise.nn.layers.Concat
    :members: forward
 
-.. autoclass:: crypten.nn.module.Gather
+.. autoclass:: shardwise.nn.layers.Gather
    :members: forward   
 
-.. autoclass:: crypten.nn.module.Reshape
+.. autoclass:: shardwise.nn.layers.Reshape
    :members: forward
 
-.. autoclass:: crypten.nn.module.ConstantPad1d
+.. autoclass:: shardwise.nn.layers.ConstantPad1d
    :members: forward
 
-.. autoclass:: crypten.nn.module.ConstantPad2d
+.. autoclass:: shardwise.nn.layers.ConstantPad2d
    :members: forward	   
 
-.. autoclass:: crypten.nn.module.ConstantPad3d
+.. autoclass:: shardwise.nn.layers.ConstantPad3d
    :members: forward
 
-.. autoclass:: crypten.nn.module.Linear
+.. autoclass:: shardwise.nn.layers.Linear
    :members: forward
 
-.. autoclass:: crypten.nn.module.Conv2d
+.. autoclass:: shardwise.nn.layers.Conv2d
    :members: forward	
 
-.. autoclass:: crypten.nn.module.ConstantPad1d
+.. autoclass:: shardwise.nn.layers.ConstantPad1d
    :members: forward
 
-.. autoclass:: crypten.nn.module.AvgPool2d
+.. autoclass:: shardwise.nn.layers.AvgPool2d
    :members: forward
 
-.. autoclass:: crypten.nn.module.MaxPool2d
+.. autoclass:: shardwise.nn.layers.MaxPool2d
    :members: forward
 
-.. autoclass:: crypten.nn.module.GlobalAveragePool
+.. autoclass:: shardwise.nn.layers.GlobalAveragePool
    :members: forward   
 
-.. autoclass:: crypten.nn.module.BatchNorm1d
+.. autoclass:: shardwise.nn.layers.BatchNorm1d
    :members: forward
 
-.. autoclass:: crypten.nn.module.BatchNorm2d
+.. autoclass:: shardwise.nn.layers.BatchNorm2d
    :members: forward
 
-.. autoclass:: crypten.nn.module.BatchNorm3d
+.. autoclass:: shardwise.nn.layers.BatchNorm3d
    :members: forward
 
-.. autoclass:: crypten.nn.module.Dropout
+.. autoclass:: shardwise.nn.layers.Dropout
    :members: forward
 
-.. autoclass:: crypten.nn.module.Dropout2d
+.. autoclass:: shardwise.nn.layers.Dropout2d
    :members: forward
 
-.. autoclass:: crypten.nn.module.Dropout3d
+.. autoclass:: shardwise.nn.layers.Dropout3d
    :members: forward
 
-.. autoclass:: crypten.nn.module.DropoutNd
+.. autoclass:: shardwise.nn.layers.DropoutNd
    :members: forward
 
-.. autoclass:: crypten.nn.module.Softmax
+.. autoclass:: shardwise.nn.layers.Softmax
    :members: forward
 
-.. autoclass:: crypten.nn.module.LogSoftmax
+.. autoclass:: shardwise.nn.layers.LogSoftmax
    :members: forward
 
 Loss Functions
 ---------------
-CrypTen also provides a number of encrypted loss functions similar
+Shardwise also provides a number of encrypted loss functions similar
 to `torch.nn`. 
 
-.. automodule:: crypten.nn.loss
+.. automodule:: shardwise.nn.loss
     :members:

@@ -20,12 +20,12 @@ import argparse
 import logging
 import os
 
-from deeplearning.projects.crypten.examples.multiprocess_launcher import (
+from examples.multiprocess_launcher import (
     MultiProcessLauncher,
 )
 
 
-parser = argparse.ArgumentParser(description="CrypTen Autograd CNN Training")
+parser = argparse.ArgumentParser(description="Shardwise Autograd CNN Training")
 
 
 def validate_world_size(world_size):

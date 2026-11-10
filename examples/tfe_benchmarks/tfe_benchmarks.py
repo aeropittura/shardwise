@@ -11,8 +11,8 @@ import tempfile
 import time
 import warnings
 
-import crypten
-import crypten.communicator as comm
+import shardwise
+import shardwise.comm as comm
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -42,7 +42,7 @@ def run_tfe_benchmarks(
     context_manager=None,
     mnist_dir=None,
 ):
-    crypten.init()
+    shardwise.init()
 
     if seed is not None:
         random.seed(seed)
@@ -250,7 +250,7 @@ def validate_side_by_side(val_loader, plaintext_model, private_model, flatten=Fa
             if flatten:
                 input = input.view(input.size(0), -1)
             output0 = plaintext_model(input)
-            encr_input = crypten.cryptensor(input)
+            encr_input = shardwise.tensor(input)
             output1 = private_model(encr_input)
             logging.info("==============================")
             logging.info("Example %d\t target = %d" % (i, target))
@@ -275,14 +275,14 @@ def validate(val_loader, model, criterion, print_freq=10, flatten=False):
             # compute output
             if flatten:
                 input = input.view(input.size(0), -1)
-            if isinstance(model, crypten.nn.Module) and not crypten.is_encrypted_tensor(
+            if isinstance(model, shardwise.nn.Module) and not shardwise.is_encrypted_tensor(
                 input
             ):
-                input = crypten.cryptensor(input)
+                input = shardwise.tensor(input)
 
             output = model(input)
 
-            if crypten.is_encrypted_tensor(output):
+            if shardwise.is_encrypted_tensor(output):
                 output = output.get_plain_text()
             loss = criterion(output, target)
 
@@ -329,7 +329,7 @@ def validate(val_loader, model, criterion, print_freq=10, flatten=False):
 def save_checkpoint(
     state, is_best, filename="checkpoint.pth.tar", model_best="model_best.pth.tar"
 ):
-    # TODO: use crypten.save_from_party() in future.
+    # TODO: use shardwise.save_from_party() in future.
     rank = comm.get().get_rank()
     # only save for process rank = 0
     if rank == 0:
@@ -377,7 +377,7 @@ def create_private_benchmark_model(model, flatten=False):
     dummy_input = torch.empty((1, 1, 28, 28))
     if flatten:
         dummy_input = torch.empty((1, 28 * 28))
-    private_model = crypten.nn.from_pytorch(model, dummy_input)
+    private_model = shardwise.nn.from_pytorch(model, dummy_input)
     private_model.encrypt()
     return private_model
 

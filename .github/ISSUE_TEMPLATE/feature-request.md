@@ -1,6 +1,6 @@
 ---
 name: "Feature Request"
-about: Submit a proposal/request for a new CrypTen feature
+about: Submit a proposal/request for a new Shardwise feature
 
 ---
 

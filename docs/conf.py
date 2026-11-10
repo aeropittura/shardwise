@@ -20,7 +20,7 @@
 
 # -- Project information -----------------------------------------------------
 
-project = "CrypTen"
+project = "Shardwise"
 author = "Facebook AI Research"
 
 # The full version, including alpha/beta/rc tags

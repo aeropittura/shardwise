@@ -30,12 +30,12 @@ import os
 import timeit
 from collections import namedtuple
 
-import crypten
-import crypten.communicator as comm
+import shardwise
+import shardwise.comm as comm
 import numpy as np
 import pandas as pd
 import torch
-from deeplearning.projects.crypten.examples import multiprocess_launcher
+from examples import multiprocess_launcher
 
 
 try:
@@ -76,7 +76,7 @@ def time_me(func=None, n_loops=10):
 
 
 class FuncBenchmarks:
-    """Benchmarks runtime and error of crypten functions against PyTorch
+    """Benchmarks runtime and error of shardwise functions against PyTorch
 
     Args:
         tensor_size (int or tuple): size of tensor for benchmarking runtimes
@@ -131,12 +131,12 @@ class FuncBenchmarks:
         return getattr(x, func)(y)
 
     def get_runtimes(self):
-        """Returns plain text and crypten runtimes"""
+        """Returns plain text and shardwise runtimes"""
         x, y = (
             torch.rand(self.tensor_size, device=self.device),
             torch.rand(self.tensor_size, device=self.device),
         )
-        x_enc, y_enc = crypten.cryptensor(x), crypten.cryptensor(y)
+        x_enc, y_enc = shardwise.tensor(x), shardwise.tensor(y)
 
         runtimes, runtimes_enc = [], []
 
@@ -184,8 +184,8 @@ class FuncBenchmarks:
         filter_size = [size // 10 for size in self.tensor_size]
         x_conv2d = torch.rand(1, 1, *self.tensor_size, device=self.device)
         weight2d = torch.rand(1, 1, *filter_size, device=self.device)
-        x_conv2d_enc = crypten.cryptensor(x_conv2d)
-        weight2d_enc = crypten.cryptensor(weight2d)
+        x_conv2d_enc = shardwise.tensor(x_conv2d)
+        weight2d_enc = shardwise.tensor(weight2d)
         return x_conv2d, x_conv2d_enc, weight2d, weight2d_enc
 
     def random_conv1d_inputs(self):
@@ -194,8 +194,8 @@ class FuncBenchmarks:
         filter_size = size // 10
         (x_conv1d,) = torch.rand(1, 1, size, device=self.device)
         weight1d = torch.rand(1, 1, filter_size, device=self.device)
-        x_conv1d_enc = crypten.cryptensor(x_conv1d)
-        weight1d_enc = crypten.cryptensor(weight1d)
+        x_conv1d_enc = shardwise.tensor(x_conv1d)
+        weight1d_enc = shardwise.tensor(weight1d)
         return x_conv1d, x_conv1d_enc, weight1d, weight1d_enc
 
     @staticmethod
@@ -221,7 +221,7 @@ class FuncBenchmarks:
         return errors.mean()
 
     def call_function_on_domain(self, func):
-        """Call plain text and CrypTen function on given function
+        """Call plain text and Shardwise function on given function
         Uses DOMAIN, TRUNCATED_DOMAIN, or appropriate layer inputs
 
         Returns: tuple of (plain text result, encrypted result)
@@ -236,8 +236,8 @@ class FuncBenchmarks:
                 TRUNCATED_DOMAIN.to(device=self.device),
             )
         y = torch.rand(DOMAIN.shape, device=self.device)
-        DOMAIN_enc, y_enc = crypten.cryptensor(DOMAIN), crypten.cryptensor(y)
-        TRUNCATED_DOMAIN_enc = crypten.cryptensor(TRUNCATED_DOMAIN)
+        DOMAIN_enc, y_enc = shardwise.tensor(DOMAIN), shardwise.tensor(y)
+        TRUNCATED_DOMAIN_enc = shardwise.tensor(TRUNCATED_DOMAIN)
 
         if func in ["exp", "cos", "sin"]:
             ref, out_enc = (
@@ -312,9 +312,9 @@ class FuncBenchmarks:
                 "runtime": [r.mid for r in runtimes],
                 "runtime Q1": [r.q1 for r in runtimes],
                 "runtime Q3": [r.q3 for r in runtimes],
-                "runtime crypten": [r.mid for r in runtimes_enc],
-                "runtime crypten Q1": [r.q1 for r in runtimes_enc],
-                "runtime crypten Q3": [r.q3 for r in runtimes_enc],
+                "runtime shardwise": [r.mid for r in runtimes_enc],
+                "runtime shardwise Q1": [r.q1 for r in runtimes_enc],
+                "runtime shardwise Q3": [r.q3 for r in runtimes_enc],
                 "total abs error": abs_errors,
                 "average relative error": relative_errors,
             }
@@ -322,7 +322,7 @@ class FuncBenchmarks:
 
 
 class ModelBenchmarks:
-    """Benchmarks runtime and accuracy of crypten models
+    """Benchmarks runtime and accuracy of shardwise models
 
     Models are benchmarked on synthetically generated
     Gaussian clusters for binary classification. Resnet18 is
@@ -380,13 +380,13 @@ class ModelBenchmarks:
         return model
 
     @time_me(n_loops=3)
-    def train_crypten(self, model, x, y, epochs, lr, loss):
-        """Trains crypten encrypted model
+    def train_shardwise(self, model, x, y, epochs, lr, loss):
+        """Trains shardwise encrypted model
 
         Args:
-            model (CrypTen model): model to be trained
-            x (crypten.tensor): inputs
-            y (crypten.tensor): targets
+            model (Shardwise model): model to be trained
+            x (shardwise.tensor): inputs
+            y (shardwise.tensor): targets
             epochs (int): number of training epochs
             lr (float): learning rate
             loss (str): type of loss to use for training
@@ -394,8 +394,8 @@ class ModelBenchmarks:
         Returns:
             model with update weights
         """
-        assert isinstance(model, crypten.nn.Module), "must be a CrypTen model"
-        criterion = getattr(crypten.nn, loss)()
+        assert isinstance(model, shardwise.nn.Module), "must be a Shardwise model"
+        criterion = getattr(shardwise.nn, loss)()
 
         for _ in range(epochs):
             model.zero_grad()
@@ -407,7 +407,7 @@ class ModelBenchmarks:
         return model
 
     def time_training(self):
-        """Returns training time per epoch for plain text and CrypTen"""
+        """Returns training time per epoch for plain text and Shardwise"""
         runtimes = []
         runtimes_enc = []
 
@@ -422,14 +422,14 @@ class ModelBenchmarks:
 
             if model.advanced:
                 y = model.data.y_onehot.to(self.device)
-            x_enc = crypten.cryptensor(x)
-            y_enc = crypten.cryptensor(y)
+            x_enc = shardwise.tensor(x)
+            y_enc = shardwise.tensor(y)
 
-            model_crypten = model.crypten
-            if hasattr(model_crypten, "to"):
-                model_crypten = model_crypten.to(self.device)
-            model_enc = model_crypten.encrypt()
-            runtime_enc, _ = self.train_crypten(
+            model_shardwise = model.shardwise
+            if hasattr(model_shardwise, "to"):
+                model_shardwise = model_shardwise.to(self.device)
+            model_enc = model_shardwise.encrypt()
+            runtime_enc, _ = self.train_shardwise(
                 model_enc, x_enc, y_enc, 1, model.lr, model.loss
             )
             runtimes_enc.append(runtime_enc)
@@ -442,7 +442,7 @@ class ModelBenchmarks:
         return y
 
     def time_inference(self):
-        """Returns inference time for plain text and CrypTen"""
+        """Returns inference time for plain text and Shardwise"""
         runtimes = []
         runtimes_enc = []
 
@@ -454,12 +454,12 @@ class ModelBenchmarks:
             runtime, _ = self.predict(model_plain, x)
             runtimes.append(runtime)
 
-            model_crypten = model.crypten
-            if hasattr(model_crypten, "to"):
-                model_crypten = model_crypten.to(self.device)
-            model_enc = model_crypten.encrypt()
+            model_shardwise = model.shardwise
+            if hasattr(model_shardwise, "to"):
+                model_shardwise = model_shardwise.to(self.device)
+            model_enc = model_shardwise.encrypt()
 
-            x_enc = crypten.cryptensor(x)
+            x_enc = shardwise.tensor(x)
             runtime_enc, _ = self.predict(model_enc, x_enc)
             runtimes_enc.append(runtime_enc)
 
@@ -483,8 +483,8 @@ class ModelBenchmarks:
         return accuracy
 
     def evaluate(self):
-        """Evaluates accuracy of crypten versus plain text models"""
-        accuracies, accuracies_crypten = [], []
+        """Evaluates accuracy of shardwise versus plain text models"""
+        accuracies, accuracies_shardwise = [], []
 
         for model in self.models:
             model_plain = model.plain
@@ -501,24 +501,24 @@ class ModelBenchmarks:
             accuracy = ModelBenchmarks.calc_accuracy(model_plain(x_test), y_test)
             accuracies.append(accuracy)
 
-            model_crypten = model.crypten
-            if hasattr(model_crypten, "to"):
-                model_crypten = model_crypten.to(self.device)
-            model_crypten = model_crypten.encrypt()
+            model_shardwise = model.shardwise
+            if hasattr(model_shardwise, "to"):
+                model_shardwise = model_shardwise.to(self.device)
+            model_shardwise = model_shardwise.encrypt()
             if model.advanced:
                 y = model.data.y_onehot.to(self.device)
-            x_enc = crypten.cryptensor(x)
-            y_enc = crypten.cryptensor(y)
-            _, model_crypten = self.train_crypten(
-                model_crypten, x_enc, y_enc, model.epochs, model.lr, model.loss
+            x_enc = shardwise.tensor(x)
+            y_enc = shardwise.tensor(y)
+            _, model_shardwise = self.train_shardwise(
+                model_shardwise, x_enc, y_enc, model.epochs, model.lr, model.loss
             )
-            x_test_enc = crypten.cryptensor(x_test)
+            x_test_enc = shardwise.tensor(x_test)
 
-            output = model_crypten(x_test_enc).get_plain_text()
+            output = model_shardwise(x_test_enc).get_plain_text()
             accuracy = ModelBenchmarks.calc_accuracy(output, y_test)
-            accuracies_crypten.append(accuracy)
+            accuracies_shardwise.append(accuracy)
 
-        return accuracies, accuracies_crypten
+        return accuracies, accuracies_shardwise
 
     def save(self, path):
         if self.device.type == "cuda":
@@ -534,7 +534,7 @@ class ModelBenchmarks:
         """Runs and stores benchmarks in self.df"""
         training_runtimes, training_runtimes_enc = self.time_training()
         inference_runtimes, inference_runtimes_enc = self.time_inference()
-        accuracies, accuracies_crypten = self.evaluate()
+        accuracies, accuracies_shardwise = self.evaluate()
         model_names = [model.name for model in self.models]
 
         training_times_both = training_runtimes + training_runtimes_enc
@@ -551,7 +551,7 @@ class ModelBenchmarks:
                 "inference time q1": [t.q1 for t in inference_times_both],
                 "inference time q3": [t.q3 for t in inference_times_both],
                 "is plain text": [True] * half_n_rows + [False] * half_n_rows,
-                "accuracy": accuracies + accuracies_crypten,
+                "accuracy": accuracies + accuracies_shardwise,
             }
         )
         self.df = self.df.sort_values(by="model")
@@ -649,14 +649,14 @@ def multiprocess_caller(args):
 
 def main():
     """Runs benchmarks and saves if path is provided"""
-    crypten.init()
+    shardwise.init()
     args = get_args()
     device = torch.device(args.device)
 
-    if not hasattr(crypten.nn.Module, "to") or not hasattr(crypten.mpc.MPCTensor, "to"):
+    if not hasattr(shardwise.nn.Module, "to") or not hasattr(shardwise.sharing.SecureTensor, "to"):
         if device.type == "cuda":
             print(
-                "GPU computation is not supported for this version of CrypTen, benchmark will be skipped"
+                "GPU computation is not supported for this version of Shardwise, benchmark will be skipped"
             )
             return
 
@@ -670,7 +670,7 @@ def main():
 
     if args.world_size > 1:
         if args.ttp:
-            crypten.mpc.set_default_provider(crypten.mpc.provider.TrustedThirdParty)
+            shardwise.sharing.set_default_provider(shardwise.providers.TrustedThirdParty)
         launcher = multiprocess_launcher.MultiProcessLauncher(
             args.world_size, multiprocess_caller, fn_args=args
         )

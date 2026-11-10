@@ -21,12 +21,12 @@ import argparse
 import logging
 import os
 
-from deeplearning.projects.crypten.examples.multiprocess_launcher import (
+from examples.multiprocess_launcher import (
     MultiProcessLauncher,
 )
 
 
-parser = argparse.ArgumentParser(description="CrypTen TFEncrypted Benchmarks")
+parser = argparse.ArgumentParser(description="Shardwise TFEncrypted Benchmarks")
 parser.add_argument(
     "--world_size",
     type=int,
@@ -136,7 +136,7 @@ parser.add_argument(
 
 
 def _run_experiment(args):
-    # only import here to initialize crypten within the subprocesses
+    # only import here to initialize shardwise within the subprocesses
     # pyre-fixme[21]: Could not find module `tfe_benchmarks`.
     from tfe_benchmarks import run_tfe_benchmarks  # @manual
 

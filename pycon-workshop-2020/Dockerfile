@@ -1,7 +1,7 @@
 # This pulls pytorch image with Python 3.7
 FROM pytorch/pytorch
 
-RUN  pip install crypten
+RUN  pip install shardwise
 RUN  pip install jupyter
 
 COPY Intro.ipynb Intro.ipynb

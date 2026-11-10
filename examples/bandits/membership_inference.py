@@ -23,7 +23,7 @@ import pickle
 import examples.util
 import torch
 import visdom
-from deeplearning.projects.crypten.examples.multiprocess_launcher import (
+from examples.multiprocess_launcher import (
     MultiProcessLauncher,
 )
 

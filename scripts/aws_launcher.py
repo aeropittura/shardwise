@@ -15,17 +15,17 @@ $ aws ec2 run-instances \
 
 Two EC2 instances will be created by the command line shown above. Assume
 the ids of the two instances created are i-068681e808235a851 and
-i-0d7ebacfe1e3f28eb. Next, pytorch and crypten must be properly installed
+i-0d7ebacfe1e3f28eb. Next, pytorch and shardwise must be properly installed
 on every instance.
 
 Then the following command lines can run the mpc_linear_svm example on the two
 EC2 instances created above:
 
-$ python3 crypten/scripts/aws_launcher.py \
+$ python3 shardwise/scripts/aws_launcher.py \
     --SSH_keys=/home/$USER/.aws/fair-$USER.pem \
     --instances=i-038dd14b9383b9d79,i-08f057b9c03d4a916 \
-    --aux_files=crypten/examples/mpc_linear_svm/mpc_linear_svm.py \
-    crypten/examples/mpc_linear_svm/launcher.py \
+    --aux_files=shardwise/examples/mpc_linear_svm/mpc_linear_svm.py \
+    shardwise/examples/mpc_linear_svm/launcher.py \
         --features 50 \
         --examples 100 \
         --epochs 50 \
@@ -36,12 +36,12 @@ $ python3 crypten/scripts/aws_launcher.py \
 If you want to train with AWS instances located at multiple regions, then you would need
 to provide ssh_key_file for each instance:
 
-$ python3 crypten/scripts/aws_launcher.py \
+$ python3 shardwise/scripts/aws_launcher.py \
     --regions=us-east-1,us-west-1 \
     --SSH_keys=/home/$USER/.aws/east.pem,/home/$USER/.aws/west.pem  \
     --instances=i-038dd14b9383b9d79,i-08f057b9c03d4a916 \
-    --aux_files=crypten/examples/mpc_linear_svm/mpc_linear_svm.py \
-    crypten/examples/mpc_linear_svm/launcher.py \
+    --aux_files=shardwise/examples/mpc_linear_svm/mpc_linear_svm.py \
+    shardwise/examples/mpc_linear_svm/launcher.py \
         --features 50 \
         --examples 100 \
         --epochs 50 \
